@@ -1,0 +1,33 @@
+
+services:
+  auth-api:
+    build:
+      context: ./auth-api/
+      dockerfile: Dockerfile # inutile ?
+      target: production
+    image: auth-service:1.0.0 # utile ?
+    container_name: auth-api_prod ## prod ?
+    init: true
+    read_only: true #a enlever si base de donnee non ?
+    tmpfs:
+      - /tmp
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - AUTH_DB=${AUTH_DB}
+      - AUTH_DB_USER=${AUTH_DB_USER}
+      - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+
+  databse:
+    image: postgres:18.1-alpine3.23
+    restart: always
+    env_file:
+      - ./database/.env
+    environment:
+      - AUTH_DB_USER=${AUTH_DB_USER}
+      - AUTH_DB=${AUTH_DB}
+      - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - CHAT_DB_USER=${CHAT_DB_USER}
+      - CHAT_DB=${CHAT_DB}
+      - CHAT_DB_PASSWORD=${CHAT_DB_PASSWORD}
+    volumes:
+      - ./database/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh

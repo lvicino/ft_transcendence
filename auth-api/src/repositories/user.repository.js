@@ -1,0 +1,22 @@
+const {sql} = require('../database/db.js');
+
+async function create(email, passwordHash) {
+  const newUser = {
+      email: email,
+      password_hash: passwordHash
+  }
+  return await sql`
+    INSERT INTO users ${sql(newUser)}
+    RETURNING id, email
+  `
+}
+
+async function findByEmail(email) {
+  return await sql`
+  SELECT id, email, password_hash 
+  FROM users 
+  WHERE email = ${email}
+  `
+}
+
+module.exports = {create, findByEmail};

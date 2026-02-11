@@ -1,0 +1,10 @@
+
+services:
+  auth-api:
+    build: 
+      target: development
+    volumes:
+      - ./auth-api:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3001:3000"
