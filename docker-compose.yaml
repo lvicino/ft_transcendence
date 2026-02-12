@@ -31,3 +31,16 @@ services:
       - CHAT_DB_PASSWORD=${CHAT_DB_PASSWORD}
     volumes:
       - ./database/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+
+  game-api:
+    build:
+      context: ./game-api/
+      target: production
+    image: game-service:1.0.0
+    container_name: game-api_prod
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
