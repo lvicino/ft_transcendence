@@ -1,11 +1,11 @@
 
 services:
   auth-api:
-    build: 
+    build:
       target: development
     volumes:
-      - ./auth-api:/usr/src/app
       - /usr/src/app/node_modules
+      - ./auth-api:/usr/src/app
     ports:
       - "3001:3000"
 
@@ -17,3 +17,8 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "3002:3000"
+
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"

@@ -22,7 +22,7 @@ function build(opts = {}) {
 
 	app.decorate('gameManager', gameManager);
 	app.register(gameRoutes, {prefix: 'api/games'});
-	app.register(wsRoutes);
+	app.register(wsRoutes, {prefix: 'api/games'});
 
 	return (app);
 }

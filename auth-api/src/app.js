@@ -7,7 +7,7 @@ function build(opts = {}) {
 	initDb();
 	const app = fastify(opts);
 	app.decorate("authService", AuthService);
-	app.register(authRoutes, {prefix: 'auth/'});
+	app.register(authRoutes, {prefix: 'api/auth/'});
 	return (app);
 }
 

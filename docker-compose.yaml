@@ -16,6 +16,8 @@ services:
       - AUTH_DB=${AUTH_DB}
       - AUTH_DB_USER=${AUTH_DB_USER}
       - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+    labels:
+      - "traefik.http.routers.whoami-03.rule=PathPrefix(`/api/auth`)"
 
   databse:
     image: postgres:18.1-alpine3.23
@@ -44,3 +46,17 @@ services:
       - /tmp
     environment:
       - JWT_SECRET=${JWT_SECRET}
+    labels:
+      - "traefik.http.routers.whoami-03.rule=PathPrefix(`/api/games`)"
+
+  traefik:
+    image: traefik:v3.6
+    command:
+      - "--providers.docker=true"
+      - "--api.insecure=true" # a metre a false pour la prode donc metre cette ligne dans le override
+      - "--entrypoints.web.address=:80"
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
