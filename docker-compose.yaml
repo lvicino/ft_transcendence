@@ -16,8 +16,16 @@ services:
       - AUTH_DB=${AUTH_DB}
       - AUTH_DB_USER=${AUTH_DB_USER}
       - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+      - SSL_CERT_PATH=${SSL_CERT_PATH}
+    volumes:
+      - certs-data:/certs/
     labels:
-      - "traefik.http.routers.whoami-03.rule=PathPrefix(`/api/auth`)"
+      - "traefik.http.routers.auth-api.rule=PathPrefix(`/api/auth`)"
+      - "traefik.http.routers.auth-api.entrypoints=websecure" ## il ce passe quoi exactement si on mes pas ca par ce que ca marche que je suis en http
+      - "traefik.http.routers.auth-api.tls=true" # ca ausi il pourrais le detecter tout seul non ?
+      - "traefik.http.services.auth-api.loadbalancer.server.scheme=https" # ca aussi il peux detect tout seul non ? # loadbalancer ?
+      - "traefik.http.services.auth-api.loadbalancer.server.port=443" # pour quoi "loadbalancer"
 
   databse:
     image: postgres:18.1-alpine3.23
@@ -46,17 +54,41 @@ services:
       - /tmp
     environment:
       - JWT_SECRET=${JWT_SECRET}
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+      - SSL_CERT_PATH=${SSL_CERT_PATH}
     labels:
-      - "traefik.http.routers.whoami-03.rule=PathPrefix(`/api/games`)"
+      - "traefik.http.routers.game-api.rule=PathPrefix(`/api/games`)"
+    volumes:
+      - certs-data:/certs/
+
 
   traefik:
     image: traefik:v3.6
     command:
       - "--providers.docker=true"
       - "--api.insecure=true" # a metre a false pour la prode donc metre cette ligne dans le override
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:80" ## pas secure
+      - "--entrypoints.websecure.address=:443"
+      - "--serverstransport.insecureSkipVerify=true" # trust auto certif
     ports:
-      - 80:80
+      - 8081:80
       - 8080:8080
+      - "8443:443"
+    environment:
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+      - SSL_CERT_PATH=${SSL_CERT_PATH}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${XDG_RUNTIME_DIR}/docker.sock:/var/run/docker.sock:ro
+      - certs-data:/certs/
+
+
+  cert-gen: ## a voir si il vas aitre assez rapide pour generer les sertif
+    image: alpine/openssl
+    entrypoint: ['/bin/sh', '/cert-gen/script.sh'] # pour quoi entrypoint pas cmd et est ce que on peux fair en sorte que les autre container demar une foit que celuis ci soit stoper ?
+    volumes:
+      - certs-data:/certs/
+      - ./cert-gen/script.sh:/cert-gen/script.sh
+
+
+volumes:
+  certs-data:
