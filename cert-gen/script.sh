@@ -12,7 +12,7 @@ EXT_FILE="$CERT_DIR/v3.ext"
 
 # LISTE DES SERVICES (DNS) QUI UTILISERONT CE CERTIFICAT
 # Ajoutez ici tous les noms de services définis dans votre docker-compose
-DOMAINS="auth-api game-api database traefik localhost"
+DOMAINS="auth-api game-api database traefik"
 TARGET_UID=1000
 TARGET_GID=1000
 
@@ -58,11 +58,11 @@ EOF
         I=$((I+1))
     done
     # On ajoute aussi l'IP locale au cas où
-    echo "IP.1 = 127.0.0.1" >> "$EXT_FILE"
+    echo "IP.1 = 127.0.0.1" >> "$EXT_FILE" # a supp non ??
 
     echo "--> Génération de la demande de signature (CSR)..."
     openssl req -new -key "$SERVER_KEY" -out "$SERVER_CSR" \
-        -subj "/CN=internal-services"
+        -subj "/CN=internal-services" # pour quoi metre "CN=internal-services" car on est pas obliger de metre quel que chose vue que on a utiliser la methode SAN non ?
 
     echo "--> Signature du certificat par la CA (avec SAN)..."
     openssl x509 -req -in "$SERVER_CSR" -CA "$CA_CERT" -CAkey "$CA_KEY" \
@@ -81,12 +81,12 @@ fi
 echo "--> Application des permissions..."
 
 # La CA est publique, mais sa clé est ultra secrète (root seulement)
-chmod 400 "$CA_KEY"
+chmod 400 "$CA_KEY" # on peux supp on a plus besoin en soit non ?
 chmod 444 "$CA_CERT"
 
 # Le certificat serveur et sa clé doivent être lisibles par Node/Traefik (1000)
 chown $TARGET_UID:$TARGET_GID "$SERVER_KEY" "$SERVER_CERT" "$CA_CERT"
-chmod 400 "$SERVER_KEY" # Lecture seule stricte pour l'utilisateur 1000
+chmod 400 "$SERVER_KEY" # Lecture seule stricte pour l'utilisateur (donc 1000)
 chmod 444 "$SERVER_CERT"
 
 echo "--- Terminé. Vos certificats sont prêts dans $CERT_DIR ---"

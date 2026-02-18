@@ -20,6 +20,9 @@ services:
       - SSL_CERT_PATH=${SSL_CERT_PATH}
     volumes:
       - certs-data:/certs/
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
     labels:
       - "traefik.http.routers.auth-api.rule=PathPrefix(`/api/auth`)"
       - "traefik.http.routers.auth-api.entrypoints=websecure" ## il ce passe quoi exactement si on mes pas ca par ce que ca marche que je suis en http
@@ -78,7 +81,7 @@ services:
       - SSL_KEY_PATH=${SSL_KEY_PATH}
       - SSL_CERT_PATH=${SSL_CERT_PATH}
     volumes:
-      - ${XDG_RUNTIME_DIR}/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro
       - certs-data:/certs/
 
 
