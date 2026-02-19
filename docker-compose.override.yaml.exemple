@@ -6,8 +6,6 @@ services:
     volumes:
       - /usr/src/app/node_modules
       - ./auth-api:/usr/src/app
-    ports:
-      - "3001:3000"
 
   game-api:
     build:
@@ -15,10 +13,12 @@ services:
     volumes:
       - ./game-api:/usr/src/app
       - /usr/src/app/node_modules
-    ports:
-      - "3002:3000"
 
-  whoami:
-    image: traefik/whoami
-    labels:
-      - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"
+  traefik:
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--serverstransport.insecureSkipVerify=true"
+      - "--api.insecure=true"
+    ports:
+      - 8080:8080

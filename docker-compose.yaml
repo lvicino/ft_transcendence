@@ -16,8 +16,8 @@ services:
       - AUTH_DB=${AUTH_DB}
       - AUTH_DB_USER=${AUTH_DB_USER}
       - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
-      - SSL_KEY_PATH=${SSL_KEY_PATH}
-      - SSL_CERT_PATH=${SSL_CERT_PATH}
+      - NODE_SSL_KEY_PATH=${NODE_SSL_KEY_PATH}
+      - NODE_CERT_PATH=${NODE_CERT_PATH}
     volumes:
       - certs-data:/certs/
     depends_on:
@@ -42,8 +42,13 @@ services:
       - CHAT_DB_USER=${CHAT_DB_USER}
       - CHAT_DB=${CHAT_DB}
       - CHAT_DB_PASSWORD=${CHAT_DB_PASSWORD}
+    command: postgres -c ssl=on -c ssl_cert_file=${DB_CERT_PATH} -c ssl_key_file=${DB_SSL_KEY_PATH}
     volumes:
       - ./database/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+      - certs-data:/certs/
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
     labels:
       - "traefik.enable=false"
 
@@ -59,8 +64,8 @@ services:
       - /tmp
     environment:
       - JWT_SECRET=${JWT_SECRET}
-      - SSL_KEY_PATH=${SSL_KEY_PATH}
-      - SSL_CERT_PATH=${SSL_CERT_PATH}
+      - NODE_SSL_KEY_PATH=${NODE_SSL_KEY_PATH}
+      - NODE_CERT_PATH=${NODE_CERT_PATH}
     depends_on:
       cert-gen:
         condition: service_completed_successfully
@@ -90,8 +95,10 @@ services:
     image: alpine/openssl
     entrypoint: ['/bin/sh', '/cert-gen/script.sh']
     environment:
-      - SSL_KEY_PATH=${SSL_KEY_PATH}
-      - SSL_CERT_PATH=${SSL_CERT_PATH}
+      - NODE_SSL_KEY_PATH=${NODE_SSL_KEY_PATH}
+      - NODE_CERT_PATH=${NODE_CERT_PATH}
+      - DB_SSL_KEY_PATH=${DB_SSL_KEY_PATH}
+      - DB_CERT_PATH=${DB_CERT_PATH}
     volumes:
       - certs-data:/certs/
       - ./cert-gen/script.sh:/cert-gen/script.sh

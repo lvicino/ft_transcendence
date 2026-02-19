@@ -6,6 +6,7 @@ const sql = postgres({
   database             : process.env.AUTH_DB,
   username             : process.env.AUTH_DB_USER,
   password             : process.env.AUTH_DB_PASSWORD,
+  ssl                  : 'require',
 });
 
 const sleep = (ms) => { return new Promise((resolve) => {setTimeout(resolve, ms)}) };
@@ -33,8 +34,9 @@ async function initDb() {
 
         } catch (error) {
             console.error('Erreur critique DDL (Data Definition Language) :', error);
+            console.error(`Retrying database connection in ${1 * t}s`);
+            await sleep(1000 * t);
         }
-        await sleep(1000 * t);
     }
     process.exit(1);
 }
