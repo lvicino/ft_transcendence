@@ -74,15 +74,13 @@ services:
       - certs-data:/certs/
 
 
-  traefik: ## pour moi j'ais setup le tls entre le backend et traefik mais j'ai l'impression qu'il y est aussi entre traefik et le clien !
+  traefik:
     image: traefik:v3.6
     command:
       - "--providers.docker=true"
-      - "--api.insecure=true" # a metre a false pour la prode donc metre cette ligne dans le override
       - "--entrypoints.websecure.address=:443"
       - "--serverstransport.insecureSkipVerify=true"
     ports:
-      - 8080:8080 ## dans ls override
       - "8443:443"
     volumes:
       - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro
@@ -91,6 +89,9 @@ services:
   cert-gen:
     image: alpine/openssl
     entrypoint: ['/bin/sh', '/cert-gen/script.sh']
+    environment:
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+      - SSL_CERT_PATH=${SSL_CERT_PATH}
     volumes:
       - certs-data:/certs/
       - ./cert-gen/script.sh:/cert-gen/script.sh

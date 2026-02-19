@@ -1,9 +1,8 @@
 #!/bin/sh
 set -e
 
-CERT_DIR="/certs"
-KEY_FILE="$CERT_DIR/server.key"
-CRT_FILE="$CERT_DIR/server.crt"
+KEY_FILE=${SSL_KEY_PATH}
+CRT_FILE=${SSL_CERT_PATH}
 
 if [ -f "$KEY_FILE" ] && [ -f "$CRT_FILE" ]; then
     echo "Certificats présents. Skip."
