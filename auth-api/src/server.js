@@ -11,7 +11,7 @@ const app = build({
     },
     https: {
 		key: fs.readFileSync(process.env.NODE_SSL_KEY_PATH),
-		cert: fs.readFileSync(process.env.NODE_CERT_PATH),
+		cert: fs.readFileSync(process.env.NODE_SSL_CERT_PATH),
     }
 })
 
