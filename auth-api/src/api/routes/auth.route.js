@@ -17,15 +17,15 @@ function genererToken(user) {
 
 module.exports = async function (fastify, opts) {
 	fastify.post('/register', async (request, reply) => {
-		const { email, password } = request.body;
+		const { email, username, password } = request.body;
 		try {
-			await fastify.authService.register(email, password);
+			await fastify.authService.register(email, username, password);
 			return reply.code(201).send();
 		} catch (error) {
 			if (error.message.includes('UNIQUE')) {
 				return reply.code(409).send({ 
 					error: "Conflict", 
-					message: "Cet email est déjà enregistré." 
+					message: "Cet email ou username est déjà enregistré." 
 				});
 			}
 			console.log("error register: ", error.message);

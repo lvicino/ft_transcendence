@@ -1,13 +1,15 @@
 const {sql} = require('../database/db.js');
 
-async function create(email, passwordHash) {
+async function create(email, username, passwordHash, oauth) {
   const newUser = {
       email: email,
-      password_hash: passwordHash
+	  username: username,
+      password_hash: passwordHash,
+	  oauth: oauth
   }
   return await sql`
     INSERT INTO users ${sql(newUser)}
-    RETURNING id, email
+    RETURNING id, email, username, oauth
   `
 }
 

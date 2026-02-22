@@ -18,13 +18,14 @@ function renderResponse(statusCode, data) {
 }
 
 /**
- * Exécute la requête d'inscription
+ * Exécute la requête d'inscription (Modifiée pour inclure username)
  */
 async function execRegister(event) {
     event.preventDefault(); // Bloque la soumission native du formulaire
     
     const payload = {
         email: document.getElementById('regEmail').value,
+        username: document.getElementById('regUsername').value,
         password: document.getElementById('regPassword').value
     };
 
@@ -49,7 +50,7 @@ async function execRegister(event) {
 }
 
 /**
- * Exécute la requête de connexion et gère le JWT
+ * Exécute la requête de connexion et gère le JWT (Inchangée)
  */
 async function execLogin(event) {
     event.preventDefault();
