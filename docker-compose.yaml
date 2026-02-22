@@ -105,6 +105,14 @@ services:
     labels:
       - "traefik.enable=false"
 
+  frontend:
+      build: 
+        context: ./debug-client
+      labels:
+        - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.front.entrypoints=websecure"
+        - "traefik.http.routers.front.tls=true"
+        - "traefik.http.services.front.loadbalancer.server.port=80"
 
 volumes:
   certs-data:
