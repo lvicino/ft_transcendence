@@ -1,13 +1,17 @@
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
-const monSecret = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
+const API_UID = process.env.API_UID;
+const API_SECRET = process.env.API_SECRET;
+const API_REDIRECT_URI = process.env.API_REDIRECT_URI 
 
 function genererToken(user) {
   const payload = {
     id: user.id,
   };
 
-  const token = jwt.sign(payload, monSecret, {
+  const token = jwt.sign(payload, JWT_SECRET, {
     expiresIn: '5h',
     algorithm: 'HS256'
   });
@@ -44,6 +48,43 @@ module.exports = async function (fastify, opts) {
 		else {
 			const access_token = genererToken(user);
 			return {access_token};
+		}
+	});
+
+	fastify.get('/login/oauth', async (request, reply) => {
+		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${API_UID}&redirect_uri=${API_REDIRECT_URI}&response_type=code`;
+		return reply.redirect(authorizeUrl);
+	});
+
+	fastify.get('/callback', async (request, reply) => {
+		const { code } = request.query;
+
+		if (!code) return reply.code(400).send("No code provided");
+
+		try {
+			const tokenResponse = await axios.post('https://api.intra.42.fr/oauth/token', {
+				grant_type: 'authorization_code',
+				client_id: API_UID,
+				client_secret: API_SECRET,
+				code: code,
+				redirect_uri: API_REDIRECT_URI
+			});
+
+			const accessToken = tokenResponse.data.access_token;
+
+			const userResponse = await axios.get('https://api.intra.42.fr/v2/me', {
+				headers: { Authorization: `Bearer ${accessToken}` }
+			});
+
+			const user = await fastify.authService.oauth(userResponse.data.email);
+
+			const access_token = genererToken(user);
+			const frontendUrl = API_REDIRECT_URI.replace('/auth/callback', '');
+			return {access_token};
+
+		} catch (error) {
+			request.log.error(error);
+			return reply.code(500).send("Authentication failed");
 		}
 	});
 }
