@@ -11,6 +11,8 @@ services:
     read_only: true #a enlever si base de donnee non ?
     tmpfs:
       - /tmp
+    env_file:
+      - ./auth-api/.env
     environment:
       - JWT_SECRET=${JWT_SECRET}
       - AUTH_DB=${AUTH_DB}
