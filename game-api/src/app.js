@@ -7,10 +7,18 @@ const wsRoutes = require('./api/routes/ws.routes.js');
 function build(opts = {}) {
 	const app = fastify(opts);
 
+	app.register(require("@fastify/cookie"), {
+		hook: 'onRequest',
+	})
+
 	app.register(fastifyWebsocket);
 
 	app.register(require('@fastify/jwt'), {
 		secret: process.env.JWT_SECRET,
+		cookie: {
+			cookieName: "access_token",
+			signed: false
+		}
 	});
 	app.decorate("authenticate", async function (request, reply) {
 		try {

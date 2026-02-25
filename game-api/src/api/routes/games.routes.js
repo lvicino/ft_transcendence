@@ -12,5 +12,4 @@ module.exports = async function (fastify, opts) {
 			reply.code(409).send({error: result.error});
 		}
 	})
-
 }

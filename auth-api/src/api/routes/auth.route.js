@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const API_UID = process.env.API_UID;
 const API_SECRET = process.env.API_SECRET;
 const API_REDIRECT_URI = process.env.API_REDIRECT_URI 
+const FRONTEND_URL = process.env.FRONTEND_URL 
 
 function genererToken(user) {
   const payload = {
@@ -47,7 +48,14 @@ module.exports = async function (fastify, opts) {
 						});
 		else {
 			const access_token = genererToken(user);
-			return {access_token};
+			reply.setCookie("access_token", access_token, {
+				path: "/",
+				httpOnly: true,
+				secure: true,
+				sameSite: "lax",
+				maxAge: 3600,
+			});
+			return ;
 		}
 	});
 
@@ -79,9 +87,14 @@ module.exports = async function (fastify, opts) {
 			const user = await fastify.authService.oauth(userResponse.data.email);
 
 			const access_token = genererToken(user);
-			const frontendUrl = API_REDIRECT_URI.replace('/auth/callback', '');
-			return {access_token};
-
+			reply.setCookie("access_token", access_token, {
+				path: "/",
+				httpOnly: true,
+				secure: true,
+				sameSite: "lax", // ou strict
+				maxAge: 3600,
+			});
+			return reply.redirect(FRONTEND_URL)
 		} catch (error) {
 			request.log.error(error);
 			return reply.code(500).send("Authentication failed");

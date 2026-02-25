@@ -6,6 +6,10 @@ const {initDb} = require('./database/db.js');
 function build(opts = {}) {
 	initDb();
 	const app = fastify(opts);
+
+	app.register(require("@fastify/cookie"), {
+		hook: 'onRequest', // pas besoin ?
+	})
 	app.decorate("authService", AuthService);
 	app.register(authRoutes, {prefix: 'api/auth/'});
 	return (app);
