@@ -60,7 +60,9 @@ module.exports = async function (fastify, opts) {
 				sameSite: "lax",
 				maxAge: 3600,
 			});
-			return ;
+			return reply.code(200).send({
+				message: "Login successful"
+			});
 		}
 	});
 
