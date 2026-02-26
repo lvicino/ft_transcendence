@@ -27,10 +27,15 @@ module.exports = async function (fastify, opts) {
 			await fastify.authService.register(email, username, password);
 			return reply.code(201).send();
 		} catch (error) {
-			if (error.message.includes('UNIQUE')) {
+			if (error.message.includes('users_email_key')) {
 				return reply.code(409).send({ 
 					error: "Conflict", 
-					message: "Cet email ou username est déjà enregistré." 
+					message: "Cet email est déjà enregistré." 
+				});
+			} else if (error.message.includes('users_username_key')) {
+				return reply.code(409).send({ 
+					error: "Conflict", 
+					message: "Cet username est déjà utilisé." 
 				});
 			}
 			console.log("error register: ", error.message);
