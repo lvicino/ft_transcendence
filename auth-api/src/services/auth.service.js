@@ -10,7 +10,7 @@ async function register(email, username, plainTextPassword) {
 
 async function login(email, plainTextPassword) {
 	const user = await UserRepository.findByEmail(email);
-	if (user.length === 0 || user[0].oauth === false)
+	if (user.length === 0 || user[0].oauth === true)
 		return (null);
 	const [salt, hash] = user[0].password_hash.split(':');
 	if (timingSafeEqual(Buffer.from(hash, 'hex'), scryptSync(plainTextPassword, salt, 64)))
