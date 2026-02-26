@@ -1,101 +1,426 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interface de Test : API Globale (Auth, OAuth & WS Games)</title>
+    <title>Debug Dashboard — ft_transcendence</title>
     <style>
-        body { font-family: monospace; background-color: #1e1e1e; color: #d4d4d4; padding: 20px; }
-        .container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
-        .panel { border: 1px solid #444; padding: 15px; width: 300px; background-color: #252526; }
-        .panel.wide { width: 100%; max-width: 620px; }
-        input, textarea { width: 90%; padding: 5px; margin-top: 5px; background: #3c3c3c; border: 1px solid #555; color: #fff; font-family: monospace; }
-        button { margin-top: 15px; padding: 8px 15px; cursor: pointer; background: #0e639c; color: white; border: none; }
-        button:hover { background: #1177bb; }
-        button.action { background: #007acc; margin-top: 5px; }
-        button.danger { background: #a31515; }
-        .log-panel { border: 1px solid #444; padding: 15px; background-color: #000; margin-bottom: 20px; }
-        pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; color: #ce9178; }
-        .status { font-weight: bold; color: #4ec9b0; margin-bottom: 10px; display: block; }
-        .stream-data { color: #b5cea8; }
+        /* ── Reset & Base ─────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        /* ── Main Grid: 3 columns, header + content ──────────── */
+        body {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 6px;
+            padding: 6px;
+        }
+
+        /* ── Header ──────────────────────────────────────────── */
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, #161b22 0%, #1a2233 100%);
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 6px 14px;
+        }
+
+        header h1 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #58a6ff;
+            letter-spacing: 0.5px;
+        }
+
+        header .tag {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            background: #238636;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        /* ── Column Containers ───────────────────────────────── */
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 0;
+            /* critical for overflow containment */
+        }
+
+        /* ── Panel (card) ────────────────────────────────────── */
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1 1 0;
+            min-height: 0;
+        }
+
+        .panel h2 {
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #21262d;
+            flex-shrink: 0;
+        }
+
+        .panel h2 .method {
+            font-weight: 800;
+            margin-right: 4px;
+        }
+
+        .panel h2 .method.post {
+            color: #3fb950;
+        }
+
+        .panel h2 .method.get {
+            color: #58a6ff;
+        }
+
+        .panel h2 .method.ws {
+            color: #d2a8ff;
+        }
+
+        /* ── Form Elements ───────────────────────────────────── */
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
+
+        label span {
+            min-width: 60px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        input,
+        textarea {
+            flex: 1;
+            padding: 4px 6px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 0.75rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #58a6ff;
+        }
+
+        textarea {
+            resize: none;
+            flex: 1 1 auto;
+            min-height: 40px;
+        }
+
+        /* ── Buttons ─────────────────────────────────────────── */
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn-action {
+            background: #1f6feb;
+            color: #fff;
+        }
+
+        .btn-action:hover {
+            background: #388bfd;
+        }
+
+        .btn-oauth {
+            background: #6e40c9;
+            color: #fff;
+        }
+
+        .btn-oauth:hover {
+            background: #8957e5;
+        }
+
+        .btn-danger {
+            background: #da3633;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #f85149;
+        }
+
+        .btn-sm {
+            padding: 3px 8px;
+            font-size: 0.65rem;
+        }
+
+        .btn-ws-dir {
+            background: #30363d;
+            color: #c9d1d9;
+            flex: 1;
+        }
+
+        .btn-ws-dir:hover {
+            background: #484f58;
+        }
+
+        /* ── Log Panels (right column) ───────────────────────── */
+        .log-panel {
+            background: #010409;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1 1 0;
+            min-height: 0;
+        }
+
+        .log-panel h2 {
+            font-size: 0.7rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #21262d;
+            flex-shrink: 0;
+        }
+
+        .status-line {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #3fb950;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+
+        .status-line.ws-status {
+            color: #d2a8ff;
+        }
+
+        pre {
+            margin: 0;
+            flex: 1 1 auto;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.7rem;
+            color: #f0883e;
+            line-height: 1.4;
+            min-height: 0;
+        }
+
+        pre::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 2px;
+        }
+
+        /* ── WS Controls ─────────────────────────────────────── */
+        .ws-controls {
+            display: none;
+            margin-top: 6px;
+            border-top: 1px solid #21262d;
+            padding-top: 6px;
+        }
+
+        .ws-controls.active {
+            display: block;
+        }
+
+        .ws-controls .btn-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        /* ── OAuth Info ───────────────────────────────────────── */
+        .info-text {
+            font-size: 0.65rem;
+            color: #484f58;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ── Form group stacking ─────────────────────────────── */
+        .form-body {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
     </style>
 </head>
+
 <body>
-    <h1>Client de Test : Architecture Complète</h1>
-    
-    <div class="container">
-        <div class="panel">
-            <h2>POST /api/auth/register</h2>
-            <form id="registerForm">
-                <label>Email: <input type="email" id="regEmail" required></label><br>
-                <label>Username: <input type="text" id="regUsername" required></label><br>
-                <label>Password: <input type="password" id="regPassword" required minlength="1"></label><br>
-                <button type="submit">Exécuter la requête</button>
+
+    <!-- ════ HEADER ════ -->
+    <header>
+        <h1>🛰 Debug Dashboard — ft_transcendence</h1>
+        <span class="tag">QA Agent Interface</span>
+    </header>
+
+    <!-- ════ COL 1 : AUTH-API ════ -->
+    <div class="col">
+        <!-- Register -->
+        <div class="panel" data-testid="panel-register">
+            <h2><span class="method post">POST</span> /api/auth/register</h2>
+            <form id="registerForm" data-testid="register-form" class="form-body">
+                <label><span>Email</span> <input type="email" id="regEmail" data-testid="reg-email"
+                        placeholder="user@test.io" required></label>
+                <label><span>Username</span> <input type="text" id="regUsername" data-testid="reg-username"
+                        placeholder="testuser" required></label>
+                <label><span>Password</span> <input type="password" id="regPassword" data-testid="reg-password"
+                        placeholder="••••" required minlength="1"></label>
+                <button type="submit" class="btn-primary" data-testid="submit-register">Exécuter Register</button>
             </form>
         </div>
 
-        <div class="panel">
-            <h2>POST /api/auth/login</h2>
-            <form id="loginForm">
-                <label>Email: <input type="email" id="logEmail" required></label><br>
-                <label>Password: <input type="password" id="logPassword" required></label><br>
-                <button type="submit">Exécuter la requête</button>
+        <!-- Login -->
+        <div class="panel" data-testid="panel-login">
+            <h2><span class="method post">POST</span> /api/auth/login</h2>
+            <form id="loginForm" data-testid="login-form" class="form-body">
+                <label><span>Email</span> <input type="email" id="logEmail" data-testid="log-email"
+                        placeholder="user@test.io" required></label>
+                <label><span>Password</span> <input type="password" id="logPassword" data-testid="log-password"
+                        placeholder="••••" required></label>
+                <button type="submit" class="btn-primary" data-testid="submit-login">Exécuter Login</button>
             </form>
         </div>
 
-        <div class="panel">
-            <h2>GET /api/auth/login/oauth</h2>
-            <p style="font-size: 0.9em; color: #888;">Délégation d'authentification (Intranet 42).</p>
-            <button id="oauthButton" style="background: #4ec9b0; color: #000; font-weight: bold;">Initialiser OAuth 42</button>
+        <!-- OAuth -->
+        <div class="panel" data-testid="panel-oauth">
+            <h2><span class="method get">GET</span> /api/auth/login/oauth</h2>
+            <span class="info-text">Délégation OAuth 2.0 vers Intranet 42</span>
+            <button id="oauthButton" class="btn-oauth" data-testid="btn-oauth">Initialiser OAuth 42</button>
         </div>
+    </div>
 
-        <div class="panel wide">
-            <h2>POST /api/games/</h2>
-            <p style="font-size: 0.9em; color: #888;">Création d'instance (Requiert cookie valide).</p>
-            <form id="gameForm">
-                <label>Objet JSON "gameParameter": <br>
-                <textarea id="gameParam" rows="5" required>{
-  "gw": 100, "gh": 100, "ballRadius": 5,
-  "ballSpeed": 5, "playerW": 5, "playerH": 5,
+    <!-- ════ COL 2 : GAME-API ════ -->
+    <div class="col">
+        <!-- Create Game -->
+        <div class="panel" data-testid="panel-create-game">
+            <h2><span class="method post">POST</span> /api/games/</h2>
+            <form id="gameForm" data-testid="game-form" class="form-body">
+                <label style="align-items: flex-start;"><span>Params</span>
+                    <textarea id="gameParam" data-testid="game-param" required>{
+  "gw": 100, "gh": 100,
+  "ballRadius": 5, "ballSpeed": 5,
+  "playerW": 5, "playerH": 5,
   "playerSpeed": 1, "playerNumber": 2
 }</textarea>
-                </label><br>
-                <button type="submit">Exécuter la requête (Créer la partie)</button>
+                </label>
+                <button type="submit" class="btn-primary" data-testid="submit-game">Créer la partie</button>
             </form>
         </div>
 
-        <div class="panel wide">
-            <h2>WS /api/games/ws</h2>
-            <p style="font-size: 0.9em; color: #888;">Connexion TCP persistante et multiplexage d'entrées.</p>
-            <form id="wsForm">
-                <label>Game ID: <input type="text" id="wsGameId" required></label><br>
-                <label>Password (Optionnel): <input type="text" id="wsPassword"></label><br>
-                <button type="submit" id="wsConnectBtn">Ouvrir le tunnel WebSocket</button>
+        <!-- WebSocket Tunnel -->
+        <div class="panel" data-testid="panel-ws">
+            <h2><span class="method ws">WS</span> /api/games/ws</h2>
+            <form id="wsForm" data-testid="ws-form" class="form-body">
+                <label><span>Game ID</span> <input type="text" id="wsGameId" data-testid="ws-game-id" placeholder="id"
+                        required></label>
+                <label><span>Password</span> <input type="text" id="wsPassword" data-testid="ws-password"
+                        placeholder="optionnel"></label>
+                <button type="submit" id="wsConnectBtn" class="btn-action" data-testid="btn-ws-connect">Ouvrir Tunnel
+                    WS</button>
             </form>
-            
-            <div id="wsControls" style="display: none; margin-top: 15px; border-top: 1px solid #555; padding-top: 10px;">
-                <strong>Transmission d'Inputs :</strong><br>
-                <button type="button" class="action" onclick="sendWsInput(-1)">Vecteur -1 (Haut/Gauche)</button>
-                <button type="button" class="action" onclick="sendWsInput(0)">Vecteur 0 (Stop)</button>
-                <button type="button" class="action" onclick="sendWsInput(1)">Vecteur 1 (Bas/Droite)</button>
-                <br><br>
-                <button type="button" class="danger" onclick="closeWs()">Fermer le tunnel (Code 1000)</button>
+
+            <div id="wsControls" class="ws-controls" data-testid="ws-controls">
+                <div class="btn-row">
+                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-left"
+                        onclick="sendWsInput(-1)">◀ -1</button>
+                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-stop"
+                        onclick="sendWsInput(0)">■ 0</button>
+                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-right"
+                        onclick="sendWsInput(1)">▶ +1</button>
+                </div>
+                <button type="button" class="btn-danger btn-sm" data-testid="btn-ws-close" onclick="closeWs()">Fermer
+                    Tunnel</button>
             </div>
         </div>
     </div>
 
-    <div class="log-panel">
-        <h2>Logs Transactionnels (REST & WS Lifecycle)</h2>
-        <span id="httpStatus" class="status">En attente d'exécution...</span>
-        <pre id="jsonPayload"></pre>
-    </div>
+    <!-- ════ COL 3 : RESPONSE VIEWERS ════ -->
+    <div class="col">
+        <!-- REST Log -->
+        <div class="log-panel" data-testid="panel-rest-log">
+            <h2>REST — Réponse HTTP</h2>
+            <span id="httpStatus" class="status-line" data-testid="http-status">En attente…</span>
+            <pre id="jsonPayload" data-testid="json-payload"></pre>
+        </div>
 
-    <div class="log-panel">
-        <h2>Flux Télémétrique (WebSocket Engine Tick)</h2>
-        <span id="wsTickStatus" class="status" style="color: #569cd6;">Désactivé</span>
-        <pre id="wsPayload" class="stream-data"></pre>
+        <!-- WS Stream -->
+        <div class="log-panel" data-testid="panel-ws-log">
+            <h2>WS — Flux Télémétrique</h2>
+            <span id="wsTickStatus" class="status-line ws-status" data-testid="ws-status">Désactivé</span>
+            <pre id="wsPayload" data-testid="ws-payload"></pre>
+        </div>
     </div>
 
     <script src="app.js"></script>
 </body>
+
 </html>

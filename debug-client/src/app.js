@@ -1,163 +1,245 @@
-// Initialisation des écouteurs d'événements DOM
-document.getElementById('registerForm').addEventListener('submit', execRegister);
-document.getElementById('loginForm').addEventListener('submit', execLogin);
-document.getElementById('oauthButton').addEventListener('click', initOAuth); // Restauration
-document.getElementById('gameForm').addEventListener('submit', execCreateGame);
-document.getElementById('wsForm').addEventListener('submit', execWsConnection);
+// ═══════════════════════════════════════════════════════════════
+// Debug Dashboard — ft_transcendence  |  app.js
+// ═══════════════════════════════════════════════════════════════
 
-const httpStatusElement = document.getElementById('httpStatus');
-const jsonPayloadElement = document.getElementById('jsonPayload');
-const wsTickStatusElement = document.getElementById('wsTickStatus');
-const wsPayloadElement = document.getElementById('wsPayload');
+// ── DOM References (via data-testid for subagent compatibility) ──
+const $ = (sel) => document.querySelector(sel);
+const byTestId = (id) => document.querySelector(`[data-testid="${id}"]`);
+
+const httpStatusEl = byTestId('http-status');
+const jsonPayloadEl = byTestId('json-payload');
+const wsStatusEl = byTestId('ws-status');
+const wsPayloadEl = byTestId('ws-payload');
+const wsControlsEl = byTestId('ws-controls');
 
 let activeSocket = null;
 
+// ── Event Listeners ─────────────────────────────────────────────
+document.getElementById('registerForm').addEventListener('submit', execRegister);
+document.getElementById('loginForm').addEventListener('submit', execLogin);
+document.getElementById('oauthButton').addEventListener('click', initOAuth);
+document.getElementById('gameForm').addEventListener('submit', execCreateGame);
+document.getElementById('wsForm').addEventListener('submit', execWsConnection);
+
+// ═══════════════════════════════════════════════════════════════
+// RENDERERS
+// ═══════════════════════════════════════════════════════════════
+
+function timestamp() {
+    return new Date().toLocaleTimeString('fr-FR', { hour12: false });
+}
+
 /**
- * Moteurs de rendu des flux
+ * Renders a REST response into the HTTP log panel.
+ * @param {string} method  - HTTP verb (POST, GET, …)
+ * @param {string} url     - Endpoint path
+ * @param {number|string} statusCode - HTTP status or client label
+ * @param {object|string} data - Response body
+ * @param {object} [headers] - Notable response headers
  */
-function renderResponse(statusCode, data) {
-    httpStatusElement.textContent = `Code/Statut : ${statusCode}`;
-    jsonPayloadElement.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+function renderResponse(method, url, statusCode, data, headers) {
+    const ts = timestamp();
+    httpStatusEl.textContent = `[${ts}]  ${method} ${url}  →  ${statusCode}`;
+
+    let output = '';
+    if (headers) {
+        const notable = {};
+        if (headers.get('set-cookie')) notable['Set-Cookie'] = headers.get('set-cookie');
+        if (headers.get('content-type')) notable['Content-Type'] = headers.get('content-type');
+        if (headers.get('location')) notable['Location'] = headers.get('location');
+        if (Object.keys(notable).length > 0) {
+            output += '── Response Headers ──\n' + JSON.stringify(notable, null, 2) + '\n\n';
+        }
+    }
+    output += '── Response Body ──\n';
+    output += typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+    jsonPayloadEl.textContent = output;
 }
 
 function renderTick(data) {
-    wsTickStatusElement.textContent = `Tick reçu à : ${new Date().toISOString()}`;
-    wsPayloadElement.textContent = JSON.stringify(data, null, 2);
+    wsStatusEl.textContent = `Tick  @  ${timestamp()}`;
+    wsPayloadEl.textContent = JSON.stringify(data, null, 2);
 }
 
-/**
- * Initialisation du flux OAuth 2.0
- */
-function initOAuth() {
-    // Déclenche une requête GET bloquante (navigation) vers le point de terminaison d'initialisation Fastify
-    window.location.href = '/api/auth/login/oauth';
+function renderWsEvent(label, data) {
+    wsStatusEl.textContent = `[${timestamp()}]  ${label}`;
+    if (data !== undefined) {
+        wsPayloadEl.textContent = typeof data === 'object'
+            ? JSON.stringify(data, null, 2) : String(data);
+    }
 }
 
-/**
- * Exécution de l'inscription locale
- */
+// ═══════════════════════════════════════════════════════════════
+// AUTH-API  —  Register
+// ═══════════════════════════════════════════════════════════════
+
 async function execRegister(event) {
     event.preventDefault();
     const payload = {
-        email: document.getElementById('regEmail').value,
-        username: document.getElementById('regUsername').value,
-        password: document.getElementById('regPassword').value
+        email: byTestId('reg-email').value,
+        username: byTestId('reg-username').value,
+        password: byTestId('reg-password').value,
     };
+    const method = 'POST';
+    const url = '/api/auth/register';
+
     try {
-        const response = await fetch('/api/auth/register', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
-        const contentType = response.headers.get("content-type");
-        const data = (contentType && contentType.includes("application/json")) ? await response.json() : "No Content";
-        renderResponse(response.status, data);
-    } catch (error) { renderResponse(0, error.message); }
+        const ct = res.headers.get('content-type');
+        const data = (ct && ct.includes('application/json'))
+            ? await res.json()
+            : (res.status === 201 ? 'Created (No Content)' : await res.text() || 'No Content');
+        renderResponse(method, url, res.status, data, res.headers);
+    } catch (err) {
+        renderResponse(method, url, 'NETWORK_ERR', err.message);
+    }
 }
 
-/**
- * Exécution de la connexion locale (Requiert l'émission d'un Set-Cookie par le serveur)
- */
+// ═══════════════════════════════════════════════════════════════
+// AUTH-API  —  Login
+// ═══════════════════════════════════════════════════════════════
+
 async function execLogin(event) {
     event.preventDefault();
-    const payload = { email: document.getElementById('logEmail').value, password: document.getElementById('logPassword').value };
+    const payload = {
+        email: byTestId('log-email').value,
+        password: byTestId('log-password').value,
+    };
+    const method = 'POST';
+    const url = '/api/auth/login';
+
     try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(payload)
+        const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
         });
-        const contentType = response.headers.get("content-type");
-        const data = (contentType && contentType.includes("application/json")) ? await response.json() : "No Content";
-        renderResponse(response.status, data);
-    } catch (error) { renderResponse(0, error.message); }
+        const ct = res.headers.get('content-type');
+        const data = (ct && ct.includes('application/json'))
+            ? await res.json()
+            : await res.text() || 'No Content';
+        renderResponse(method, url, res.status, data, res.headers);
+    } catch (err) {
+        renderResponse(method, url, 'NETWORK_ERR', err.message);
+    }
 }
 
-/**
- * Exécution de la création d'une instance de jeu
- */
+// ═══════════════════════════════════════════════════════════════
+// AUTH-API  —  OAuth 42
+// ═══════════════════════════════════════════════════════════════
+
+function initOAuth() {
+    window.location.href = '/api/auth/login/oauth';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME-API  —  Create Game
+// ═══════════════════════════════════════════════════════════════
+
 async function execCreateGame(event) {
     event.preventDefault();
     let gameParameterParsed;
     try {
-        gameParameterParsed = JSON.parse(document.getElementById('gameParam').value);
+        gameParameterParsed = JSON.parse(byTestId('game-param').value);
     } catch (parseError) {
-        return renderResponse(0, `Erreur JSON locale : ${parseError.message}`);
+        return renderResponse('POST', '/api/games/', 'JSON_ERR', `Erreur JSON locale : ${parseError.message}`);
     }
 
+    const method = 'POST';
+    const url = '/api/games/';
+
     try {
-        const response = await fetch('/api/games/', {
-            method: 'POST',
+        const res = await fetch(url, {
+            method,
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin', // Propagation stricte du cookie d'authentification
-            body: JSON.stringify({ gameParameter: gameParameterParsed })
+            credentials: 'same-origin',
+            body: JSON.stringify({ gameParameter: gameParameterParsed }),
         });
-        const contentType = response.headers.get("content-type");
-        const data = (contentType && contentType.includes("application/json")) ? await response.json() : "No Content";
-        renderResponse(response.status, data);
-    } catch (error) {
-        renderResponse(0, `Erreur réseau : ${error.message}`);
+        const ct = res.headers.get('content-type');
+        const data = (ct && ct.includes('application/json'))
+            ? await res.json()
+            : await res.text() || 'No Content';
+        renderResponse(method, url, res.status, data, res.headers);
+    } catch (err) {
+        renderResponse(method, url, 'NETWORK_ERR', `Erreur réseau : ${err.message}`);
     }
 }
 
-/**
- * Négociation et instanciation du tunnel WebSocket
- */
+// ═══════════════════════════════════════════════════════════════
+// GAME-API  —  WebSocket Tunnel
+// ═══════════════════════════════════════════════════════════════
+
 function execWsConnection(event) {
     event.preventDefault();
 
     if (activeSocket && activeSocket.readyState !== WebSocket.CLOSED) {
-        renderResponse('WS Client', 'Un tunnel est déjà actif ou en cours de négociation.');
+        renderResponse('WS', '/api/games/ws', 'BUSY', 'Un tunnel est déjà actif ou en cours de négociation.');
         return;
     }
 
-    const gameId = document.getElementById('wsGameId').value;
-    const password = document.getElementById('wsPassword').value;
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUri = `${wsProtocol}//${window.location.host}/api/games/ws`;
+    const gameId = byTestId('ws-game-id').value;
+    const password = byTestId('ws-password').value;
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUri = `${proto}//${window.location.host}/api/games/ws`;
+
+    renderWsEvent('CONNECTING…', `URI: ${wsUri}`);
 
     try {
         activeSocket = new WebSocket(wsUri);
 
         activeSocket.onopen = () => {
-            renderResponse('WS 101', 'Switching Protocols réussi. Exécution de la charge utile d\'initialisation.');
-            document.getElementById('wsControls').style.display = 'block';
+            renderWsEvent('OPEN  (101 Switching Protocols)');
+            wsControlsEl.classList.add('active');
             document.getElementById('wsConnectBtn').disabled = true;
 
             const initPayload = { gameid: gameId };
             if (password) initPayload.password = password;
             activeSocket.send(JSON.stringify(initPayload));
+            renderWsEvent('SENT init payload', initPayload);
         };
 
-        activeSocket.onmessage = (messageEvent) => {
-            const data = JSON.parse(messageEvent.data);
-            if (data.ball) {
-                renderTick(data);
-            } else if (data.type === 'Game Stop') {
-                renderResponse('WS Trame de contrôle', `Arrêt du serveur. Raison: ${data.reason}`);
-            } else if (data.type === 'error') {
-                renderResponse('WS Exception', `Erreur du serveur: ${data.message}`);
-            } else {
-                renderResponse('WS Trame inconnue', data);
+        activeSocket.onmessage = (msgEvent) => {
+            try {
+                const data = JSON.parse(msgEvent.data);
+                if (data.ball) {
+                    renderTick(data);
+                } else if (data.type === 'Game Stop') {
+                    renderWsEvent(`GAME STOP — reason: ${data.reason}`, data);
+                } else if (data.type === 'error') {
+                    renderWsEvent(`ERROR — ${data.message}`, data);
+                } else {
+                    renderWsEvent('MESSAGE', data);
+                }
+            } catch (e) {
+                renderWsEvent('RAW MESSAGE', msgEvent.data);
             }
         };
 
         activeSocket.onclose = (closeEvent) => {
-            renderResponse(`WS Close [${closeEvent.code}]`, `Fermeture du tunnel. Raison fournie: ${closeEvent.reason || 'Aucune'}`);
-            document.getElementById('wsControls').style.display = 'none';
+            renderWsEvent(`CLOSED [${closeEvent.code}]`, `Raison: ${closeEvent.reason || 'aucune'}`);
+            wsControlsEl.classList.remove('active');
             document.getElementById('wsConnectBtn').disabled = false;
-            wsTickStatusElement.textContent = 'Désactivé (Tunnel fermé)';
             activeSocket = null;
         };
 
-        activeSocket.onerror = (errorEvent) => {
-            renderResponse('WS Error', 'Erreur critique au niveau de la couche de transport.');
+        activeSocket.onerror = () => {
+            renderWsEvent('ERROR', 'Erreur critique sur la couche transport.');
         };
 
     } catch (err) {
-        renderResponse('Client Error', `Échec d'instanciation de l'objet WebSocket: ${err.message}`);
+        renderWsEvent('FATAL', `Échec d'instanciation WebSocket: ${err.message}`);
     }
 }
 
-/**
- * Transmission sérialisée de la commande d'entrée (Vecteur)
- */
+// ═══════════════════════════════════════════════════════════════
+// WS Input Controls
+// ═══════════════════════════════════════════════════════════════
+
 function sendWsInput(mooveValue) {
     if (activeSocket && activeSocket.readyState === WebSocket.OPEN) {
         const payload = { type: 'input', moove: mooveValue };
@@ -165,11 +247,8 @@ function sendWsInput(mooveValue) {
     }
 }
 
-/**
- * Clôture du descripteur de socket
- */
 function closeWs() {
     if (activeSocket) {
-        activeSocket.close(1000, "Initiative de déconnexion du client frontal");
+        activeSocket.close(1000, 'Déconnexion initiée par le client de debug');
     }
 }
