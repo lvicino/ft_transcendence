@@ -15,10 +15,15 @@ class GameManager {
 				error: "GAME_ALREADY_STARTED"
 			};
 		}
-		if (this.games.has(gameid) && this.games.get(gameid).players.size > 0) {
+		if (this.games.has(gameid)) {
 			return {
 				success: false,
-				error: "GAME_ALREADY_AND_CONTAINS_PLAYER"
+				error: "GAME_ALREADY_EXISTE",
+				id: gameid,
+				data: {
+					id: gameid,
+					password: this.games.get(gameid).password,
+				}
 			};
 		}
 		const game = {

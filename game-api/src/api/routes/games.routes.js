@@ -9,7 +9,7 @@ module.exports = async function (fastify, opts) {
 		if (result.success) {
 			reply.code(201).send({...result.data});
 		} else {
-			reply.code(409).send({error: result.error});
+			reply.code(409).send({error: result.error, ...result.data});
 		}
 	})
 }
