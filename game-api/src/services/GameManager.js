@@ -53,8 +53,9 @@ class GameManager {
 			this.startedGames.set(gameId, this.games.get(gameId));
 			this.games.delete(gameId);
 			this.#startGame(gameId);
+			return ({joined: true, reason: "", players: "2/2"});
 		}
-		return ({joined: true, reason: ""});
+		return ({joined: true, reason: "", players: "1/2"});
 	}
 
 	#startGame(id) {

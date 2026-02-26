@@ -15,6 +15,7 @@ module.exports = async function (fastify) {
                 if (!state.joined) {
                     throw new Error("impossible de rejoindere la partie: "+ state.reason);
                 }
+                socket.send(JSON.stringify({type:"info", message: "Partie rejoin avec succes", player: state.players}));
             } catch (err) {
                 socket.send(JSON.stringify({type:"error", message: err.message}));
                 socket.close();
