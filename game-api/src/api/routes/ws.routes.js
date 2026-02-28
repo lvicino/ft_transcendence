@@ -25,6 +25,7 @@ module.exports = async function (fastify) {
                     const data = JSON.parse(message);
                     console.log(data);
                     if (data.type === "input") {
+                        console.log("data.moove: ", data.moove);
                         fastify.gameManager.HandleInput(user.gameid, user, data.moove);
                     }
                 } catch (error) {

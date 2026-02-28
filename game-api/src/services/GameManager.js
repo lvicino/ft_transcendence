@@ -64,11 +64,9 @@ class GameManager {
 	}
 
 	#startGame(id) {
-		
 		const game = this.startedGames.get(Number(id));
 		game.intervalID = setInterval(() => {
 			const mooves = [...game.players.values()].map((p) => {return p.moove});
-			console.log("mooves :", mooves);
 			const gameState = game.pong.update(...mooves);
 			const data = JSON.stringify(gameState);
 			[...game.players.values()].map((p) => {p.socket.send(data)});
@@ -79,9 +77,11 @@ class GameManager {
 		gameid = Number(gameid);
 		moove = Number(moove);
 		if (this.startedGames.has(gameid)) {
-			for (const player of this.startedGames.get(gameid).players) {
-				if (player.id == user.id)
+			console.log("ici 1");
+			for (const [id, player] of this.startedGames.get(gameid).players) {
+				if (id == user.id) {
 					player.moove = moove;
+				}
 			}
 		}
 	}
@@ -89,8 +89,8 @@ class GameManager {
 	handleDisconnect(user) {
 		const gameid = Number(user.gameid);
 		if (this.startedGames.has(gameid)) {
-			for (const player of this.startedGames.get(gameid).players.values()) {
-				if (player.id != user.id) {
+			for (const [id, player] of this.startedGames.get(gameid).players) {
+				if (id != user.id) {
 					player.socket.send(JSON.stringify({type: "Game Stop", reason: 1}));
 					player.socket.close();
 				}
