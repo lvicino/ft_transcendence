@@ -1,34 +1,22 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debug Dashboard — ft_transcendence</title>
     <style>
         /* ── Reset & Base ─────────────────────────────────────── */
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html,
-        body {
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100vh; width: 100vw; overflow: hidden;
             font-family: 'Courier New', Courier, monospace;
-            background: #0d1117;
-            color: #c9d1d9;
+            background: #0d1117; color: #c9d1d9;
         }
 
-        /* ── Main Grid: 3 columns, header + content ──────────── */
+        /* ── Main Grid: 4 columns, header + content ──────────── */
         body {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1.4fr 1fr;
             grid-template-rows: auto 1fr;
             gap: 6px;
             padding: 6px;
@@ -37,283 +25,160 @@
         /* ── Header ──────────────────────────────────────────── */
         header {
             grid-column: 1 / -1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
             background: linear-gradient(90deg, #161b22 0%, #1a2233 100%);
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 6px 14px;
+            border: 1px solid #30363d; border-radius: 6px;
+            padding: 5px 14px;
         }
-
-        header h1 {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #58a6ff;
-            letter-spacing: 0.5px;
-        }
-
-        header .tag {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            background: #238636;
-            color: #fff;
-            border-radius: 10px;
-        }
+        header h1 { font-size: 0.9rem; font-weight: 700; color: #58a6ff; letter-spacing: 0.5px; }
+        header .tag { font-size: 0.6rem; padding: 2px 8px; background: #238636; color: #fff; border-radius: 10px; }
 
         /* ── Column Containers ───────────────────────────────── */
         .col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            display: flex; flex-direction: column; gap: 5px;
             min-height: 0;
-            /* critical for overflow containment */
         }
 
         /* ── Panel (card) ────────────────────────────────────── */
         .panel {
             background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
+            border: 1px solid #30363d; border-radius: 6px;
+            padding: 6px 8px;
+            display: flex; flex-direction: column;
             overflow: hidden;
             flex: 1 1 0;
             min-height: 0;
         }
-
         .panel h2 {
-            font-size: 0.75rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #21262d;
+            font-size: 0.65rem; color: #8b949e; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 4px;
+            padding-bottom: 3px; border-bottom: 1px solid #21262d;
             flex-shrink: 0;
         }
-
-        .panel h2 .method {
-            font-weight: 800;
-            margin-right: 4px;
-        }
-
-        .panel h2 .method.post {
-            color: #3fb950;
-        }
-
-        .panel h2 .method.get {
-            color: #58a6ff;
-        }
-
-        .panel h2 .method.ws {
-            color: #d2a8ff;
-        }
+        .panel h2 .method { font-weight: 800; margin-right: 4px; }
+        .panel h2 .method.post { color: #3fb950; }
+        .panel h2 .method.get  { color: #58a6ff; }
+        .panel h2 .method.ws   { color: #d2a8ff; }
 
         /* ── Form Elements ───────────────────────────────────── */
         label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.7rem;
-            color: #8b949e;
-            margin-bottom: 4px;
+            display: flex; align-items: center; gap: 4px;
+            font-size: 0.65rem; color: #8b949e; margin-bottom: 3px;
         }
-
-        label span {
-            min-width: 60px;
-            text-align: right;
-            flex-shrink: 0;
+        label span { min-width: 52px; text-align: right; flex-shrink: 0; }
+        input, textarea {
+            flex: 1; padding: 3px 5px;
+            background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
+            color: #c9d1d9; font-family: inherit; font-size: 0.68rem;
+            outline: none; transition: border-color 0.15s;
         }
-
-        input,
-        textarea {
-            flex: 1;
-            padding: 4px 6px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 4px;
-            color: #c9d1d9;
-            font-family: inherit;
-            font-size: 0.75rem;
-            outline: none;
-            transition: border-color 0.15s;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: #58a6ff;
-        }
-
-        textarea {
-            resize: none;
-            flex: 1 1 auto;
-            min-height: 40px;
-        }
+        input:focus, textarea:focus { border-color: #58a6ff; }
+        textarea { resize: none; flex: 1 1 auto; min-height: 30px; }
 
         /* ── Buttons ─────────────────────────────────────────── */
         button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s ease;
+            padding: 4px 8px; border: none; border-radius: 4px;
+            font-family: inherit; font-size: 0.65rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s ease;
             flex-shrink: 0;
         }
+        button:active { transform: scale(0.97); }
+        .btn-primary   { background: #238636; color: #fff; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-action    { background: #1f6feb; color: #fff; }
+        .btn-action:hover  { background: #388bfd; }
+        .btn-oauth     { background: #6e40c9; color: #fff; }
+        .btn-oauth:hover   { background: #8957e5; }
+        .btn-danger    { background: #da3633; color: #fff; }
+        .btn-danger:hover  { background: #f85149; }
+        .btn-sm        { padding: 2px 6px; font-size: 0.6rem; }
+        .btn-ws-dir    { background: #30363d; color: #c9d1d9; flex: 1; }
+        .btn-ws-dir:hover { background: #484f58; }
 
-        button:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: #238636;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #2ea043;
-        }
-
-        .btn-action {
-            background: #1f6feb;
-            color: #fff;
-        }
-
-        .btn-action:hover {
-            background: #388bfd;
-        }
-
-        .btn-oauth {
-            background: #6e40c9;
-            color: #fff;
-        }
-
-        .btn-oauth:hover {
-            background: #8957e5;
-        }
-
-        .btn-danger {
-            background: #da3633;
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #f85149;
-        }
-
-        .btn-sm {
-            padding: 3px 8px;
-            font-size: 0.65rem;
-        }
-
-        .btn-ws-dir {
-            background: #30363d;
-            color: #c9d1d9;
-            flex: 1;
-        }
-
-        .btn-ws-dir:hover {
-            background: #484f58;
-        }
-
-        /* ── Log Panels (right column) ───────────────────────── */
+        /* ── Log Panels ──────────────────────────────────────── */
         .log-panel {
             background: #010409;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
+            border: 1px solid #30363d; border-radius: 6px;
+            padding: 6px 8px;
+            display: flex; flex-direction: column;
             overflow: hidden;
             flex: 1 1 0;
             min-height: 0;
         }
-
         .log-panel h2 {
-            font-size: 0.7rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #21262d;
+            font-size: 0.65rem; color: #8b949e; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 3px;
+            padding-bottom: 3px; border-bottom: 1px solid #21262d;
             flex-shrink: 0;
         }
-
         .status-line {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #3fb950;
-            margin-bottom: 4px;
-            flex-shrink: 0;
+            font-size: 0.65rem; font-weight: 700; color: #3fb950;
+            margin-bottom: 3px; flex-shrink: 0;
         }
-
-        .status-line.ws-status {
-            color: #d2a8ff;
-        }
-
+        .status-line.ws-status { color: #d2a8ff; }
         pre {
-            margin: 0;
-            flex: 1 1 auto;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-size: 0.7rem;
-            color: #f0883e;
-            line-height: 1.4;
+            margin: 0; flex: 1 1 auto; overflow-y: auto;
+            white-space: pre-wrap; word-wrap: break-word;
+            font-size: 0.63rem; color: #f0883e; line-height: 1.3;
             min-height: 0;
         }
-
-        pre::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        pre::-webkit-scrollbar-thumb {
-            background: #30363d;
-            border-radius: 2px;
-        }
+        pre::-webkit-scrollbar { width: 3px; }
+        pre::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
 
         /* ── WS Controls ─────────────────────────────────────── */
-        .ws-controls {
-            display: none;
-            margin-top: 6px;
-            border-top: 1px solid #21262d;
-            padding-top: 6px;
-        }
-
-        .ws-controls.active {
-            display: block;
-        }
-
-        .ws-controls .btn-row {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 4px;
-        }
+        .ws-controls { display: none; margin-top: 4px; border-top: 1px solid #21262d; padding-top: 4px; }
+        .ws-controls.active { display: block; }
+        .ws-controls .btn-row { display: flex; gap: 3px; margin-bottom: 3px; }
 
         /* ── OAuth Info ───────────────────────────────────────── */
-        .info-text {
-            font-size: 0.65rem;
-            color: #484f58;
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
+        .info-text { font-size: 0.6rem; color: #484f58; flex: 1; display: flex; align-items: center; }
 
         /* ── Form group stacking ─────────────────────────────── */
-        .form-body {
-            display: flex;
-            flex-direction: column;
-            flex: 1 1 auto;
+        .form-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+
+        /* ── Pong Canvas Panel ───────────────────────────────── */
+        .canvas-panel {
+            background: #010409;
+            border: 1px solid #30363d; border-radius: 6px;
+            padding: 6px 8px;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            flex: 1 1 0;
             min-height: 0;
         }
+        .canvas-panel h2 {
+            font-size: 0.65rem; color: #8b949e; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 3px;
+            padding-bottom: 3px; border-bottom: 1px solid #21262d;
+            flex-shrink: 0;
+        }
+        .canvas-panel .canvas-wrapper {
+            flex: 1 1 auto; min-height: 0;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        #pongCanvas {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 4px;
+            max-width: 100%; max-height: 100%;
+        }
+        .canvas-overlay {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem; color: #484f58;
+            text-align: center; pointer-events: none;
+        }
+        .canvas-overlay.hidden { display: none; }
+        .canvas-hud {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.6rem; color: #8b949e;
+            padding-top: 3px; flex-shrink: 0;
+        }
+        .canvas-hud .fps { color: #3fb950; }
+        .canvas-hud .game-info { color: #d2a8ff; }
     </style>
 </head>
-
 <body>
 
     <!-- ════ HEADER ════ -->
@@ -328,13 +193,10 @@
         <div class="panel" data-testid="panel-register">
             <h2><span class="method post">POST</span> /api/auth/register</h2>
             <form id="registerForm" data-testid="register-form" class="form-body">
-                <label><span>Email</span> <input type="email" id="regEmail" data-testid="reg-email"
-                        placeholder="user@test.io" required></label>
-                <label><span>Username</span> <input type="text" id="regUsername" data-testid="reg-username"
-                        placeholder="testuser" required></label>
-                <label><span>Password</span> <input type="password" id="regPassword" data-testid="reg-password"
-                        placeholder="••••" required minlength="1"></label>
-                <button type="submit" class="btn-primary" data-testid="submit-register">Exécuter Register</button>
+                <label><span>Email</span>    <input type="email"    id="regEmail"    data-testid="reg-email"    placeholder="user@test.io" required></label>
+                <label><span>Username</span> <input type="text"     id="regUsername" data-testid="reg-username" placeholder="testuser"     required></label>
+                <label><span>Password</span> <input type="password" id="regPassword" data-testid="reg-password" placeholder="••••"         required minlength="1"></label>
+                <button type="submit" class="btn-primary" data-testid="submit-register">Register</button>
             </form>
         </div>
 
@@ -342,19 +204,17 @@
         <div class="panel" data-testid="panel-login">
             <h2><span class="method post">POST</span> /api/auth/login</h2>
             <form id="loginForm" data-testid="login-form" class="form-body">
-                <label><span>Email</span> <input type="email" id="logEmail" data-testid="log-email"
-                        placeholder="user@test.io" required></label>
-                <label><span>Password</span> <input type="password" id="logPassword" data-testid="log-password"
-                        placeholder="••••" required></label>
-                <button type="submit" class="btn-primary" data-testid="submit-login">Exécuter Login</button>
+                <label><span>Email</span>    <input type="email"    id="logEmail"    data-testid="log-email"    placeholder="user@test.io" required></label>
+                <label><span>Password</span> <input type="password" id="logPassword" data-testid="log-password" placeholder="••••"         required></label>
+                <button type="submit" class="btn-primary" data-testid="submit-login">Login</button>
             </form>
         </div>
 
         <!-- OAuth -->
         <div class="panel" data-testid="panel-oauth">
             <h2><span class="method get">GET</span> /api/auth/login/oauth</h2>
-            <span class="info-text">Délégation OAuth 2.0 vers Intranet 42</span>
-            <button id="oauthButton" class="btn-oauth" data-testid="btn-oauth">Initialiser OAuth 42</button>
+            <span class="info-text">OAuth 2.0 → Intranet 42</span>
+            <button id="oauthButton" class="btn-oauth" data-testid="btn-oauth">OAuth 42</button>
         </div>
     </div>
 
@@ -380,30 +240,41 @@
         <div class="panel" data-testid="panel-ws">
             <h2><span class="method ws">WS</span> /api/games/ws</h2>
             <form id="wsForm" data-testid="ws-form" class="form-body">
-                <label><span>Game ID</span> <input type="text" id="wsGameId" data-testid="ws-game-id" placeholder="id"
-                        required></label>
-                <label><span>Password</span> <input type="text" id="wsPassword" data-testid="ws-password"
-                        placeholder="optionnel"></label>
-                <button type="submit" id="wsConnectBtn" class="btn-action" data-testid="btn-ws-connect">Ouvrir Tunnel
-                    WS</button>
+                <label><span>Game ID</span>  <input type="text" id="wsGameId"   data-testid="ws-game-id"  placeholder="id" required></label>
+                <label><span>Password</span> <input type="text" id="wsPassword" data-testid="ws-password" placeholder="optionnel"></label>
+                <button type="submit" id="wsConnectBtn" class="btn-action" data-testid="btn-ws-connect">Ouvrir Tunnel WS</button>
             </form>
 
             <div id="wsControls" class="ws-controls" data-testid="ws-controls">
                 <div class="btn-row">
-                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-left"
-                        onclick="sendWsInput(-1)">◀ -1</button>
-                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-stop"
-                        onclick="sendWsInput(0)">■ 0</button>
-                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-right"
-                        onclick="sendWsInput(1)">▶ +1</button>
+                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-left"  onclick="sendWsInput(-1)">◀ -1</button>
+                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-stop"  onclick="sendWsInput(0)">■ 0</button>
+                    <button type="button" class="btn-ws-dir btn-sm" data-testid="btn-ws-input-right" onclick="sendWsInput(1)">▶ +1</button>
                 </div>
-                <button type="button" class="btn-danger btn-sm" data-testid="btn-ws-close" onclick="closeWs()">Fermer
-                    Tunnel</button>
+                <button type="button" class="btn-danger btn-sm" data-testid="btn-ws-close" onclick="closeWs()">Fermer Tunnel</button>
             </div>
         </div>
     </div>
 
-    <!-- ════ COL 3 : RESPONSE VIEWERS ════ -->
+    <!-- ════ COL 3 : PONG GAME VISUALIZER ════ -->
+    <div class="col">
+        <div class="canvas-panel" data-testid="panel-pong">
+            <h2>🎮 Pong — Vue en Direct</h2>
+            <div class="canvas-wrapper">
+                <canvas id="pongCanvas" data-testid="pong-canvas" width="400" height="400"></canvas>
+                <div id="canvasOverlay" class="canvas-overlay" data-testid="pong-overlay">
+                    En attente de données WS…<br>
+                    <small>Connectez-vous au tunnel WebSocket<br>pour voir la partie en direct</small>
+                </div>
+            </div>
+            <div class="canvas-hud">
+                <span id="pongFps" class="fps" data-testid="pong-fps">—</span>
+                <span id="pongInfo" class="game-info" data-testid="pong-info">Idle</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ COL 4 : RESPONSE VIEWERS ════ -->
     <div class="col">
         <!-- REST Log -->
         <div class="log-panel" data-testid="panel-rest-log">
@@ -422,5 +293,4 @@
 
     <script src="app.js"></script>
 </body>
-
 </html>
