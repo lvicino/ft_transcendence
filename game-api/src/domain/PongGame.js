@@ -57,6 +57,9 @@ class PongGame {
 					player.y -= player.move * playerStep;
 				}
 			}
+			if (player.y + player.h / 2 > this.h || player.y - player.h / 2 < 0) {
+				player.y -= player.move * playerStep;
+			}
 		}
 	}
 
@@ -115,6 +118,8 @@ class PongGame {
 			this.setupBall(this.ballSpeed);
 
 		return {
+			gameWide: this.w,
+			gameHeight: this.h,
 			ball: {x: this.ball.x, y: this.ball.y, radius: this.ball.radius},
 			players: [...this.players],
 		}
