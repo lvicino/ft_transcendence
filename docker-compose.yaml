@@ -110,6 +110,8 @@ services:
   frontend:
       build: 
         context: ./debug-client
+      volumes:
+       - ./debug-client/src/:/usr/share/nginx/html/
       labels:
         - "traefik.http.routers.front.rule=PathPrefix(`/`)"
         - "traefik.http.routers.front.entrypoints=websecure"
