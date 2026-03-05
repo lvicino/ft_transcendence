@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking } from '../store';
+import { useGameFlowStore } from '../store';
 
 export default function GameFinished() {
   const navigate = useNavigate();
-  const { status, matchId, cancelMatchmaking } = useMatchmaking();
+  const status = useGameFlowStore((s) => s.status);
+  const matchId = useGameFlowStore((s) => s.matchId);
+  const leaveLobby = useGameFlowStore((s) => s.leaveLobby);
   const [uiError, setUiError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function GameFinished() {
               return;
             }
             setUiError(null);
-            cancelMatchmaking();
+            leaveLobby();
           }}
           disabled={status !== 'finished'}
         >

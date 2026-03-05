@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LogOut, User, Gamepad2, Shield, MessageSquare } from "lucide-react";
-import { useAuth, useUI, useToast } from "../store";
+import { LogOut, User, Gamepad2, MessageSquare } from "lucide-react";
+import { useAuth, useAuthStore, useGameFlowStore, useGameStore, useUI, useToast } from "../store";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/Button";
 import { Avatar } from "./ui/Avatar";
 
 export function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toggleChat } = useUI();
   const { success } = useToast();
   
@@ -20,14 +20,15 @@ export function Navbar() {
   };
 
   const handleLogout = () => {
-    logout();
+    useAuthStore.getState().actions.logout();
+    useGameFlowStore.getState().leaveLobby();
+    useGameStore.getState().resetGame();
     success('Logged out');
     navigate("/auth");
   };
 
   const navItems = [
     { href: "/dashboard", label: "Play", icon: <Gamepad2 size={16} /> },
-    { href: "/game", label: "Arena", icon: <Shield size={16} /> },
     { href: "/me", label: "Agent", icon: <User size={16} /> },
   ];
 

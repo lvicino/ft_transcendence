@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking, useToast } from '../store';
+import { useGameFlowStore, useToast } from '../store';
 
 export default function GameJoin() {
   const navigate = useNavigate();
   const { error: toastError, success } = useToast();
-  const { status, matchId, queueTimer, beginMatchmaking, cancelMatchmaking } = useMatchmaking();
+  const status = useGameFlowStore((s) => s.status);
+  const matchId = useGameFlowStore((s) => s.matchId);
+  const queueTimer = useGameFlowStore((s) => s.queueTimer);
+  const beginMatchmaking = useGameFlowStore((s) => s.beginMatchmaking);
+  const cancelMatchmaking = useGameFlowStore((s) => s.cancelMatchmaking);
   const [uiError, setUiError] = useState<string | null>(null);
   const prevStatusRef = useRef(status);
 

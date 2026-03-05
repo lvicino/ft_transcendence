@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking } from '../store';
+import { useGameFlowStore } from '../store/gameStore';
 
 export default function Lobby() {
   const navigate = useNavigate();
-  const { status, matchId, startMatch, cancelMatchmaking } = useMatchmaking();
+
+  const status = useGameFlowStore((s) => s.status);
+  const matchId = useGameFlowStore((s) => s.matchId);
+  const startMatch = useGameFlowStore((s) => s.startMatch);
+  const leaveLobby = useGameFlowStore((s) => s.leaveLobby);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
@@ -59,7 +63,7 @@ export default function Lobby() {
             variant="ghost"
             className="w-full"
             onClick={() => {
-              cancelMatchmaking();
+              leaveLobby();
               navigate('/play', { replace: true });
             }}
           >

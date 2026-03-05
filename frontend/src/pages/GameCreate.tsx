@@ -3,14 +3,16 @@ import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking, useToast } from '../store';
+import { useGameFlowStore, useToast } from '../store';
 
 const mockId = () => `match_${Math.random().toString(36).slice(2, 8)}`;
 
 export default function GameCreate() {
   const navigate = useNavigate();
   const { error: toastError } = useToast();
-  const { status, matchId, setMatchFound } = useMatchmaking();
+  const status = useGameFlowStore((s) => s.status);
+  const matchId = useGameFlowStore((s) => s.matchId);
+  const setMatchFound = useGameFlowStore((s) => s.setMatchFound);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
 

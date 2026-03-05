@@ -3,13 +3,15 @@ import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '../components/ui/Button';
-import { useMatchmaking, useGameStore } from '../store';
+import { useGameFlowStore, useGameStore } from '../store';
 import GameCanvas from '../components/GameCanvas';
 
 export default function Game() {
   const navigate = useNavigate();
   const { matchId: routeMatchId } = useParams();
-  const { status, matchId, finishMatch } = useMatchmaking();
+  const status = useGameFlowStore((s) => s.status);
+  const matchId = useGameFlowStore((s) => s.matchId);
+  const finishMatch = useGameFlowStore((s) => s.finishMatch);
   
   // Подписываемся только на счет для Scoreboard (остальное внутри Canvas)
   const score = useGameStore((state) => state.score);
@@ -40,7 +42,7 @@ export default function Game() {
         <div className="text-primary">{score.right}</div>
       </div>
 
-      {/* Game Arena: Контейнер 16:9 для нашего GameCanvas */}
+      {/* Game Area: Контейнер 16:9 для нашего GameCanvas */}
       <div className="relative aspect-video w-full max-w-4xl overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-[0_0_40px_rgba(91,178,184,0.15)] backdrop-blur-sm">
         <GameCanvas />
       </div>
