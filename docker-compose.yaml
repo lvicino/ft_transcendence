@@ -107,13 +107,13 @@ services:
     labels:
       - "traefik.enable=false"
 
-  frontend:
+  debug-client:
       build: 
         context: ./debug-client
       volumes:
        - ./debug-client/src/:/usr/share/nginx/html/
       labels:
-        - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.front.rule=PathPrefix(`/test/`)"
         - "traefik.http.routers.front.entrypoints=websecure"
         - "traefik.http.routers.front.tls=true"
         - "traefik.http.services.front.loadbalancer.server.port=80"
