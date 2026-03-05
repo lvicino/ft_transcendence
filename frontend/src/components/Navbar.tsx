@@ -26,7 +26,7 @@ export function Navbar() {
   };
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: <Gamepad2 size={16} /> },
+    { href: "/dashboard", label: "Play", icon: <Gamepad2 size={16} /> },
     { href: "/game", label: "Arena", icon: <Shield size={16} /> },
     { href: "/me", label: "Agent", icon: <User size={16} /> },
   ];

@@ -52,7 +52,7 @@ export default function GameFinished() {
           }}
           disabled={status !== 'finished'}
         >
-          Back to Dashboard
+          Back to Play
         </Button>
       }
     />
