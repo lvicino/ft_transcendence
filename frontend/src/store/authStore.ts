@@ -1,40 +1,41 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-
+import { persist } from 'zustand/middleware';
 import type { User } from '../lib/types';
 import { useMatchmakingStore } from './gameStore';
 
-type AuthStoreState = {
+interface AuthState {
   token: string | null;
   user: User | null;
-  login: (payload: { token: string; user: User }) => void;
-  logout: () => void;
-};
+  actions: {
+    login: (token: string, user: User) => void;
+    logout: () => void;
+  };
+}
 
-export const useAuthStore = create<AuthStoreState>()(
+export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
       user: null,
-      login: ({ token, user }) => set({ token, user }),
-      logout: () => {
-        useMatchmakingStore.getState().cancelMatchmaking();
-        set({ token: null, user: null });
+      actions: {
+        login: (token, user) => set({ token, user }),
+        logout: () => {
+          // Чистим игровые очереди при выходе
+          useMatchmakingStore.getState().cancelMatchmaking();
+          set({ token: null, user: null });
+        },
       },
     }),
-    {
-      name: 'ft_transcendence_auth',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ token: state.token, user: state.user }),
-    }
+    { name: 'auth-storage' } // По умолчанию использует localStorage
   )
 );
 
-export function useAuth() {
-  const token = useAuthStore((state) => state.token);
-  const user = useAuthStore((state) => state.user);
-  const login = useAuthStore((state) => state.login);
-  const logout = useAuthStore((state) => state.logout);
-
-  return { isAuthenticated: Boolean(token), user, login, logout };
-}
+// Удобный хук для использования в компонентах
+export const useAuth = () => {
+  const { token, user, actions } = useAuthStore();
+  return { 
+    isAuthenticated: !!token, 
+    user, 
+    ...actions 
+  };
+};
