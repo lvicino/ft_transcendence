@@ -113,10 +113,10 @@ services:
       volumes:
        - ./debug-client/src/:/usr/share/nginx/html/
       labels:
-        - "traefik.http.routers.front.rule=PathPrefix(`/test/`)"
-        - "traefik.http.routers.front.entrypoints=websecure"
-        - "traefik.http.routers.front.tls=true"
-        - "traefik.http.services.front.loadbalancer.server.port=80"
+        - "traefik.http.routers.debug-client.rule=PathPrefix(`/test/`)"
+        - "traefik.http.routers.debug-client.entrypoints=websecure"
+        - "traefik.http.routers.debug-client.tls=true"
+        - "traefik.http.services.debug-client.loadbalancer.server.port=80"
 
 volumes:
   certs-data:

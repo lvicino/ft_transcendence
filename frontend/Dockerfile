@@ -5,10 +5,13 @@ COPY --chown=node:node package.json package-lock.json ./
 USER node
 
 FROM base AS development
-CMD ["npm", "run", "dev"]
+ENV HOST=0.0.0.0
+RUN npm ci && npm cache clean --force
+CMD ["npm", "run", "dev", "--", "--host"]
 
 FROM base AS builder
 COPY --chown=node:node . .
+RUN npm ci --only=production && npm cache clean --force
 RUN npm run build
 
 # a test
