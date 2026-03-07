@@ -7,7 +7,7 @@ export type User = {
 
 export type PresenceStatus = 'online' | 'ingame' | 'offline';
 
-export type GameStatus = 'idle' | 'searching' | 'lobby' | 'playing' | 'finished';
+export type GameStatus = 'idle' | 'lobby' | 'playing' | 'finished';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -25,13 +25,9 @@ export interface AuthState {
   logout: () => void;
 }
 
-export interface MatchmakingState {
+export interface GameFlowState {
   status: GameStatus;
   matchId: string | null;
-  queueTimer: number;
-  beginMatchmaking: () => void;
-  cancelMatchmaking: () => void;
-  setMatchFound: (matchId: string) => void;
 }
 
 export interface UIState {
@@ -46,7 +42,7 @@ export interface ToastState {
   removeToast: (id: string) => void;
 }
 
-export type AppStore = AuthState & MatchmakingState & UIState & ToastState;
+export type AppStore = AuthState & GameFlowState & UIState & ToastState;
 
 export interface GameplayState {
   ball: { x: number; y: number };

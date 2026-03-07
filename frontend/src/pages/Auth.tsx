@@ -93,7 +93,7 @@ export default function Auth() {
     startAuthFlowMock({
       onStatus: (msg: string) => setStatusMsg(msg),
       onSuccess: (user, token) => {
-        login({ user, token });
+        login(token, user);
         navigate("/dashboard", { replace: true });
       },
     });

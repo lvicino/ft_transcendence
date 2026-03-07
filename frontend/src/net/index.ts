@@ -10,4 +10,4 @@ export {
   WsClientEventSchema,
 } from './socket';
 export type { LobbyPlayer, GameFrame, WsServerEvent, WsClientEvent } from './socket';
-export { startAuthFlowMock, startMatchmakingMock } from './mocks';
+export { startAuthFlowMock } from './mocks';

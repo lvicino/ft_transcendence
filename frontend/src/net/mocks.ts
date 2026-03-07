@@ -24,15 +24,3 @@ export function startAuthFlowMock(options: AuthFlowOptions): () => void {
 
   return () => timers.forEach(clearTimeout);
 }
-
-export function startMatchmakingMock(options: {
-  onTick: () => void;
-  onMatchFound: (id: string) => void;
-}): () => void {
-  const interval = setInterval(options.onTick, 1000);
-  const timeout = setTimeout(() => options.onMatchFound(`match_${Date.now()}`), 4000);
-  return () => {
-    clearInterval(interval);
-    clearTimeout(timeout);
-  };
-}

@@ -32,7 +32,7 @@ function parseFastifyMessage(payload: unknown, fallbackStatus: number): string {
 }
 
 export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>, init?: RequestInit): Promise<T | null> {
-  const { token, logout } = useAuthStore.getState();
+  const { token, actions } = useAuthStore.getState();
   const { addToast } = useUIStore.getState();
 
   const headers = new Headers(init?.headers);
@@ -51,7 +51,7 @@ export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>, init?: R
       const msg = parseFastifyMessage(payload, res.status);
       addToast({ message: msg, type: 'error', title: 'API Error' });
 
-      if (res.status === 401) logout();
+      if (res.status === 401) actions.logout();
       return null;
     }
 

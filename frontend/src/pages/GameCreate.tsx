@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../components/ui/Button';
-import { Loader } from '../components/ui/Loader';
 import { useGameFlowStore, useToast } from '../store';
 
 const mockId = () => `match_${Math.random().toString(36).slice(2, 8)}`;
@@ -11,8 +10,7 @@ export default function GameCreate() {
   const navigate = useNavigate();
   const { error: toastError } = useToast();
   const status = useGameFlowStore((s) => s.status);
-  const setMatchFound = useGameFlowStore((s) => s.setMatchFound);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const enterLobby = useGameFlowStore((s) => s.enterLobby);
   const [uiError, setUiError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,8 +27,6 @@ export default function GameCreate() {
         Status: <span className="text-white">{status}</span>
       </div>
 
-      {isSubmitting ? <Loader size="sm" label="Submitting" className="w-full justify-start gap-2" /> : null}
-
       {uiError ? <p className="text-sm text-red-300">{uiError}</p> : null}
 
       <Button
@@ -44,8 +40,9 @@ export default function GameCreate() {
             return;
           }
           setUiError(null);
-          setIsSubmitting(true);
-          setMatchFound(mockId());
+          const id = mockId();
+          enterLobby(id);
+          navigate(`/lobby/${encodeURIComponent(id)}`);
         }}
         disabled={status !== 'idle'}
       >
