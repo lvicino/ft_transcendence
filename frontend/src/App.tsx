@@ -21,9 +21,9 @@ import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
 
 function RequireAuthShell() {
-  const { isAuthenticated } = useAuth();
+/*   for testing without auth --- const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) return <Navigate to="/auth" replace />;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />; */
 
   return (
     <>

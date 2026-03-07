@@ -1,29 +1,20 @@
 // src/pages/Auth.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-
-import { useAuth } from "@/store";
-import { startAuthFlowMock } from "@/net";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Terminal } from "lucide-react";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Min 6 characters"),
-});
-
-const registerSchema = z.object({
-  username: z.string().min(2, "Min 2 characters").max(24, "Max 24 characters"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Min 6 characters"),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
-type RegisterValues = z.infer<typeof registerSchema>;
+type LoginValues = {
+  email: string;
+  password: string;
+};
+type RegisterValues = {
+  username: string;
+  email: string;
+  password: string;
+};
 type FieldErrors = Partial<Record<"username" | "email" | "password", string>>;
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";
@@ -46,9 +37,6 @@ export default function Auth() {
 
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
   const values = isLogin ? loginValues : registerValues;
 
   function setField<K extends keyof (LoginValues & RegisterValues)>(key: K, value: string) {
@@ -66,20 +54,33 @@ export default function Auth() {
 
   function validateCurrent(): boolean {
     setErrors({});
-    const parsed = isLogin
-      ? loginSchema.safeParse(loginValues)
-      : registerSchema.safeParse(registerValues);
+    const email = values.email.trim();
+    const password = values.password;
 
-    if (parsed.success) return true;
-
-    const first = parsed.error.issues[0];
-    const field = first?.path?.[0];
-    const msg = first?.message ?? "Invalid input";
-
-    if (field === "username" || field === "email" || field === "password") {
-      setErrors((p) => ({ ...p, [field]: msg }));
+    if (!isLogin) {
+      const username = registerValues.username.trim();
+      if (username.length < 2) {
+        setErrors((p) => ({ ...p, username: "Min 2 characters" }));
+        return false;
+      }
+      if (username.length > 24) {
+        setErrors((p) => ({ ...p, username: "Max 24 characters" }));
+        return false;
+      }
     }
-    return false;
+
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isEmailValid) {
+      setErrors((p) => ({ ...p, email: "Invalid email" }));
+      return false;
+    }
+
+    if (password.length < 6) {
+      setErrors((p) => ({ ...p, password: "Min 6 characters" }));
+      return false;
+    }
+
+    return true;
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -88,15 +89,8 @@ export default function Auth() {
     if (!validateCurrent()) return;
 
     setIsLoading(true);
-    setStatusMsg("Initializing uplink...");
-
-    startAuthFlowMock({
-      onStatus: (msg: string) => setStatusMsg(msg),
-      onSuccess: (user, token) => {
-        login(token, user);
-        navigate("/dashboard", { replace: true });
-      },
-    });
+    setStatusMsg("Auth mock removed. Implement API flow.");
+    setIsLoading(false);
   };
 
   function toggleMode() {

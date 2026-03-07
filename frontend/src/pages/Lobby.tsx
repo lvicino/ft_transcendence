@@ -1,8 +1,8 @@
+// src/pages/Lobby.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../components/ui/Button';
-import { Loader } from '../components/ui/Loader';
 import { useGameFlowStore } from '../store/gameStore';
 
 export default function Lobby() {
@@ -13,7 +13,6 @@ export default function Lobby() {
   const startMatch = useGameFlowStore((s) => s.startMatch);
   const leaveLobby = useGameFlowStore((s) => s.leaveLobby);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,8 +35,6 @@ export default function Lobby() {
         Match ID: <span className="text-white">{matchId ?? 'n/a'}</span>
       </div>
 
-      {isSubmitting ? <Loader size="sm" label="Starting match..." className="w-full justify-start gap-2" /> : null}
-
       {uiError ? <p className="text-sm text-red-300">{uiError}</p> : null}
 
       <Button
@@ -45,8 +42,8 @@ export default function Lobby() {
         className="w-full"
         onClick={() => {
           setUiError(null);
-          setIsSubmitting(true);
           startMatch();
+          navigate(`/game/${matchId}`);
         }}
         disabled={!canStart}
       >
