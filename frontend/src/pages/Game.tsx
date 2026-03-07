@@ -16,14 +16,10 @@ export default function Game() {
   // Подписываемся только на счет для Scoreboard (остальное внутри Canvas)
   const score = useGameStore((state) => state.score);
 
-  // Гвард: если мы не в игре, выкидываем в дашборд (защита от прямого URL)
+  // Гвард: если мы не в игре, выкидываем на play (защита от прямого URL)
   useEffect(() => {
-    if (status === 'finished') {
-      navigate('/game/finished', { replace: true });
-      return;
-    }
     if (status !== 'playing') {
-      navigate('/dashboard', { replace: true });
+      navigate('/play', { replace: true });
     }
   }, [status, navigate]);
 

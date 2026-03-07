@@ -1,91 +1,63 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { useGameFlowStore, useToast } from '../store';
 
 export default function GameJoin() {
   const navigate = useNavigate();
-  const { error: toastError, success } = useToast();
+  const { error: toastError } = useToast();
+
   const status = useGameFlowStore((s) => s.status);
-  const matchId = useGameFlowStore((s) => s.matchId);
-  const queueTimer = useGameFlowStore((s) => s.queueTimer);
-  const beginMatchmaking = useGameFlowStore((s) => s.beginMatchmaking);
-  const cancelMatchmaking = useGameFlowStore((s) => s.cancelMatchmaking);
-  const [uiError, setUiError] = useState<string | null>(null);
-  const prevStatusRef = useRef(status);
+  const enterLobby = useGameFlowStore((s) => s.enterLobby);
+
+  const [matchId, setMatchId] = useState('');
 
   useEffect(() => {
-    if (prevStatusRef.current === 'searching' && status === 'lobby') {
-      success('Match found');
+    if (status !== 'idle') {
+      navigate('/play', { replace: true });
     }
-    if (status === 'idle') {
-      navigate('/dashboard', { replace: true });
-      prevStatusRef.current = status;
-      return;
-    }
-    if (status === 'searching') {
-      prevStatusRef.current = status;
-      return;
-    }
-    if (status === 'lobby') {
-      navigate(matchId ? `/lobby/${encodeURIComponent(matchId)}` : '/lobby', { replace: true });
-      prevStatusRef.current = status;
-      return;
-    }
-    if (status === 'playing') {
-      navigate(matchId ? `/game/${encodeURIComponent(matchId)}` : '/game', { replace: true });
-      prevStatusRef.current = status;
-      return;
-    }
-    if (status === 'finished') {
-      navigate('/game/finished', { replace: true });
-    }
-    prevStatusRef.current = status;
-  }, [status, matchId, navigate, success]);
+  }, [status, navigate]);
 
   return (
-    <FlowPageCard
-      title="Join / Search (Mock Flow)"
-      status={status}
-      error={uiError}
-      isLoading={status === 'searching'}
-      loadingLabel="Searching"
-      actions={
-        <>
-          {status === 'searching' ? (
-            <Button type="button" variant="outline" className="w-full" onClick={cancelMatchmaking}>
-              Cancel
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              className="w-full"
-              onClick={() => {
-                if (status !== 'idle') {
-                  const msg = 'Search can be started only from idle state';
-                  setUiError(msg);
-                  toastError('Error (mock)');
-                  return;
-                }
-                setUiError(null);
-                beginMatchmaking();
-              }}
-              disabled={status !== 'idle'}
-            >
-              Start Search
-            </Button>
-          )}
-          <Button type="button" variant="ghost" className="w-full" onClick={() => navigate('/dashboard')}>
-            Back
-          </Button>
-        </>
-      }
-    >
-      <div className="text-sm text-white/60">
-        Queue: <span className="text-white">{queueTimer}s</span>
-      </div>
-    </FlowPageCard>
+    <div className="mx-auto w-full max-w-md space-y-6 py-10">
+
+      <h1 className="text-3xl font-bold text-white">
+        Join Game
+      </h1>
+
+      <Input
+        placeholder="Enter Match ID"
+        value={matchId}
+        onChange={(e) => setMatchId(e.target.value)}
+      />
+
+      <Button
+        className="w-full"
+        onClick={() => {
+          if (!matchId.trim()) {
+            toastError('Match ID required');
+            return;
+          }
+
+          const id = matchId.trim();
+
+          enterLobby(id);
+          navigate(`/lobby/${encodeURIComponent(id)}`);
+        }}
+      >
+        Join Lobby
+      </Button>
+
+      <Button
+        variant="ghost"
+        className="w-full"
+        onClick={() => navigate('/play')}
+      >
+        Back
+      </Button>
+
+    </div>
   );
 }
