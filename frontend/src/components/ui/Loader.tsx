@@ -1,6 +1,7 @@
 // src/components/ui/Loader.tsx
 import * as React from "react";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
 
 interface LoaderProps extends React.ComponentPropsWithRef<"div"> {
@@ -17,6 +18,8 @@ export const Loader = ({
   ref,
   ...props
 }: LoaderProps) => {
+  const { t } = useTranslation();
+
   const iconSizes = {
     sm: 16,
     md: 24,
@@ -54,7 +57,7 @@ export const Loader = ({
         </span>
       )}
 
-      <span className="sr-only">Loading...</span>
+      <span className="sr-only">{t("loading")}</span>
     </div>
   );
 };

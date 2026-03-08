@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '../components/ui/Button';
 import { useGameFlowStore, useToast } from '../store';
@@ -8,6 +9,7 @@ const mockId = () => `match_${Math.random().toString(36).slice(2, 8)}`;
 
 export default function GameCreate() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { error: toastError } = useToast();
   const status = useGameFlowStore((s) => s.status);
   const enterLobby = useGameFlowStore((s) => s.enterLobby);
@@ -21,10 +23,10 @@ export default function GameCreate() {
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6 py-10">
-      <h1 className="text-3xl font-bold text-white">Create (Mock Flow)</h1>
+      <h1 className="text-3xl font-bold text-white">{t("gameCreateTitle")}</h1>
 
       <div className="text-sm text-white/60">
-        Status: <span className="text-white">{status}</span>
+        {t("status")}: <span className="text-white">{status}</span>
       </div>
 
       {uiError ? <p className="text-sm text-red-300">{uiError}</p> : null}
@@ -34,9 +36,9 @@ export default function GameCreate() {
         className="w-full"
         onClick={() => {
           if (status !== 'idle') {
-            const msg = 'Lobby can be created only from idle state';
+            const msg = t("lobbyCreateOnlyIdle");
             setUiError(msg);
-            toastError('Error (mock)');
+            toastError(t("errorMock"));
             return;
           }
           setUiError(null);
@@ -46,10 +48,10 @@ export default function GameCreate() {
         }}
         disabled={status !== 'idle'}
       >
-        Create Lobby
+        {t("createLobby")}
       </Button>
       <Button type="button" variant="ghost" className="w-full" onClick={() => navigate('/dashboard')}>
-        Back
+        {t("back")}
       </Button>
     </div>
   );

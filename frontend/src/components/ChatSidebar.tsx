@@ -1,5 +1,6 @@
 // src/components/ChatSidebar.tsx
 import { X, Send, MessageSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useUI } from '../store';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
@@ -25,6 +26,7 @@ const BASE_MOCK_MESSAGES: ChatMessage[] = [
 ];
 
 export default function ChatSidebar() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isChatOpen, toggleChat } = useUI();
   const messages: ChatMessage[] = [
@@ -44,7 +46,7 @@ export default function ChatSidebar() {
       {/* Backdrop (клик по фону закрывает чат) */}
       <button
         type="button"
-        aria-label="Close chat"
+        aria-label={t("closeChat")}
         onClick={toggleChat}
         className={cn(
           'absolute inset-0 bg-black/30 transition-opacity',
@@ -59,7 +61,7 @@ export default function ChatSidebar() {
           'transition-transform duration-300 ease-in-out will-change-transform',
           isChatOpen ? 'translate-x-0' : 'translate-x-full'
         )}
-        aria-label="Chat"
+        aria-label={t("chat")}
       >
         {/* Header */}
         <div className="flex h-20 flex-shrink-0 items-center justify-between border-b border-white/10 bg-black/40 p-4">
@@ -68,8 +70,8 @@ export default function ChatSidebar() {
               <MessageSquare className="h-[18px] w-[18px] text-white/80" />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold tracking-wide text-white">Chat</span>
-              <span className="text-[10px] uppercase tracking-widest text-white/40">Global</span>
+              <span className="text-sm font-semibold tracking-wide text-white">{t("chat")}</span>
+              <span className="text-[10px] uppercase tracking-widest text-white/40">{t("global")}</span>
             </div>
           </div>
 
@@ -78,7 +80,7 @@ export default function ChatSidebar() {
             variant="ghost"
             size="icon"
             onClick={toggleChat}
-            aria-label="Close"
+            aria-label={t("close")}
             className="text-white/60 hover:bg-white/10 hover:text-white"
           >
             <X className="h-5 w-5" />
@@ -92,11 +94,11 @@ export default function ChatSidebar() {
         <div className="flex flex-shrink-0 gap-2 border-t border-white/10 bg-black/40 p-4">
           <form className="flex w-full gap-2" onSubmit={(e) => e.preventDefault()}>
             <Input
-              placeholder="Type message…"
-              aria-label="Message"
+              placeholder={t("typeMessage")}
+              aria-label={t("message")}
               className="flex-1 bg-white/5"
             />
-            <Button type="submit" size="icon" aria-label="Send message" className="w-12 rounded-lg">
+            <Button type="submit" size="icon" aria-label={t("sendMessage")} className="w-12 rounded-lg">
               <Send className="h-[18px] w-[18px]" />
             </Button>
           </form>

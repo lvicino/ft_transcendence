@@ -1,5 +1,6 @@
 // src/pages/Auth.tsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -24,6 +25,7 @@ function oAuth42Url(): string {
 }
 
 export default function Auth() {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
@@ -60,23 +62,23 @@ export default function Auth() {
     if (!isLogin) {
       const username = registerValues.username.trim();
       if (username.length < 2) {
-        setErrors((p) => ({ ...p, username: "Min 2 characters" }));
+        setErrors((p) => ({ ...p, username: t("validationMin2") }));
         return false;
       }
       if (username.length > 24) {
-        setErrors((p) => ({ ...p, username: "Max 24 characters" }));
+        setErrors((p) => ({ ...p, username: t("validationMax24") }));
         return false;
       }
     }
 
     const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!isEmailValid) {
-      setErrors((p) => ({ ...p, email: "Invalid email" }));
+      setErrors((p) => ({ ...p, email: t("validationInvalidEmail") }));
       return false;
     }
 
     if (password.length < 6) {
-      setErrors((p) => ({ ...p, password: "Min 6 characters" }));
+      setErrors((p) => ({ ...p, password: t("validationMin6") }));
       return false;
     }
 
@@ -89,7 +91,7 @@ export default function Auth() {
     if (!validateCurrent()) return;
 
     setIsLoading(true);
-    setStatusMsg("Auth mock removed. Implement API flow.");
+    setStatusMsg(t("authMockRemoved"));
     setIsLoading(false);
   };
 
@@ -119,11 +121,11 @@ export default function Auth() {
             </div>
 
             <CardTitle className="text-3xl text-white">
-              {isLogin ? "SYSTEM ACCESS" : "NEW REGISTRATION"}
+              {isLogin ? t("authSystemAccess") : t("authNewRegistration")}
             </CardTitle>
 
             <p className="text-xs text-white/40 font-mono uppercase tracking-[0.2em] mt-2">
-              Secure Connection v19.0
+              {t("authSecureConnection")}
             </p>
           </CardHeader>
 
@@ -132,7 +134,7 @@ export default function Auth() {
               {!isLogin ? (
                 <div className="space-y-2">
                   <Input
-                    placeholder="CODENAME (USERNAME)"
+                    placeholder={t("authCodenamePlaceholder")}
                     name="username"
                     value={registerValues.username}
                     onChange={(e) => setField("username", e.target.value)}
@@ -149,7 +151,7 @@ export default function Auth() {
               <div className="space-y-2">
                 <Input
                   type="email"
-                  placeholder="EMAIL ADDRESS"
+                  placeholder={t("authEmailPlaceholder")}
                   name="email"
                   value={values.email}
                   onChange={(e) => setField("email", e.target.value)}
@@ -165,7 +167,7 @@ export default function Auth() {
               <div className="space-y-2">
                 <Input
                   type="password"
-                  placeholder="ACCESS KEY (PASSWORD)"
+                  placeholder={t("authPasswordPlaceholder")}
                   name="password"
                   value={values.password}
                   onChange={(e) => setField("password", e.target.value)}
@@ -186,7 +188,7 @@ export default function Auth() {
                   isLoading={isLoading}
                   disabled={isLoading}
                 >
-                  {isLoading ? "PROCESSING..." : isLogin ? "ESTABLISH LINK" : "CREATE IDENTITY"}
+                  {isLoading ? t("authProcessing") : isLogin ? t("authEstablishLink") : t("authCreateIdentity")}
                 </Button>
               </div>
 
@@ -206,7 +208,7 @@ export default function Auth() {
                 onClick={toggleMode}
                 disabled={isLoading}
               >
-                {isLogin ? "Need Access? Register" : "Have Access? Login"}
+                {isLogin ? t("authNeedAccessRegister") : t("authHaveAccessLogin")}
               </Button>
             </div>
 
@@ -215,7 +217,7 @@ export default function Auth() {
               <div className="flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/10" />
                 <div className="text-[10px] uppercase tracking-[0.3em] text-white/35 font-mono">
-                  or continue with
+                  {t("authOrContinueWith")}
                 </div>
                 <div className="h-px flex-1 bg-white/10" />
               </div>
@@ -227,7 +229,7 @@ export default function Auth() {
                 onClick={loginWith42}
                 disabled={isLoading}
               >
-                LOGIN WITH 42
+                {t("authLoginWith42Upper")}
               </Button>
             </div>
           </CardContent>

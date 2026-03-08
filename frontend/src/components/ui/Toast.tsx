@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
 import type { Toast as ToastData } from '@/lib/types';
@@ -24,6 +25,8 @@ type ToastProps = {
 };
 
 export const Toast = memo(function Toast({ toast, onPop }: ToastProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       className={cn(
@@ -48,7 +51,7 @@ export const Toast = memo(function Toast({ toast, onPop }: ToastProps) {
         type="button"
         onClick={() => onPop(toast.id)}
         className="shrink-0 rounded-md p-1 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
-        aria-label="Dismiss notification"
+        aria-label={t("dismissNotification")}
       >
         <X className="h-4 w-4" />
       </button>

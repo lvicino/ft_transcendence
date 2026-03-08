@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 
 export default function Play() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-10">
       <header>
         <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
-          Play
+          {t("play")}
         </h1>
       </header>
 
@@ -18,7 +20,7 @@ export default function Play() {
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-2xl">
-              Create Game
+              {t("createGame")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -26,7 +28,7 @@ export default function Play() {
               className="w-full"
               onClick={() => navigate("/game/create")}
             >
-              Create
+              {t("create")}
             </Button>
           </CardContent>
         </Card>
@@ -34,7 +36,7 @@ export default function Play() {
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-2xl">
-              Join Game
+              {t("joinGame")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -42,7 +44,7 @@ export default function Play() {
               className="w-full"
               onClick={() => navigate("/game/join")}
             >
-              Join
+              {t("join")}
             </Button>
           </CardContent>
         </Card>

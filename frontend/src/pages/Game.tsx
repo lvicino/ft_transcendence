@@ -1,6 +1,6 @@
 // src/pages/Game.tsx
-import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '../components/ui/Button';
 import { useGameFlowStore, useGameStore } from '../store';
@@ -9,8 +9,8 @@ import GameCanvas from '../components/GameCanvas';
 export default function Game() {
   const navigate = useNavigate();
   const { matchId: routeMatchId } = useParams();
+  const { t } = useTranslation();
 
-  const status = useGameFlowStore((s) => s.status);
   const matchId = useGameFlowStore((s) => s.matchId);
   const finishMatch = useGameFlowStore((s) => s.finishMatch);
 
@@ -32,7 +32,7 @@ export default function Game() {
         <div className="text-primary">{score.left}</div>
 
         <div className="text-sm font-sans tracking-widest text-white/50">
-          MATCH: {matchId || routeMatchId || 'UNKNOWN'}
+          {t("gameMatchLabel")}: {matchId || routeMatchId || t("unknown")}
         </div>
 
         <div className="text-primary">{score.right}</div>
@@ -53,7 +53,7 @@ export default function Game() {
           navigate('/game/finished');
         }}
       >
-        Forfeit Match
+        {t("forfeitMatch")}
       </Button>
     </div>
   );

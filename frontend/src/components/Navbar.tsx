@@ -1,14 +1,17 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LogOut, User, Gamepad2, MessageSquare } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth, useAuthStore, useGameFlowStore, useGameStore, useUI, useToast } from "../store";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/Button";
 import { Avatar } from "./ui/Avatar";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export function Navbar() {
   const { user, isAuthenticated } = useAuth();
   const { toggleChat } = useUI();
   const { success } = useToast();
+  const { t } = useTranslation();
   
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -23,13 +26,13 @@ export function Navbar() {
     useAuthStore.getState().actions.logout();
     useGameFlowStore.getState().leaveLobby();
     useGameStore.getState().resetGame();
-    success('Logged out');
+    success(t("loggedOut"));
     navigate("/auth");
   };
 
   const navItems = [
-    { href: "/dashboard", label: "Play", icon: <Gamepad2 size={16} /> },
-    { href: "/me", label: "Agent", icon: <User size={16} /> },
+    { href: "/play", label: t("play"), icon: <Gamepad2 size={16} /> },
+    { href: "/me", label: t("profile"), icon: <User size={16} /> },
   ];
 
   return (
@@ -41,7 +44,7 @@ export function Navbar() {
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => go(isAuthed ? "/dashboard" : "/")}
+          onClick={() => go(isAuthed ? "/play" : "/")}
           className="group h-auto min-w-0 flex-col items-start gap-0 px-0 py-0 leading-none hover:bg-transparent"
         >
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red">42_SCHOOL</span>
@@ -76,18 +79,20 @@ export function Navbar() {
 
         {/* ACTIONS */}
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+
           {isAuthed ? (
             <>
               <Avatar
                 userId={user?.id}
                 src={user?.avatar}
-                alt={user?.username ? `${user.username} avatar` : 'User avatar'}
+                alt={user?.username ? `${user.username} avatar` : t("userAvatar")}
                 size="sm"
                 className="hidden sm:flex border-white/20"
               />
 
               <div className="hidden sm:flex flex-col items-start leading-none mr-2">
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Operator</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{t("navbarOperator")}</span>
                 <span className="text-xs font-black text-white">{user?.username}</span>
               </div>
 
@@ -100,7 +105,7 @@ export function Navbar() {
                   icon={<MessageSquare size={14} />}
                   className="hidden md:flex"
                 >
-                  Link
+                  {t("navbarChat")}
                 </Button>
 
                 <Button
@@ -108,7 +113,7 @@ export function Navbar() {
                   size="icon"
                   onClick={handleLogout}
                   className="text-white/40 hover:text-brand-red"
-                  title="Logout"
+                  title={t("logout")}
                 >
                   <LogOut size={18} />
                 </Button>
@@ -116,7 +121,7 @@ export function Navbar() {
             </>
           ) : (
             <Button size="sm" onClick={() => navigate("/auth")}>
-              Connect
+              {t("connect")}
             </Button>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 
-import { useToast } from '@/store'; // Используем алиас @
+import { useToast } from '@/store'; 
 import { Toast } from '@/components/ui/Toast';
 
 export function Toaster() {

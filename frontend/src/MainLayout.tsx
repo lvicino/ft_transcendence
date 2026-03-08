@@ -1,7 +1,10 @@
 import { Link, Outlet } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Navbar } from './components/Navbar';
 
 export default function MainLayout() {
+  const { t } = useTranslation();
+
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-brand-bg text-brand-white">
       {/* Background Layer: Используем CSS переменные из Tailwind v4 */}
@@ -34,10 +37,10 @@ export default function MainLayout() {
         <footer className="mt-auto border-t border-white/10 pt-4">
           <nav className="flex items-center justify-center gap-6 text-xs uppercase tracking-widest text-white/60">
             <Link to="/terms" className="transition-colors hover:text-primary">
-              Terms
+              {t("terms")}
             </Link>
             <Link to="/privacy" className="transition-colors hover:text-primary">
-              Privacy
+              {t("privacy")}
             </Link>
           </nav>
         </footer>

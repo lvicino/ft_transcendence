@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -7,6 +8,7 @@ import { useGameFlowStore, useToast } from '../store';
 
 export default function GameJoin() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { error: toastError } = useToast();
 
   const status = useGameFlowStore((s) => s.status);
@@ -24,11 +26,11 @@ export default function GameJoin() {
     <div className="mx-auto w-full max-w-md space-y-6 py-10">
 
       <h1 className="text-3xl font-bold text-white">
-        Join Game
+        {t("gameJoinTitle")}
       </h1>
 
       <Input
-        placeholder="Enter Match ID"
+        placeholder={t("enterMatchId")}
         value={matchId}
         onChange={(e) => setMatchId(e.target.value)}
       />
@@ -37,7 +39,7 @@ export default function GameJoin() {
         className="w-full"
         onClick={() => {
           if (!matchId.trim()) {
-            toastError('Match ID required');
+            toastError(t("matchIdRequired"));
             return;
           }
 
@@ -47,7 +49,7 @@ export default function GameJoin() {
           navigate(`/lobby/${encodeURIComponent(id)}`);
         }}
       >
-        Join Lobby
+        {t("joinLobby")}
       </Button>
 
       <Button
@@ -55,7 +57,7 @@ export default function GameJoin() {
         className="w-full"
         onClick={() => navigate('/play')}
       >
-        Back
+        {t("back")}
       </Button>
 
     </div>

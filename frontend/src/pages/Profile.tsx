@@ -2,6 +2,7 @@
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import { UserRound } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Alert } from "../components/ui/Alert";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
@@ -39,6 +40,7 @@ type ProfileResponse = {
 
 export default function Profile() {
   const { id } = useParams<{ id?: string }>();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { success } = useToast();
 
@@ -92,7 +94,7 @@ export default function Profile() {
       <div className="mx-auto max-w-5xl space-y-10 py-10 px-6">
         <Card className="border border-white/10 bg-white/5 p-10">
           <div className="flex justify-center">
-            <Loader size="lg" label="Loading profile" />
+            <Loader size="lg" label={t("loadingProfile")} />
           </div>
         </Card>
       </div>
@@ -119,11 +121,12 @@ export default function Profile() {
         />
 
         <div className="flex-1 space-y-4 text-center md:text-left">
+          {/* Backend identity fields stay untranslated by design. */}
           <h1 className="text-5xl text-white font-['Goonies']">
-            {viewedUser?.login || "Unknown"}
+            {viewedUser?.login || t("unknown")}
           </h1>
 
-          <p className="text-xs text-white/50">ID: {viewedUser?.id ?? "N/A"}</p>
+          <p className="text-xs text-white/50">{t("idLabel")}: {viewedUser?.id ?? "N/A"}</p>
 
           <div className="flex flex-wrap justify-center gap-3 md:justify-start">
             <Badge
@@ -139,7 +142,7 @@ export default function Profile() {
             </Badge>
 
             <Badge variant="outline" className="border-primary/50 text-primary">
-              Rating {viewedStats?.rating ?? 0}
+              {t("rating")} {viewedStats?.rating ?? 0}
             </Badge>
           </div>
 
@@ -147,17 +150,17 @@ export default function Profile() {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                onClick={() => success("Edit profile")}
+                onClick={() => success(t("editProfile"))}
               >
-                Edit profile
+                {t("editProfile")}
               </Button>
 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => success("Upload avatar")}
+                onClick={() => success(t("uploadAvatar"))}
               >
-                Upload avatar
+                {t("uploadAvatar")}
               </Button>
             </div>
           )}
@@ -169,7 +172,7 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="text-xs flex items-center gap-2">
               <UserRound size={14} />
-              {isOwnProfile ? "My Matches" : "Friend actions"}
+              {isOwnProfile ? t("myMatches") : t("friendActions")}
             </CardTitle>
           </CardHeader>
 
@@ -198,7 +201,7 @@ export default function Profile() {
                 ))
               ) : (
                 <p className="text-sm text-white/60">
-                  No recent matches yet
+                  {t("noRecentMatches")}
                 </p>
               )
             ) : (
@@ -208,10 +211,10 @@ export default function Profile() {
                   disabled={isFriend}
                   onClick={() => {
                     setIsFriend(true);
-                    success("Friend added");
+                    success(t("friendAdded"));
                   }}
                 >
-                  Add friend
+                  {t("addFriend")}
                 </Button>
 
                 <Button
@@ -220,10 +223,10 @@ export default function Profile() {
                   disabled={!isFriend}
                   onClick={() => {
                     setIsFriend(false);
-                    success("Friend removed");
+                    success(t("friendRemoved"));
                   }}
                 >
-                  Remove friend
+                  {t("removeFriend")}
                 </Button>
               </>
             )}
@@ -232,9 +235,9 @@ export default function Profile() {
 
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: "Wins", value: viewedStats?.wins ?? 0 },
-            { label: "Losses", value: viewedStats?.losses ?? 0 },
-            { label: "Winrate %", value: `${viewedStats?.winrate ?? 0}%` },
+            { label: t("wins"), value: viewedStats?.wins ?? 0 },
+            { label: t("losses"), value: viewedStats?.losses ?? 0 },
+            { label: t("winrate"), value: `${viewedStats?.winrate ?? 0}%` },
           ].map((item) => (
             <Card key={item.label} className="border border-white/10 bg-white/5">
               <CardContent className="flex flex-col items-center justify-center p-8 text-center">
