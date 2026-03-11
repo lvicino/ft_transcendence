@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import MainLayout from './MainLayout';
 
 import LandingPage from './pages/LandingPage';
@@ -21,8 +21,7 @@ import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
 
 /**
- * Защита приватных роутов + тут же подключаем приватные оверлеи (чат).
- * Если токена нет — отправляем на /auth.
+ * Protected routes — redirects to /auth if not authenticated.
  */
 function RequireAuthShell() {
   const { isAuthenticated } = useAuth();
@@ -32,26 +31,18 @@ function RequireAuthShell() {
   return (
     <>
       <Outlet />
-      {/* ✅ Чат доступен только авторизованным */}
       <ChatSidebar />
     </>
   );
 }
 
 /**
- * Публичные роуты (Landing, Auth).
- * Если юзер уже вошёл — отправляем его в Dashboard.
- * Но можно форсить показ /auth через ?forceAuthMock=1 (для вёрстки).
+ * Public routes — redirects to /dashboard if already authenticated.
  */
 function RequireGuest() {
   const { isAuthenticated } = useAuth();
-  const location = useLocation();
 
-  const forceAuthMock =
-    location.pathname === '/auth' &&
-    new URLSearchParams(location.search).get('forceAuthMock') === '1';
-
-  return isAuthenticated && !forceAuthMock ? <Navigate to="/dashboard" replace /> : <Outlet />;
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />;
 }
 
 export default function App() {
@@ -59,17 +50,17 @@ export default function App() {
     <>
       <Routes>
         <Route element={<MainLayout />}>
-          {/* --- ПУБЛИЧНЫЕ --- */}
+          {/* --- PUBLIC --- */}
           <Route element={<RequireGuest />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<Auth />} />
           </Route>
 
-          {/* Всегда доступны */}
+          {/* Always accessible */}
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
 
-          {/* --- ЗАЩИЩЕННЫЕ --- */}
+          {/* --- PROTECTED --- */}
           <Route element={<RequireAuthShell />}>
             <Route path="/dashboard" element={<Dashboard />} />
 
@@ -81,10 +72,8 @@ export default function App() {
             <Route path="/game/join" element={<GameJoin />} />
 
             <Route path="/lobby" element={<Lobby />} />
-            <Route path="/lobby/:matchId" element={<Lobby />} />
 
             <Route path="/game" element={<Game />} />
-            <Route path="/game/:matchId" element={<Game />} />
             <Route path="/game/finished" element={<GameFinished />} />
           </Route>
 
@@ -93,7 +82,6 @@ export default function App() {
         </Route>
       </Routes>
 
-      {/* Глобальные уведомления можно оставить для всех страниц */}
       <Toaster />
     </>
   );

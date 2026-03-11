@@ -13,21 +13,7 @@ export default function Dashboard() {
         </h1>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center text-2xl">Quick Match</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button
-              className="w-full"
-              onClick={() => navigate("/lobby?mode=quick")}
-            >
-              Start
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
         <Card>
           <CardHeader>

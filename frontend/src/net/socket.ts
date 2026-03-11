@@ -1,114 +1,22 @@
-import { z } from 'zod';
+import type { BackendGameState } from '@/lib/types';
 
-import { useAuthStore } from '@/store/authStore';
-import { useUIStore } from '@/store/uiStore';
-
-const DEFAULT_WS_BASE_URL = 'ws://localhost:3000/ws';
+const DEFAULT_WS_BASE_URL = `wss://${window.location.host}/api/games/ws`;
 const WS_BASE_URL = (import.meta.env.VITE_WS_BASE_URL as string | undefined) ?? DEFAULT_WS_BASE_URL;
 
-const IdSchema = z.string().trim().min(1);
-const LoginSchema = z.string().trim().min(1).max(64);
+export type WsIncomingMessage =
+  | { type: 'info'; message: string; player: string }
+  | { type: 'error'; message: string }
+  | { type: 'Game Stop'; reason: number }
+  | BackendGameState; // game state frames have no "type" field
 
-export const LobbyPlayerSchema = z.object({
-  id: IdSchema,
-  login: LoginSchema,
-  avatar: z.string().url().nullable().optional(),
-});
-
-export const MatchScoreSchema = z.object({
-  p1: z.number().int().nonnegative(),
-  p2: z.number().int().nonnegative(),
-});
-
-export const GameFrameSchema = z.object({
-  matchId: IdSchema,
-  tick: z.number().int().nonnegative(),
-  score: MatchScoreSchema,
-  ball: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  paddles: z.object({
-    leftY: z.number(),
-    rightY: z.number(),
-  }),
-  status: z.enum(['idle', 'playing', 'paused', 'finished']),
-});
-
-export const WsServerEventSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('lobby.snapshot'),
-    payload: z.object({
-      matchId: IdSchema,
-      players: z.array(LobbyPlayerSchema).min(1).max(2),
-      readyPlayerIds: z.array(IdSchema),
-    }),
-  }),
-  z.object({
-    type: z.literal('lobby.player_ready'),
-    payload: z.object({
-      matchId: IdSchema,
-      playerId: IdSchema,
-    }),
-  }),
-  z.object({
-    type: z.literal('match.started'),
-    payload: z.object({
-      matchId: IdSchema,
-    }),
-  }),
-  z.object({
-    type: z.literal('game.state'),
-    payload: GameFrameSchema,
-  }),
-  z.object({
-    type: z.literal('system.error'),
-    payload: z.object({
-      message: z.string().min(1),
-      code: z.string().optional(),
-    }),
-  }),
-]);
-
-export const WsClientEventSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('lobby.ready'),
-    payload: z.object({
-      matchId: IdSchema,
-    }),
-  }),
-  z.object({
-    type: z.literal('lobby.leave'),
-    payload: z.object({
-      matchId: IdSchema,
-    }),
-  }),
-  z.object({
-    type: z.literal('game.input'),
-    payload: z.object({
-      matchId: IdSchema,
-      up: z.boolean(),
-      down: z.boolean(),
-    }),
-  }),
-]);
-
-export type LobbyPlayer = z.infer<typeof LobbyPlayerSchema>;
-export type GameFrame = z.infer<typeof GameFrameSchema>;
-export type WsServerEvent = z.infer<typeof WsServerEventSchema>;
-export type WsClientEvent = z.infer<typeof WsClientEventSchema>;
-
-type RealtimeConnectOptions = {
-  matchId?: string;
-  onEvent: (event: WsServerEvent) => void;
-  onOpen?: () => void;
-  onClose?: () => void;
+export type WsOutgoingInput = {
+  type: 'input';
+  moove: -1 | 0 | 1;
 };
 
-type RealtimeClient = {
-  close: () => void;
-  send: (event: WsClientEvent) => boolean;
-  isOpen: () => boolean;
+export type WsJoinMessage = {
+  gameid: number;
+  password: string;
 };
 
 function parseJsonSafe(raw: string): unknown | null {
@@ -119,68 +27,82 @@ function parseJsonSafe(raw: string): unknown | null {
   }
 }
 
-function buildWsUrl(matchId?: string): string {
-  const { token } = useAuthStore.getState();
-  const url = new URL(WS_BASE_URL);
-  if (token) url.searchParams.set('token', token);
-  if (matchId) url.searchParams.set('matchId', matchId);
-  return url.toString();
-}
+export type GameSocketCallbacks = {
+  onInfo: (message: string, playerCount: string) => void;
+  onGameState: (state: BackendGameState) => void;
+  onGameStop: (reason: number) => void;
+  onError: (message: string) => void;
+  onOpen: () => void;
+  onClose: () => void;
+};
 
-export function connectRealtime(options: RealtimeConnectOptions): RealtimeClient {
-  const { addToast } = useUIStore.getState();
-  const ws = new WebSocket(buildWsUrl(options.matchId));
+export type GameSocket = {
+  join: (gameid: number, password: string) => void;
+  sendInput: (moove: -1 | 0 | 1) => void;
+  close: () => void;
+  isOpen: () => boolean;
+};
+
+export function connectGameSocket(callbacks: GameSocketCallbacks): GameSocket {
+  const ws = new WebSocket(WS_BASE_URL);
 
   ws.onopen = () => {
-    options.onOpen?.();
+    callbacks.onOpen();
   };
 
   ws.onclose = () => {
-    options.onClose?.();
+    callbacks.onClose();
   };
 
   ws.onerror = () => {
-    addToast({ message: 'Realtime channel is unstable', type: 'warning', title: 'WebSocket' });
+    callbacks.onError('WebSocket connection error');
   };
 
-  ws.onmessage = (message) => {
-    const payload = parseJsonSafe(message.data);
-    if (payload === null) {
-      addToast({ message: 'Received non-JSON WebSocket payload', type: 'warning', title: 'Protocol Mismatch' });
-      return;
+  ws.onmessage = (event) => {
+    const data = parseJsonSafe(event.data as string);
+    if (data === null) return;
+
+    const msg = data as Record<string, unknown>;
+
+    // Check if it's a typed message (info, error, Game Stop)
+    if (typeof msg.type === 'string') {
+      if (msg.type === 'info') {
+        callbacks.onInfo(
+          String(msg.message ?? ''),
+          String(msg.player ?? ''),
+        );
+        return;
+      }
+      if (msg.type === 'error') {
+        callbacks.onError(String(msg.message ?? 'Unknown error'));
+        return;
+      }
+      if (msg.type === 'Game Stop') {
+        callbacks.onGameStop(Number(msg.reason ?? 0));
+        return;
+      }
     }
 
-    const parsedEvent = WsServerEventSchema.safeParse(payload);
-    if (!parsedEvent.success) {
-      addToast({ message: 'Received invalid WebSocket event payload', type: 'warning', title: 'Protocol Mismatch' });
-      return;
+    // Otherwise it's a game state frame (has gameWide, gameHeight, ball, players)
+    if ('gameWide' in msg && 'ball' in msg && 'players' in msg) {
+      callbacks.onGameState(msg as unknown as BackendGameState);
     }
-
-    if (parsedEvent.data.type === 'system.error') {
-      addToast({ message: parsedEvent.data.payload.message, type: 'error', title: 'Realtime Error' });
-      return;
-    }
-
-    options.onEvent(parsedEvent.data);
   };
 
   return {
-    close: () => ws.close(1000, 'client-close'),
-    isOpen: () => ws.readyState === WebSocket.OPEN,
-    send: (event) => {
-      const parsedEvent = WsClientEventSchema.safeParse(event);
-      if (!parsedEvent.success) {
-        addToast({ message: 'Attempted to send invalid WebSocket payload', type: 'warning', title: 'Protocol Mismatch' });
-        return false;
+    join: (gameid: number, password: string) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ gameid, password }));
       }
-
-      if (ws.readyState !== WebSocket.OPEN) {
-        addToast({ message: 'Realtime connection is not ready yet', type: 'info', title: 'WebSocket' });
-        return false;
-      }
-
-      ws.send(JSON.stringify(parsedEvent.data));
-      return true;
     },
+    sendInput: (moove: -1 | 0 | 1) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'input', moove }));
+      }
+    },
+    close: () => {
+      ws.close(1000, 'client-close');
+    },
+    isOpen: () => ws.readyState === WebSocket.OPEN,
   };
 }

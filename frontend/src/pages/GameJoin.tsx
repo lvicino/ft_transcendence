@@ -1,86 +1,84 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking, useToast } from '../store';
+import { Input } from '../components/ui/Input';
+import { useGameFlow, useToast } from '../store';
 
 export default function GameJoin() {
   const navigate = useNavigate();
-  const { error: toastError, success } = useToast();
-  const { status, matchId, queueTimer, beginMatchmaking, cancelMatchmaking } = useMatchmaking();
+  const { error: toastError } = useToast();
+  const { status, setGameJoinInfo } = useGameFlow();
+  const [gameIdInput, setGameIdInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [uiError, setUiError] = useState<string | null>(null);
-  const prevStatusRef = useRef(status);
 
-  useEffect(() => {
-    if (prevStatusRef.current === 'searching' && status === 'lobby') {
-      success('Match found');
-    }
-    if (status === 'idle') {
-      navigate('/dashboard', { replace: true });
-      prevStatusRef.current = status;
+  function handleJoin() {
+    if (status !== 'idle') {
+      const msg = 'Can only join from idle state';
+      setUiError(msg);
+      toastError(msg);
       return;
     }
-    if (status === 'searching') {
-      prevStatusRef.current = status;
+
+    const id = Number(gameIdInput.trim());
+    const pwd = passwordInput.trim();
+
+    if (isNaN(id) || id <= 0) {
+      setUiError('Please enter a valid game ID');
       return;
     }
-    if (status === 'lobby') {
-      navigate(matchId ? `/lobby/${encodeURIComponent(matchId)}` : '/lobby', { replace: true });
-      prevStatusRef.current = status;
+    if (!pwd) {
+      setUiError('Please enter the game password');
       return;
     }
-    if (status === 'playing') {
-      navigate(matchId ? `/game/${encodeURIComponent(matchId)}` : '/game', { replace: true });
-      prevStatusRef.current = status;
-      return;
-    }
-    if (status === 'finished') {
-      navigate('/game/finished', { replace: true });
-    }
-    prevStatusRef.current = status;
-  }, [status, matchId, navigate, success]);
+
+    setUiError(null);
+    setGameJoinInfo(id, pwd);
+    navigate('/lobby', { replace: true });
+  }
 
   return (
     <FlowPageCard
-      title="Join / Search (Mock Flow)"
+      title="Join Game"
       status={status}
       error={uiError}
-      isLoading={status === 'searching'}
-      loadingLabel="Searching"
       actions={
         <>
-          {status === 'searching' ? (
-            <Button type="button" variant="outline" className="w-full" onClick={cancelMatchmaking}>
-              Cancel
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              className="w-full"
-              onClick={() => {
-                if (status !== 'idle') {
-                  const msg = 'Search can be started only from idle state';
-                  setUiError(msg);
-                  toastError('Error (mock)');
-                  return;
-                }
-                setUiError(null);
-                beginMatchmaking();
-              }}
-              disabled={status !== 'idle'}
-            >
-              Start Search
-            </Button>
-          )}
+          <Button
+            type="button"
+            className="w-full"
+            onClick={handleJoin}
+            disabled={status !== 'idle'}
+          >
+            Join Game
+          </Button>
           <Button type="button" variant="ghost" className="w-full" onClick={() => navigate('/dashboard')}>
             Back
           </Button>
         </>
       }
     >
-      <div className="text-sm text-white/60">
-        Queue: <span className="text-white">{queueTimer}s</span>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs font-mono uppercase tracking-widest text-white/50">Game ID</label>
+          <Input
+            placeholder="Enter game ID"
+            value={gameIdInput}
+            onChange={(e) => setGameIdInput(e.target.value)}
+            className="font-mono bg-black/50 border-white/10 focus:border-white/30"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-mono uppercase tracking-widest text-white/50">Password</label>
+          <Input
+            placeholder="Enter game password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            className="font-mono bg-black/50 border-white/10 focus:border-white/30"
+          />
+        </div>
       </div>
     </FlowPageCard>
   );

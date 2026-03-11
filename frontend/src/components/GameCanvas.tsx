@@ -13,7 +13,7 @@ export default function GameCanvas() {
     let animationId: number;
 
     const render = () => {
-      // 1. Подгоняем размер канваса под родителя (чтобы не мылило)
+      // Resize canvas to parent
       if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
@@ -21,11 +21,12 @@ export default function GameCanvas() {
 
       const { width, height } = canvas;
       const state = useGameStore.getState();
+      const gs = state.gameState;
 
-      // 2. Очистка (Прозрачный фон!)
+      // Clear
       ctx.clearRect(0, 0, width, height);
 
-      // 3. Сетка (еле заметная)
+      // Center line
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -33,32 +34,43 @@ export default function GameCanvas() {
       ctx.lineTo(width / 2, height);
       ctx.stroke();
 
-      // 4. Рисуем элементы (Белые, "Светящиеся")
+      if (!gs) {
+        // No game state yet — draw placeholder
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.font = '16px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Waiting for game data...', width / 2, height / 2);
+        animationId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Scale factors: backend coordinates → canvas pixels
+      const scaleX = width / gs.gameWide;
+      const scaleY = height / gs.gameHeight;
+
+      // Draw style
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
       ctx.shadowBlur = 10;
 
-      // Размеры (относительные)
-      const paddleW = width * 0.015;
-      const paddleH = height * 0.15;
-      const ballR = width * 0.01;
+      // Draw players (paddles)
+      for (const player of gs.players) {
+        const px = player.x * scaleX - (player.w * scaleX) / 2;
+        const py = player.y * scaleY - (player.h * scaleY) / 2;
+        const pw = player.w * scaleX;
+        const ph = player.h * scaleY;
+        ctx.fillRect(px, py, pw, ph);
+      }
 
-      // Левая ракетка
-      const leftY = (state.paddles.left / 100) * height - paddleH / 2;
-      ctx.fillRect(10, leftY, paddleW, paddleH);
-
-      // Правая ракетка
-      const rightY = (state.paddles.right / 100) * height - paddleH / 2;
-      ctx.fillRect(width - 10 - paddleW, rightY, paddleW, paddleH);
-
-      // Мяч
-      const ballX = (state.ball.x / 100) * width;
-      const ballY = (state.ball.y / 100) * height;
+      // Draw ball
+      const ballX = gs.ball.x * scaleX;
+      const ballY = gs.ball.y * scaleY;
+      const ballR = gs.ball.radius * scaleX;
       ctx.beginPath();
       ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
       ctx.fill();
 
-      // Сброс тени (для производительности)
+      // Reset shadow
       ctx.shadowBlur = 0;
 
       animationId = requestAnimationFrame(render);
@@ -66,7 +78,6 @@ export default function GameCanvas() {
 
     render();
 
-    // React 19 Style Cleanup: просто возвращаем функцию отписки
     return () => cancelAnimationFrame(animationId);
   }, []);
 

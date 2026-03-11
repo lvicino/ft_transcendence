@@ -3,8 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
-import { useAuth } from "@/store";
-import { startAuthFlowMock } from "@/net";
+import { useAuth, useToast } from "@/store";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -26,11 +25,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 type RegisterValues = z.infer<typeof registerSchema>;
 type FieldErrors = Partial<Record<"username" | "email" | "password", string>>;
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";
-function oAuth42Url(): string {
-  const base = apiBase ? apiBase.replace(/\/+$/, "") : "";
-  return base ? `${base}/auth/42` : "/api/auth/42";
-}
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim().replace(/\/+$/, "") ?? "/api";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -47,6 +42,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const { login } = useAuth();
+  const { error: toastError, success: toastSuccess } = useToast();
   const navigate = useNavigate();
 
   const values = isLogin ? loginValues : registerValues;
@@ -82,21 +78,99 @@ export default function Auth() {
     return false;
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
     if (!validateCurrent()) return;
 
     setIsLoading(true);
-    setStatusMsg("Initializing uplink...");
+    setStatusMsg("Connecting to server...");
 
-    startAuthFlowMock({
-      onStatus: (msg: string) => setStatusMsg(msg),
-      onSuccess: (user, token) => {
-        login({ user, token });
+    try {
+      if (isLogin) {
+        // --- LOGIN ---
+        setStatusMsg("Authenticating...");
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: loginValues.email, password: loginValues.password }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => null) as Record<string, unknown> | null;
+          const msg = (data?.message as string) ?? `Login failed (${res.status})`;
+          toastError(msg);
+          setStatusMsg("");
+          setIsLoading(false);
+          return;
+        }
+
+        // Login successful — cookie is set by backend
+        // Backend doesn't return user data on login, build a user from form data
+        login({
+          user: {
+            id: "self",
+            username: loginValues.email.split("@")[0],
+            email: loginValues.email,
+          },
+        });
+        toastSuccess("Login successful");
         navigate("/dashboard", { replace: true });
-      },
-    });
+      } else {
+        // --- REGISTER ---
+        setStatusMsg("Creating account...");
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email: registerValues.email,
+            username: registerValues.username,
+            password: registerValues.password,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => null) as Record<string, unknown> | null;
+          const msg = (data?.message as string) ?? `Registration failed (${res.status})`;
+          toastError(msg);
+          setStatusMsg("");
+          setIsLoading(false);
+          return;
+        }
+
+        // Registration successful — auto-login
+        setStatusMsg("Account created! Logging in...");
+        const loginRes = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: registerValues.email, password: registerValues.password }),
+        });
+
+        if (loginRes.ok) {
+          login({
+            user: {
+              id: "self",
+              username: registerValues.username,
+              email: registerValues.email,
+            },
+          });
+          toastSuccess("Account created and logged in");
+          navigate("/dashboard", { replace: true });
+        } else {
+          toastSuccess("Account created! Please login.");
+          setIsLogin(true);
+          setStatusMsg("");
+          setIsLoading(false);
+        }
+      }
+    } catch {
+      toastError("Network error — check your connection");
+      setStatusMsg("");
+      setIsLoading(false);
+    }
   };
 
   function toggleMode() {
@@ -108,7 +182,7 @@ export default function Auth() {
 
   function loginWith42() {
     if (isLoading) return;
-    window.location.href = oAuth42Url();
+    window.location.href = `${API_BASE}/auth/login/oauth`;
   }
 
   return (
@@ -216,7 +290,7 @@ export default function Auth() {
               </Button>
             </div>
 
-            {/* ✅ SSO внизу как “Continue with …” */}
+            {/* SSO */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/10" />

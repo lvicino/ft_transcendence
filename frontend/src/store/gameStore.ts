@@ -1,109 +1,111 @@
 import { create } from 'zustand';
-import type { GameStatus, GameplayState } from '../lib/types';
+import type { GameStatus, GameplayState, GameCreationInfo, BackendGameState } from '../lib/types';
 
-type MatchmakingStoreState = {
+type GameFlowStoreState = {
   status: GameStatus;
-  matchId: string | null;
-  queueTimer: number;
+  gameId: number | null;
+  gamePassword: string | null;
+  playerCount: string | null;
 
-  beginMatchmaking: () => void;
-  cancelMatchmaking: () => void;
-  setMatchFound: (matchId: string) => void;
-
-  // ✅ добавили для UI-flow
+  setGameCreated: (info: GameCreationInfo) => void;
+  setGameJoinInfo: (gameId: number, password: string) => void;
+  setPlayerCount: (count: string) => void;
   startMatch: () => void;
   finishMatch: () => void;
+  reset: () => void;
 };
 
-const generateId = () => Math.random().toString(36).slice(2, 9);
-
-let mockInterval: ReturnType<typeof setInterval> | null = null;
-
-export const useMatchmakingStore = create<MatchmakingStoreState>((set, get) => ({
+export const useGameFlowStore = create<GameFlowStoreState>((set, get) => ({
   status: 'idle',
-  matchId: null,
-  queueTimer: 0,
+  gameId: null,
+  gamePassword: null,
+  playerCount: null,
 
-  beginMatchmaking: () => {
-    const { status } = get();
-    if (status !== 'idle') return;
-
-    set({ status: 'searching', queueTimer: 0 });
-    get().cancelMatchmaking();
-    set({ status: 'searching', queueTimer: 0 });
-
-    const start = Date.now();
-    mockInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - start) / 1000);
-      set({ queueTimer: elapsed });
-
-      if (elapsed > 3) {
-        get().setMatchFound(`match_${generateId()}`);
-      }
-    }, 1000);
+  setGameCreated: (info) => {
+    set({
+      status: 'lobby',
+      gameId: info.gameId,
+      gamePassword: info.gamePassword,
+      playerCount: null,
+    });
   },
 
-  cancelMatchmaking: () => {
-    if (mockInterval) clearInterval(mockInterval);
-    mockInterval = null;
-    set({ status: 'idle', matchId: null, queueTimer: 0 });
+  setGameJoinInfo: (gameId, password) => {
+    set({
+      status: 'lobby',
+      gameId,
+      gamePassword: password,
+      playerCount: null,
+    });
   },
 
-  setMatchFound: (matchId) => {
-    if (mockInterval) clearInterval(mockInterval);
-    mockInterval = null;
-    set({ status: 'lobby', matchId });
+  setPlayerCount: (count) => {
+    set({ playerCount: count });
   },
 
-  // ✅ минимально: лобби -> игра
   startMatch: () => {
-    const { status, matchId } = get();
-    if (status !== 'lobby' || !matchId) return;
+    const { status } = get();
+    if (status !== 'lobby') return;
     set({ status: 'playing' });
   },
 
-  // ✅ минимально: игра -> конец
   finishMatch: () => {
     const { status } = get();
     if (status !== 'playing') return;
     set({ status: 'finished' });
   },
+
+  reset: () => {
+    set({
+      status: 'idle',
+      gameId: null,
+      gamePassword: null,
+      playerCount: null,
+    });
+  },
 }));
 
 export const useGameStore = create<GameplayState>((set) => ({
-  ball: { x: 50, y: 50 },
-  paddles: { left: 50, right: 50 },
+  gameState: null,
   score: { left: 0, right: 0 },
 
-  updateGame: (data) => set((state) => ({ ...state, ...data })),
+  updateGameState: (data: BackendGameState) => set({ gameState: data }),
+  incrementScore: (team: number) =>
+    set((state) => ({
+      score: {
+        left: team === 1 ? state.score.left + 1 : state.score.left,
+        right: team === 0 ? state.score.right + 1 : state.score.right,
+      },
+    })),
   resetGame: () =>
     set({
-      ball: { x: 50, y: 50 },
-      paddles: { left: 50, right: 50 },
+      gameState: null,
       score: { left: 0, right: 0 },
     }),
 }));
 
-export function useMatchmaking() {
-  const status = useMatchmakingStore((s) => s.status);
-  const matchId = useMatchmakingStore((s) => s.matchId);
-  const queueTimer = useMatchmakingStore((s) => s.queueTimer);
-  const beginMatchmaking = useMatchmakingStore((s) => s.beginMatchmaking);
-  const cancelMatchmaking = useMatchmakingStore((s) => s.cancelMatchmaking);
-  const setMatchFound = useMatchmakingStore((s) => s.setMatchFound);
-
-  // ✅ новое
-  const startMatch = useMatchmakingStore((s) => s.startMatch);
-  const finishMatch = useMatchmakingStore((s) => s.finishMatch);
+export function useGameFlow() {
+  const status = useGameFlowStore((s) => s.status);
+  const gameId = useGameFlowStore((s) => s.gameId);
+  const gamePassword = useGameFlowStore((s) => s.gamePassword);
+  const playerCount = useGameFlowStore((s) => s.playerCount);
+  const setGameCreated = useGameFlowStore((s) => s.setGameCreated);
+  const setGameJoinInfo = useGameFlowStore((s) => s.setGameJoinInfo);
+  const setPlayerCount = useGameFlowStore((s) => s.setPlayerCount);
+  const startMatch = useGameFlowStore((s) => s.startMatch);
+  const finishMatch = useGameFlowStore((s) => s.finishMatch);
+  const reset = useGameFlowStore((s) => s.reset);
 
   return {
     status,
-    matchId,
-    queueTimer,
-    beginMatchmaking,
-    cancelMatchmaking,
-    setMatchFound,
+    gameId,
+    gamePassword,
+    playerCount,
+    setGameCreated,
+    setGameJoinInfo,
+    setPlayerCount,
     startMatch,
     finishMatch,
+    reset,
   };
 }

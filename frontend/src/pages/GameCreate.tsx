@@ -1,60 +1,88 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking, useToast } from '../store';
+import { useGameFlow, useToast } from '../store';
+import { apiFetch } from '@/net';
 
-const mockId = () => `match_${Math.random().toString(36).slice(2, 8)}`;
+const CreateGameResponseSchema = z.object({
+  id: z.number(),
+  password: z.string(),
+});
+
+const DEFAULT_GAME_PARAMS = {
+  gw: 800,
+  gh: 400,
+  ballRadius: 8,
+  ballSpeed: 5,
+  playerW: 10,
+  playerH: 80,
+  playerSpeed: 5,
+  playerNumber: 2,
+};
 
 export default function GameCreate() {
   const navigate = useNavigate();
   const { error: toastError } = useToast();
-  const { status, matchId, setMatchFound } = useMatchmaking();
+  const { status, gameId, setGameCreated } = useGameFlow();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === 'lobby') {
+    if (status === 'lobby' && gameId !== null) {
       setIsSubmitting(false);
-      navigate(matchId ? `/lobby/${encodeURIComponent(matchId)}` : '/lobby', { replace: true });
+      navigate('/lobby', { replace: true });
       return;
     }
     if (status === 'playing') {
       setIsSubmitting(false);
-      navigate(matchId ? `/game/${encodeURIComponent(matchId)}` : '/game', { replace: true });
+      navigate('/game', { replace: true });
       return;
     }
     if (status === 'finished') {
       setIsSubmitting(false);
       navigate('/game/finished', { replace: true });
     }
-  }, [status, matchId, navigate]);
+  }, [status, gameId, navigate]);
+
+  async function handleCreate() {
+    if (status !== 'idle') {
+      const msg = 'Lobby can be created only from idle state';
+      setUiError(msg);
+      toastError(msg);
+      return;
+    }
+    setUiError(null);
+    setIsSubmitting(true);
+
+    const result = await apiFetch('/games/', CreateGameResponseSchema, {
+      method: 'POST',
+      body: JSON.stringify({ gameParameter: DEFAULT_GAME_PARAMS }),
+    });
+
+    if (result) {
+      setGameCreated({ gameId: result.id, gamePassword: result.password });
+    } else {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <FlowPageCard
-      title="Create (Mock Flow)"
+      title="Create Game"
       status={status}
       error={uiError}
       isLoading={isSubmitting}
-      loadingLabel="Submitting"
+      loadingLabel="Creating game..."
       actions={
         <>
           <Button
             type="button"
             className="w-full"
-            onClick={() => {
-              if (status !== 'idle') {
-                const msg = 'Lobby can be created only from idle state';
-                setUiError(msg);
-                toastError('Error (mock)');
-                return;
-              }
-              setUiError(null);
-              setIsSubmitting(true);
-              setMatchFound(mockId());
-            }}
-            disabled={status !== 'idle'}
+            onClick={handleCreate}
+            disabled={status !== 'idle' || isSubmitting}
           >
             Create Lobby
           </Button>

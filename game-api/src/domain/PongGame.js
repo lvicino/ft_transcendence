@@ -96,12 +96,11 @@ class PongGame {
 	}
 
 	update(...playersMove) {
-		playersMove.map((m) => {
-			if (m >= 1)
-				m = 1;
-			if (m <= -1)
-				m = -1;
-		})
+		playersMove = playersMove.map((m) => {
+			if (m >= 1) return 1;
+			if (m <= -1) return -1;
+			return m;
+		});
 		if (playersMove.length != this.players.length)
 			throw "nbr player != nbr move";
 		let step = Math.max(this.ball.speed, this.players[0].speed);

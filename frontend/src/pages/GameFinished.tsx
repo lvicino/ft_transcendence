@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking } from '../store';
+import { useGameFlow, useGameStore } from '../store';
 
 export default function GameFinished() {
   const navigate = useNavigate();
-  const { status, matchId, cancelMatchmaking } = useMatchmaking();
+  const { status, gameId, reset } = useGameFlow();
+  const { score, resetGame } = useGameStore();
   const [uiError, setUiError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -15,46 +16,50 @@ export default function GameFinished() {
       navigate('/dashboard', { replace: true });
       return;
     }
-    if (status === 'searching') {
-      navigate('/game/join', { replace: true });
-      return;
-    }
     if (status === 'lobby') {
-      navigate(matchId ? `/lobby/${encodeURIComponent(matchId)}` : '/lobby', { replace: true });
+      navigate('/lobby', { replace: true });
       return;
     }
     if (status === 'playing') {
-      navigate(matchId ? `/game/${encodeURIComponent(matchId)}` : '/game', { replace: true });
+      navigate('/game', { replace: true });
+    }
+  }, [status, navigate]);
+
+  function handleBackToDashboard() {
+    if (status !== 'finished') {
+      const msg = 'Reset is available only in finished state';
+      setUiError(msg);
       return;
     }
-    if (status === 'finished') {
-      navigate('/game/finished', { replace: true });
-    }
-  }, [status, matchId, navigate]);
+    setUiError(null);
+    resetGame();
+    reset();
+  }
 
   return (
     <FlowPageCard
-      title="Finished (Mock Flow)"
+      title="Game Finished"
       status={status}
       error={uiError}
       actions={
         <Button
           type="button"
           className="w-full"
-          onClick={() => {
-            if (status !== 'finished') {
-              const msg = 'Reset is available only in finished state';
-              setUiError(msg);
-              return;
-            }
-            setUiError(null);
-            cancelMatchmaking();
-          }}
+          onClick={handleBackToDashboard}
           disabled={status !== 'finished'}
         >
           Back to Dashboard
         </Button>
       }
-    />
+    >
+      <div className="space-y-2 text-center">
+        <div className="text-sm text-white/60">
+          Game ID: <span className="text-white font-mono">{gameId ?? 'n/a'}</span>
+        </div>
+        <div className="text-2xl font-bold text-white">
+          {score.left} — {score.right}
+        </div>
+      </div>
+    </FlowPageCard>
   );
 }

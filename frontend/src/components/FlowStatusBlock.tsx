@@ -11,8 +11,7 @@ type FlowStatusBlockProps = {
 };
 
 function getBadgeVariant(status: GameStatus): 'default' | 'success' | 'warning' | 'error' | 'outline' {
-  if (status === 'searching') return 'warning';
-  if (status === 'lobby') return 'outline';
+  if (status === 'lobby') return 'warning';
   if (status === 'playing') return 'success';
   if (status === 'finished') return 'default';
   return 'outline';

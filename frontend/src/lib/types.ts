@@ -7,7 +7,7 @@ export type User = {
 
 export type PresenceStatus = 'online' | 'ingame' | 'offline';
 
-export type GameStatus = 'idle' | 'searching' | 'lobby' | 'playing' | 'finished';
+export type GameStatus = 'idle' | 'lobby' | 'playing' | 'finished';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -19,19 +19,14 @@ export type Toast = {
 };
 
 export interface AuthState {
-  token: string | null;
   user: User | null;
-  login: (payload: { token: string; user: User }) => void;
+  login: (payload: { user: User }) => void;
   logout: () => void;
 }
 
-export interface MatchmakingState {
-  status: GameStatus;
-  matchId: string | null;
-  queueTimer: number;
-  beginMatchmaking: () => void;
-  cancelMatchmaking: () => void;
-  setMatchFound: (matchId: string) => void;
+export interface GameCreationInfo {
+  gameId: number;
+  gamePassword: string;
 }
 
 export interface UIState {
@@ -46,19 +41,35 @@ export interface ToastState {
   removeToast: (id: string) => void;
 }
 
-export type AppStore = AuthState & MatchmakingState & UIState & ToastState;
-
-export interface GameplayState {
-  ball: { x: number; y: number };
-  paddles: { left: number; right: number };
-  score: { left: number; right: number };
-  updateGame: (data: Partial<GameplayState>) => void;
-  resetGame: () => void;
+export interface BackendBall {
+  x: number;
+  y: number;
+  radius: number;
 }
 
-export interface GameState {
-  score: { p1: number; p2: number };
-  status: 'idle' | 'playing' | 'paused' | 'finished';
+export interface BackendPlayer {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  speed: number;
+  team: number;
+  move: number;
+}
+
+export interface BackendGameState {
+  gameWide: number;
+  gameHeight: number;
+  ball: BackendBall;
+  players: BackendPlayer[];
+}
+
+export interface GameplayState {
+  gameState: BackendGameState | null;
+  score: { left: number; right: number };
+  updateGameState: (data: BackendGameState) => void;
+  incrementScore: (team: number) => void;
+  resetGame: () => void;
 }
 
 export interface ChatMessage {

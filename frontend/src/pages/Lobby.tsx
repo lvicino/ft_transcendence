@@ -1,113 +1,129 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useMatchmaking } from '../store';
+import { useGameFlow, useToast } from '../store';
+import { connectGameSocket } from '@/net';
+import type { GameSocket } from '@/net';
 
 export default function Lobby() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const isQuickMode = searchParams.get('mode') === 'quick';
-  const { status, matchId, queueTimer, beginMatchmaking, startMatch, cancelMatchmaking } = useMatchmaking();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { success: toastSuccess, error: toastError } = useToast();
+  const { status, gameId, gamePassword, playerCount, setPlayerCount, startMatch, reset } = useGameFlow();
   const [uiError, setUiError] = useState<string | null>(null);
+  const socketRef = useRef<GameSocket | null>(null);
+  const hasJoinedRef = useRef(false);
 
   useEffect(() => {
-    if (isQuickMode && status === 'idle') {
-      beginMatchmaking();
+    // Guard: must be in lobby with valid game info
+    if (status !== 'lobby' || gameId === null || gamePassword === null) {
+      if (status === 'idle') {
+        navigate('/dashboard', { replace: true });
+      }
       return;
     }
 
-    if (status === 'idle' && !isQuickMode) {
-      navigate('/dashboard', { replace: true });
-      return;
-    }
+    // Connect WebSocket
+    const socket = connectGameSocket({
+      onOpen: () => {
+        // Send join message
+        if (!hasJoinedRef.current) {
+          socket.join(gameId, gamePassword);
+          hasJoinedRef.current = true;
+        }
+      },
+      onInfo: (message, count) => {
+        setPlayerCount(count);
+        toastSuccess(message);
+        if (count === '2/2') {
+          // Game is starting
+          startMatch();
+        }
+      },
+      onGameState: () => {
+        // If we receive a game state while still in lobby, transition to playing
+        if (status === 'lobby') {
+          startMatch();
+        }
+      },
+      onGameStop: () => {
+        toastError('Game was stopped');
+        reset();
+        navigate('/dashboard', { replace: true });
+      },
+      onError: (message) => {
+        setUiError(message);
+        toastError(message);
+      },
+      onClose: () => {
+        // If still in lobby, disconnect means game was cancelled
+        if (socketRef.current) {
+          socketRef.current = null;
+        }
+      },
+    });
 
+    socketRef.current = socket;
+
+    return () => {
+      socket.close();
+      socketRef.current = null;
+      hasJoinedRef.current = false;
+    };
+  }, [status, gameId, gamePassword]);
+
+  // Navigate on status change
+  useEffect(() => {
     if (status === 'playing') {
-      setIsSubmitting(false);
-      navigate(matchId ? `/game/${encodeURIComponent(matchId)}` : '/game', { replace: true });
+      navigate('/game', { replace: true });
       return;
     }
     if (status === 'finished') {
-      setIsSubmitting(false);
       navigate('/game/finished', { replace: true });
     }
-  }, [status, matchId, isQuickMode, beginMatchmaking, navigate]);
+  }, [status, navigate]);
 
-  const canStart = status === 'lobby' && Boolean(matchId);
-  const isSearching = status === 'searching';
-  const showQueue = isSearching;
-  const showLobbyActions = status === 'lobby';
+  function handleLeave() {
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
+    reset();
+    navigate('/dashboard', { replace: true });
+  }
 
   return (
     <FlowPageCard
-      title="Lobby (Mock Flow)"
+      title="Lobby"
       status={status}
       error={uiError}
-      isLoading={isSearching || isSubmitting}
-      loadingLabel={isSearching ? 'Searching' : 'Submitting'}
+      isLoading={status === 'lobby'}
+      loadingLabel="Waiting for opponent..."
       actions={
-        <>
-          {isSearching ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                cancelMatchmaking();
-                navigate('/dashboard', { replace: true });
-              }}
-            >
-              Cancel
-            </Button>
-          ) : null}
-
-          {showLobbyActions ? (
-            <>
-              <Button
-                type="button"
-                className="w-full"
-                onClick={() => {
-                  if (status !== 'lobby') {
-                    const msg = 'Match can be started only in lobby';
-                    setUiError(msg);
-                    return;
-                  }
-                  setUiError(null);
-                  setIsSubmitting(true);
-                  startMatch();
-                }}
-                disabled={!canStart}
-              >
-                Start Match
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => {
-                  cancelMatchmaking();
-                  navigate('/dashboard', { replace: true });
-                }}
-              >
-                Leave Lobby
-              </Button>
-            </>
-          ) : null}
-        </>
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full"
+          onClick={handleLeave}
+        >
+          Leave Lobby
+        </Button>
       }
     >
-      {showQueue ? (
+      <div className="space-y-2">
         <div className="text-sm text-white/60">
-          Queue: <span className="text-white">{queueTimer}s</span>
+          Game ID: <span className="text-white font-mono">{gameId ?? 'n/a'}</span>
         </div>
-      ) : null}
-      {status === 'lobby' ? (
         <div className="text-sm text-white/60">
-          Match ID: <span className="text-white">{matchId ?? 'n/a'}</span>
+          Password: <span className="text-white font-mono text-xs">{gamePassword ?? 'n/a'}</span>
         </div>
-      ) : null}
+        {playerCount && (
+          <div className="text-sm text-white/60">
+            Players: <span className="text-white">{playerCount}</span>
+          </div>
+        )}
+      </div>
     </FlowPageCard>
   );
 }

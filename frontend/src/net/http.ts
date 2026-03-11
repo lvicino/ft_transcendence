@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { useAuthStore, useUIStore } from '@/store';
 
-const DEFAULT_API_BASE_URL = 'http://localhost:3000/api';
+const DEFAULT_API_BASE_URL = '/api';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? DEFAULT_API_BASE_URL;
 
 const FastifyErrorSchema = z.object({
@@ -32,7 +32,7 @@ function parseFastifyMessage(payload: unknown, fallbackStatus: number): string {
 }
 
 export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>, init?: RequestInit): Promise<T | null> {
-  const { token, logout } = useAuthStore.getState();
+  const { logout } = useAuthStore.getState();
   const { addToast } = useUIStore.getState();
 
   const headers = new Headers(init?.headers);
@@ -41,10 +41,13 @@ export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>, init?: R
   if (hasBody && !isFormData && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
-  if (token) headers.set('Authorization', `Bearer ${token}`);
 
   try {
-    const res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers,
+      credentials: 'include',
+    });
     const payload = res.status === 204 ? null : await res.json().catch(() => null);
 
     if (!res.ok) {
