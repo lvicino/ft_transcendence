@@ -1,95 +1,69 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import FlowPageCard from '../components/FlowPageCard';
 import { Button } from '../components/ui/Button';
-import { useGameFlow, useToast } from '../store';
-import { connectGameSocket } from '@/net';
-import type { GameSocket } from '@/net';
+import { useGameFlow, useGameStore, useToast } from '../store';
 
 export default function Lobby() {
   const navigate = useNavigate();
   const { success: toastSuccess, error: toastError } = useToast();
-  const { status, gameId, gamePassword, playerCount, setPlayerCount, startMatch, reset } = useGameFlow();
+  const {
+    status, gameId, gamePassword, playerCount,
+    setPlayerCount, startMatch, disconnectAndReset, connectAndJoin,
+  } = useGameFlow();
+  const { updateGameState } = useGameStore();
   const [uiError, setUiError] = useState<string | null>(null);
-  const socketRef = useRef<GameSocket | null>(null);
-  const hasJoinedRef = useRef(false);
 
+  // Guard: must be in lobby with valid game info
   useEffect(() => {
-    // Guard: must be in lobby with valid game info
-    if (status !== 'lobby' || gameId === null || gamePassword === null) {
-      if (status === 'idle') {
-        navigate('/dashboard', { replace: true });
-      }
+    if (status === 'idle') {
+      navigate('/dashboard', { replace: true });
       return;
     }
-
-    // Connect WebSocket
-    const socket = connectGameSocket({
-      onOpen: () => {
-        // Send join message
-        if (!hasJoinedRef.current) {
-          socket.join(gameId, gamePassword);
-          hasJoinedRef.current = true;
-        }
-      },
-      onInfo: (message, count) => {
-        setPlayerCount(count);
-        toastSuccess(message);
-        if (count === '2/2') {
-          // Game is starting
-          startMatch();
-        }
-      },
-      onGameState: () => {
-        // If we receive a game state while still in lobby, transition to playing
-        if (status === 'lobby') {
-          startMatch();
-        }
-      },
-      onGameStop: () => {
-        toastError('Game was stopped');
-        reset();
-        navigate('/dashboard', { replace: true });
-      },
-      onError: (message) => {
-        setUiError(message);
-        toastError(message);
-      },
-      onClose: () => {
-        // If still in lobby, disconnect means game was cancelled
-        if (socketRef.current) {
-          socketRef.current = null;
-        }
-      },
-    });
-
-    socketRef.current = socket;
-
-    return () => {
-      socket.close();
-      socketRef.current = null;
-      hasJoinedRef.current = false;
-    };
-  }, [status, gameId, gamePassword]);
-
-  // Navigate on status change
-  useEffect(() => {
     if (status === 'playing') {
       navigate('/game', { replace: true });
       return;
     }
     if (status === 'finished') {
       navigate('/game/finished', { replace: true });
+      return;
     }
   }, [status, navigate]);
 
+  // Connect WebSocket once when entering lobby
+  useEffect(() => {
+    if (status !== 'lobby' || gameId === null || gamePassword === null) return;
+
+    connectAndJoin({
+      onInfo: (message, count) => {
+        setPlayerCount(count);
+        toastSuccess(message);
+        if (count === '2/2') {
+          startMatch();
+        }
+      },
+      onGameState: (state) => {
+        // If receiving game frames while in lobby, start the match
+        updateGameState(state);
+        startMatch();
+      },
+      onGameStop: () => {
+        toastError('Game was stopped');
+        disconnectAndReset();
+      },
+      onError: (message) => {
+        setUiError(message);
+        toastError(message);
+      },
+    });
+
+    // NO cleanup here — the socket lives in the store and must survive
+    // the route transition from /lobby → /game
+  }, [status, gameId, gamePassword]);
+
   function handleLeave() {
-    if (socketRef.current) {
-      socketRef.current.close();
-      socketRef.current = null;
-    }
-    reset();
+    disconnectAndReset();
     navigate('/dashboard', { replace: true });
   }
 

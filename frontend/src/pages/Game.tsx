@@ -4,17 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../components/ui/Button';
 import { useGameFlow, useGameStore } from '../store';
-import { useToast } from '../store';
 import GameCanvas from '../components/GameCanvas';
-import { connectGameSocket } from '@/net';
-import type { GameSocket } from '@/net';
 
 export default function Game() {
   const navigate = useNavigate();
-  const { status, gameId, gamePassword, finishMatch } = useGameFlow();
-  const { updateGameState, score } = useGameStore();
-  const { error: toastError } = useToast();
-  const socketRef = useRef<GameSocket | null>(null);
+  const { status, gameId, finishMatch, sendInput } = useGameFlow();
+  const score = useGameStore((state) => state.score);
   const keysRef = useRef<{ up: boolean; down: boolean }>({ up: false, down: false });
 
   // Guard: if not playing, redirect
@@ -28,42 +23,7 @@ export default function Game() {
     }
   }, [status, navigate]);
 
-  // Connect WebSocket for gameplay
-  useEffect(() => {
-    if (status !== 'playing' || gameId === null || gamePassword === null) return;
-
-    const socket = connectGameSocket({
-      onOpen: () => {
-        // Send join message (reconnect scenario)
-        socket.join(gameId, gamePassword);
-      },
-      onInfo: () => {
-        // Already joined info
-      },
-      onGameState: (state) => {
-        updateGameState(state);
-      },
-      onGameStop: () => {
-        toastError('Game ended — opponent disconnected');
-        finishMatch();
-      },
-      onError: (message) => {
-        toastError(message);
-      },
-      onClose: () => {
-        socketRef.current = null;
-      },
-    });
-
-    socketRef.current = socket;
-
-    return () => {
-      socket.close();
-      socketRef.current = null;
-    };
-  }, [status, gameId, gamePassword]);
-
-  // Keyboard input handling
+  // Keyboard input handling — sends through the global store socket
   const computeMovement = useCallback((): -1 | 0 | 1 => {
     const { up, down } = keysRef.current;
     if (up && !down) return -1;
@@ -87,11 +47,9 @@ export default function Game() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // Send input at 30fps
+    // Send input at 30fps through the global socket
     const inputInterval = setInterval(() => {
-      if (socketRef.current?.isOpen()) {
-        socketRef.current.sendInput(computeMovement());
-      }
+      sendInput(computeMovement());
     }, 1000 / 30);
 
     return () => {
@@ -99,13 +57,9 @@ export default function Game() {
       window.removeEventListener('keyup', handleKeyUp);
       clearInterval(inputInterval);
     };
-  }, [status, computeMovement]);
+  }, [status, computeMovement, sendInput]);
 
   function handleForfeit() {
-    if (socketRef.current) {
-      socketRef.current.close();
-      socketRef.current = null;
-    }
     finishMatch();
   }
 
