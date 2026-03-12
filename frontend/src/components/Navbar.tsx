@@ -120,7 +120,11 @@ export function Navbar() {
               </div>
             </>
           ) : (
-            <Button size="sm" onClick={() => navigate("/auth")}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/auth")}
+              className="w-36 border-white/20 hover:bg-white hover:text-black transition-all duration-700">
               {t("connect")}
             </Button>
           )}

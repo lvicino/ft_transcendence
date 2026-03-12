@@ -24,10 +24,12 @@ export default function LanguageSwitcher() {
             type="button"
             onClick={() => i18n.changeLanguage(language.code)}
             className={cn(
-              "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors",
+              "rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all duration-300",
               isActive
-                ? "bg-brand-red/20 text-brand-red"
-                : "text-white/70 hover:text-white"
+                // Активный язык: белый фон, черный текст (строгий B&W)
+                ? "bg-white text-black shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                // Неактивный язык: тот самый hover, как у карточек (чуть-чуть фона и легкое свечение)
+                : "text-white/70 hover:bg-white/5 hover:text-white hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
             )}
             aria-pressed={isActive}
           >

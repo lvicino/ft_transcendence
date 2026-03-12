@@ -7,7 +7,8 @@ type GameFlowState = {
   status: GameStatus;
   matchId: string | null;
   theme: GameTheme;
-  powerUps: boolean;
+  ballSpeed: number;
+  paddleSpeed: number;
   maxScore: number;
 
   enterLobby: (matchId: string) => void;
@@ -15,7 +16,8 @@ type GameFlowState = {
   startMatch: () => void;
   finishMatch: () => void;
   setTheme: (theme: GameTheme) => void;
-  togglePowerUps: () => void;
+  setBallSpeed: (ballSpeed: number) => void;
+  setPaddleSpeed: (paddleSpeed: number) => void;
   setMaxScore: (maxScore: number) => void;
 };
 
@@ -23,7 +25,8 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
   status: 'idle',
   matchId: null,
   theme: 'classic',
-  powerUps: false,
+  ballSpeed: 5,
+  paddleSpeed: 5,
   maxScore: 5,
 
   enterLobby: (matchId) => set({ status: 'lobby', matchId }),
@@ -44,7 +47,9 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
 
   setTheme: (theme) => set({ theme }),
 
-  togglePowerUps: () => set((s) => ({ powerUps: !s.powerUps })),
+  setBallSpeed: (ballSpeed) => set({ ballSpeed }),
+
+  setPaddleSpeed: (paddleSpeed) => set({ paddleSpeed }),
 
   setMaxScore: (maxScore) => set({ maxScore }),
 }));

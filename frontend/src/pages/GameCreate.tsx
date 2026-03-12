@@ -1,4 +1,3 @@
-// src/pages/GameCreate.tsx
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -15,10 +14,12 @@ export default function GameCreate() {
 
   const {
     theme,
-    powerUps,
+    ballSpeed,
+    paddleSpeed,
     maxScore,
     setTheme,
-    togglePowerUps,
+    setBallSpeed,
+    setPaddleSpeed,
     setMaxScore,
   } = useGameFlowStore();
 
@@ -28,14 +29,15 @@ export default function GameCreate() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <Card>
+  
+       <Card>
         <CardHeader>
           <CardTitle>Create Game</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
 
-          {/* Theme */}
+          {/* Theme - ТВОЙ ОРИГИНАЛЬНЫЙ ДИЗАЙН */}
           <div className="space-y-2">
             <p className="text-sm opacity-70">Theme</p>
 
@@ -46,7 +48,7 @@ export default function GameCreate() {
                   type="button"
                   onClick={() => setTheme(item.id)}
                   className={`overflow-hidden rounded-lg border ${
-                    theme === item.id ? "border-white" : "border-white/20"
+                    theme === item.id ? "border-white" : "border-white/20 hover:border-white/40"
                   }`}
                 >
                   <div className={`relative h-20 ${item.bg}`}>
@@ -62,34 +64,58 @@ export default function GameCreate() {
             </div>
           </div>
 
-          {/* Power ups */}
-          <div className="flex items-center justify-between">
-            <span>Power-ups</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm opacity-70">Ball speed</p>
+              <span className="text-sm text-white/70">{ballSpeed}</span>
+            </div>
 
-            <Button
-              variant={powerUps ? "default" : "outline"}
-              onClick={togglePowerUps}
-            >
-              {powerUps ? "Enabled" : "Disabled"}
-            </Button>
+            <input
+              type="range"
+              min={1}
+              max={10}
+              step={1}
+              value={ballSpeed}
+              onChange={(event) => setBallSpeed(Number(event.target.value))}
+              className="w-full accent-white"
+            />
           </div>
 
-          {/* Max score */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm opacity-70">Paddle speed</p>
+              <span className="text-sm text-white/70">{paddleSpeed}</span>
+            </div>
+
+            <input
+              type="range"
+              min={1}
+              max={10}
+              step={1}
+              value={paddleSpeed}
+              onChange={(event) => setPaddleSpeed(Number(event.target.value))}
+              className="w-full accent-white"
+            />
+          </div>
+
           <div className="space-y-2">
             <p className="text-sm opacity-70">Max score</p>
 
-            <select
-              value={maxScore}
-              onChange={(e) => setMaxScore(Number(e.target.value))}
-              className="border border-white/10 bg-black/40 rounded px-3 py-2"
-            >
-              <option value={3}>3</option>
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-            </select>
+            <div className="flex gap-2">
+              {[3, 5, 10].map((score) => (
+                <Button
+                  key={score}
+                  variant={maxScore === score ? "default" : "outline"}
+                  onClick={() => setMaxScore(score)}
+                  className="flex-1"
+                >
+                  {score}
+                </Button>
+              ))}
+            </div>
           </div>
 
-          <Button className="w-full" onClick={createGame}>
+          <Button className="w-full mt-4" onClick={createGame}>
             Create Lobby
           </Button>
 
