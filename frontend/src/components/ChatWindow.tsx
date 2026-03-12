@@ -18,7 +18,6 @@ export default function ChatWindow({ messages, currentUserId }: ChatWindowProps)
   return (
     <div className="flex-1 space-y-4 overflow-y-auto p-4">
       {messages.map((msg) => {
-        // Backend-provided user/message content must stay raw (never pass through i18n).
         const displayName = msg.senderLogin ?? msg.senderId;
         const isOwn = Boolean(currentUserId && msg.senderId === currentUserId);
 

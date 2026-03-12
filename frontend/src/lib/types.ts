@@ -8,6 +8,7 @@ export type User = {
 export type PresenceStatus = 'online' | 'ingame' | 'offline';
 
 export type GameStatus = 'idle' | 'lobby' | 'playing' | 'finished';
+export type GameTheme = 'classic' | '42' | 'pokemon';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
