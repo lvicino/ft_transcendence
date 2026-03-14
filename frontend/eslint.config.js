@@ -30,7 +30,6 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      // Наши кастомные строгие правила
       '@typescript-eslint/no-explicit-any': 'error', // Модуль: No Any [cite: 22]
       'no-unused-vars': 'off', // Отключаем базовый, используем TS версию
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

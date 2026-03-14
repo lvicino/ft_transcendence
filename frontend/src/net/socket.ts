@@ -1,5 +1,6 @@
 const WS_BASE_URL =
-  import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:3000/ws";
+  import.meta.env.VITE_WS_BASE_URL ??
+  `ws://${window.location.host}/api/games/ws`;
 
 export function connectGameSocket(
   matchId: string,
@@ -11,7 +12,7 @@ export function connectGameSocket(
     ws.send(
       JSON.stringify({
         gameid: matchId,
-        password: null,
+        password: "",
       })
     );
   };
@@ -25,15 +26,14 @@ export function connectGameSocket(
     }
   };
 
-  ws.onerror = (err) => {
-    console.error("WebSocket error", err);
+  ws.onerror = () => {
+    console.error("WebSocket error");
   };
 
   ws.onclose = () => {
-  console.log("WebSocket closed");
+    console.log("WebSocket closed");
   };
 
-  
   return {
     send(data: any) {
       if (ws.readyState === WebSocket.OPEN) {

@@ -1,5 +1,5 @@
 const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+  import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export async function apiFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${API_BASE}${path}`, {
