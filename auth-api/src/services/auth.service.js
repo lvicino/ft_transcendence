@@ -31,4 +31,15 @@ async function oauth(email) {
 	return (null);
 }
 
-module.exports = {register, login, oauth};
+async function getById(id) {
+	const user = await UserRepository.findById(id);
+	if (user.length === 0)
+		return (null);
+	return ({
+		id: String(user[0].id),
+		email: user[0].email,
+		username: user[0].username,
+	});
+}
+
+module.exports = {register, login, oauth, getById};

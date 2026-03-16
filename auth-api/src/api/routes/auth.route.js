@@ -66,6 +66,45 @@ module.exports = async function (fastify, opts) {
 		}
 	});
 
+	fastify.get('/session', async (request, reply) => {
+		const token = request.cookies.access_token;
+		if (!token) {
+			return reply.code(401).send({
+				error: "Unauthorized",
+				message: "No active session",
+			});
+		}
+
+		try {
+			const payload = jwt.verify(token, JWT_SECRET, {
+				algorithms: ['HS256'],
+			});
+			const user = await fastify.authService.getById(payload.id);
+			if (!user) {
+				return reply.code(404).send({
+					error: "Not Found",
+					message: "User not found",
+				});
+			}
+			return reply.code(200).send({ user });
+		} catch (error) {
+			return reply.code(401).send({
+				error: "Unauthorized",
+				message: "Invalid session",
+			});
+		}
+	});
+
+	fastify.post('/logout', async (request, reply) => {
+		reply.clearCookie("access_token", {
+			path: "/",
+			httpOnly: true,
+			secure: true,
+			sameSite: "lax",
+		});
+		return reply.code(204).send();
+	});
+
 	fastify.get('/login/oauth', async (request, reply) => {
 		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${API_UID}&redirect_uri=${API_REDIRECT_URI}&response_type=code`;
 		return reply.redirect(authorizeUrl);

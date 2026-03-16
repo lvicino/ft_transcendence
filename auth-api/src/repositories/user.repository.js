@@ -21,4 +21,12 @@ async function findByEmail(email) {
   `
 }
 
-module.exports = {create, findByEmail};
+async function findById(id) {
+  return await sql`
+  SELECT id, email, username, oauth
+  FROM users
+  WHERE id = ${id}
+  `
+}
+
+module.exports = {create, findByEmail, findById};
