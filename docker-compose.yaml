@@ -90,7 +90,7 @@ services:
     ports:
       - "8443:443"
     volumes:
-      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 
   cert-gen:
@@ -108,10 +108,9 @@ services:
       - "traefik.enable=false"
 
   frontend:
-      build: 
-        context: ./debug-client
-      volumes:
-       - ./debug-client/src/:/usr/share/nginx/html/
+      build:
+        context: ./frontend
+        target: production
       labels:
         - "traefik.http.routers.front.rule=PathPrefix(`/`)"
         - "traefik.http.routers.front.entrypoints=websecure"
