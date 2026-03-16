@@ -4,3 +4,4 @@ docker-compose.override.yaml
 .env
 run/secrets/
 .DS_Store
+frontend/dist/*
