@@ -1,11 +1,14 @@
 // src/pages/Auth.tsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Terminal } from "lucide-react";
+import { apiFetch } from "@/net/http";
+import { useAuthStore, useToast } from "@/store";
 
 type LoginValues = {
   email: string;
@@ -21,14 +24,16 @@ type FieldErrors = Partial<Record<"username" | "email" | "password", string>>;
 const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";
 function oAuth42Url(): string {
   const base = apiBase ? apiBase.replace(/\/+$/, "") : "";
-  return base ? `${base}/auth/42` : "/api/auth/42";
+  return base ? `${base}/auth/login/oauth` : "/api/auth/login/oauth";
 }
 
 export default function Auth() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState("");
+  const login = useAuthStore((state) => state.login);
+  const { error: toastError, success: toastSuccess } = useToast();
 
   const [loginValues, setLoginValues] = useState<LoginValues>({ email: "", password: "" });
   const [registerValues, setRegisterValues] = useState<RegisterValues>({
@@ -40,6 +45,21 @@ export default function Auth() {
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const values = isLogin ? loginValues : registerValues;
+
+  // Backend auth errors currently expose only localized message strings, so the UI maps them here.
+  function getAuthErrorMessage(message: string) {
+    if (message === "Identifiants invalides") return t("authErrorInvalidCredentials");
+    if (message === "Cet email est déjà enregistré.") return t("authErrorEmailTaken");
+    if (message === "Cet username est déjà utilisé.") return t("authErrorUsernameTaken");
+    return t("authErrorGeneric");
+  }
+
+  async function syncSession() {
+    const data = await apiFetch("/auth/session");
+    const session = data as { user: { id: string; username: string; email: string } };
+    login(session.user);
+    return session.user;
+  }
 
   function setField<K extends keyof (LoginValues & RegisterValues)>(key: K, value: string) {
     setErrors((p) => ({ ...p, [key as keyof FieldErrors]: undefined }));
@@ -85,20 +105,56 @@ export default function Auth() {
     return true;
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
     if (!validateCurrent()) return;
 
     setIsLoading(true);
-    setStatusMsg(t("authMockRemoved"));
-    setIsLoading(false);
+
+    try {
+      if (isLogin) {
+        await apiFetch("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({
+            email: loginValues.email.trim(),
+            password: loginValues.password,
+          }),
+        });
+      } else {
+        await apiFetch("/auth/register", {
+          method: "POST",
+          body: JSON.stringify({
+            username: registerValues.username.trim(),
+            email: registerValues.email.trim(),
+            password: registerValues.password,
+          }),
+        });
+
+        toastSuccess(t("authRegisterSuccess"));
+
+        await apiFetch("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({
+            email: registerValues.email.trim(),
+            password: registerValues.password,
+          }),
+        });
+      }
+
+      await syncSession();
+      navigate("/play", { replace: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Authentication failed";
+      toastError(getAuthErrorMessage(message));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   function toggleMode() {
     if (isLoading) return;
     setErrors({});
-    setStatusMsg("");
     setIsLogin((v) => !v);
   }
 
@@ -192,11 +248,6 @@ export default function Auth() {
                 </Button>
               </div>
 
-              {isLoading ? (
-                <div className="text-center font-mono text-xs text-white/60 animate-pulse">
-                  {">"} {statusMsg}
-                </div>
-              ) : null}
             </form>
 
             <div className="mt-7 flex items-center justify-between text-xs font-mono uppercase text-white/40">

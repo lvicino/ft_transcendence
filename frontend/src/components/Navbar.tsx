@@ -22,8 +22,17 @@ export function Navbar() {
     navigate(to);
   };
 
-  const handleLogout = () => {
-    useAuthStore.getState().actions.logout();
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Local client state should still be cleared if the logout request fails.
+    }
+
+    useAuthStore.getState().logout();
     useGameFlowStore.getState().leaveLobby();
     useGameStore.getState().resetGame();
     success(t("loggedOut"));

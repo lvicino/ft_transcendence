@@ -3,35 +3,40 @@ import { persist } from 'zustand/middleware';
 import type { User } from '../lib/types';
 
 interface AuthState {
-  token: string | null;
   user: User | null;
-  actions: {
-    login: (token: string, user: User) => void;
-    logout: () => void;
-  };
+  authStatus: 'checking' | 'authenticated' | 'guest';
+  login: (user: User) => void;
+  logout: () => void;
+  setChecking: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      token: null,
       user: null,
-      actions: {
-        login: (token, user) => set({ token, user }),
-        logout: () => {
-          set({ token: null, user: null });
-        },
+      authStatus: 'checking',
+      login: (user) => set({ user, authStatus: 'authenticated' }),
+      logout: () => {
+        set({ user: null, authStatus: 'guest' });
       },
+      setChecking: () => set({ authStatus: 'checking' }),
     }),
-    { name: 'auth-storage' }
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+      }),
+    }
   )
 );
 
 export const useAuth = () => {
-  const { token, user, actions } = useAuthStore();
+  const { user, authStatus, login, logout } = useAuthStore();
   return {
-    isAuthenticated: !!token,
+    isAuthenticated: authStatus === 'authenticated' && !!user,
+    authStatus,
     user,
-    ...actions,
+    login,
+    logout,
   };
 };

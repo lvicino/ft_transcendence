@@ -20,9 +20,9 @@ export type Toast = {
 };
 
 export interface AuthState {
-  token: string | null;
   user: User | null;
-  login: (payload: { token: string; user: User }) => void;
+  authStatus: 'checking' | 'authenticated' | 'guest';
+  login: (user: User) => void;
   logout: () => void;
 }
 

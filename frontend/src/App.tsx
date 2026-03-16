@@ -17,13 +17,15 @@ import NotFound from './pages/NotFound';
 
 import { useAuth } from './store';
 
+import { SessionHydrator } from './components/auth/SessionHydrator';
 import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
 
 function RequireAuthShell() {
-/*   for testing without auth --- const { isAuthenticated } = useAuth();
+  const { isAuthenticated, authStatus } = useAuth();
 
-  if (!isAuthenticated) return <Navigate to="/auth" replace />; */
+  if (authStatus === 'checking') return null;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
 
   return (
     <>
@@ -35,19 +37,21 @@ function RequireAuthShell() {
 }
 
 function RequireGuest() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, authStatus } = useAuth();
   const location = useLocation();
 
   const forceAuthMock =
     location.pathname === '/auth' &&
     new URLSearchParams(location.search).get('forceAuthMock') === '1';
 
+  if (authStatus === 'checking') return <Outlet />;
   return isAuthenticated && !forceAuthMock ? <Navigate to="/play" replace /> : <Outlet />;
 }
 
 export default function App() {
   return (
     <>
+      <SessionHydrator />
       <Routes>
         <Route element={<MainLayout />}>
 
