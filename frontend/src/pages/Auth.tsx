@@ -7,25 +7,19 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Terminal } from "lucide-react";
-import { apiFetch } from "@/net/http";
+import { api, getErrorMessage } from "@/net/api";
 import { useAuthStore, useToast } from "@/store";
 
 type LoginValues = {
-  email: string;
-  password: string;
-};
-type RegisterValues = {
   username: string;
   email: string;
   password: string;
 };
-type FieldErrors = Partial<Record<"username" | "email" | "password", string>>;
-
-const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";
-function oAuth42Url(): string {
-  const base = apiBase ? apiBase.replace(/\/+$/, "") : "";
-  return base ? `${base}/auth/login/oauth` : "/api/auth/login/oauth";
-}
+type FieldErrors = {
+  username?: string;
+  email?: string;
+  password?: string;
+};
 
 export default function Auth() {
   const { t } = useTranslation();
@@ -35,52 +29,41 @@ export default function Auth() {
   const login = useAuthStore((state) => state.login);
   const { error: toastError, success: toastSuccess } = useToast();
 
-  const [loginValues, setLoginValues] = useState<LoginValues>({ email: "", password: "" });
-  const [registerValues, setRegisterValues] = useState<RegisterValues>({
+  const [formValues, setFormValues] = useState<LoginValues>({
     username: "",
     email: "",
     password: "",
   });
 
   const [errors, setErrors] = useState<FieldErrors>({});
-
-  const values = isLogin ? loginValues : registerValues;
-
-  // Backend auth errors currently expose only localized message strings, so the UI maps them here.
-  function getAuthErrorMessage(message: string) {
-    if (message === "Identifiants invalides") return t("authErrorInvalidCredentials");
-    if (message === "Cet email est déjà enregistré.") return t("authErrorEmailTaken");
-    if (message === "Cet username est déjà utilisé.") return t("authErrorUsernameTaken");
-    return t("authErrorGeneric");
-  }
-
   async function syncSession() {
-    const data = await apiFetch("/auth/session");
-    const session = data as { user: { id: string; username: string; email: string } };
+    const session = await api.authApi.getSession();
     login(session.user);
     return session.user;
   }
 
-  function setField<K extends keyof (LoginValues & RegisterValues)>(key: K, value: string) {
-    setErrors((p) => ({ ...p, [key as keyof FieldErrors]: undefined }));
-
-    if (isLogin) {
-      if (key === "email" || key === "password") {
-        setLoginValues((v) => ({ ...v, [key]: value }));
-      }
-      return;
-    }
-
-    setRegisterValues((v) => ({ ...v, [key]: value }));
+  function setUsername(username: string) {
+    setErrors((prev) => ({ ...prev, username: undefined }));
+    setFormValues((prev) => ({ ...prev, username }));
   }
 
-  function validateCurrent(): boolean {
+  function setEmail(email: string) {
+    setErrors((prev) => ({ ...prev, email: undefined }));
+    setFormValues((prev) => ({ ...prev, email }));
+  }
+
+  function setPassword(password: string) {
+    setErrors((prev) => ({ ...prev, password: undefined }));
+    setFormValues((prev) => ({ ...prev, password }));
+  }
+
+  function validateFormValues(): boolean {
     setErrors({});
-    const email = values.email.trim();
-    const password = values.password;
+    const email = formValues.email.trim();
+    const password = formValues.password;
 
     if (!isLogin) {
-      const username = registerValues.username.trim();
+      const username = formValues.username.trim();
       if (username.length < 2) {
         setErrors((p) => ({ ...p, username: t("validationMin2") }));
         return false;
@@ -108,35 +91,21 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
-    if (!validateCurrent()) return;
+    if (!validateFormValues()) return;
 
     setIsLoading(true);
 
     try {
-      if (isLogin) {
-        await apiFetch("/auth/login", {
-          method: "POST",
-          body: JSON.stringify({
-            email: loginValues.email.trim(),
-            password: loginValues.password,
-          }),
-        });
-      } else {
-        await apiFetch("/auth/register", {
-          method: "POST",
-          body: JSON.stringify({
-            username: registerValues.username.trim(),
-            email: registerValues.email.trim(),
-            password: registerValues.password,
-          }),
+      if (!isLogin) {
+        await api.authApi.register({
+          username: formValues.username.trim(),
+          email: formValues.email.trim(),
+          password: formValues.password,
         });
 
-        await apiFetch("/auth/login", {
-          method: "POST",
-          body: JSON.stringify({
-            email: registerValues.email.trim(),
-            password: registerValues.password,
-          }),
+        await api.authApi.login({
+          email: formValues.email.trim(),
+          password: formValues.password,
         });
       }
 
@@ -147,7 +116,7 @@ export default function Auth() {
       navigate("/play", { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Authentication failed";
-      toastError(getAuthErrorMessage(message));
+      toastError(getErrorMessage(message));
     } finally {
       setIsLoading(false);
     }
@@ -161,7 +130,7 @@ export default function Auth() {
 
   function loginWith42() {
     if (isLoading) return;
-    window.location.href = oAuth42Url();
+    window.location.href = api.authApi.getOAuthLoginUrl();
   }
 
   return (
@@ -193,8 +162,8 @@ export default function Auth() {
                   <Input
                     placeholder={t("authCodenamePlaceholder")}
                     name="username"
-                    value={registerValues.username}
-                    onChange={(e) => setField("username", e.target.value)}
+                    value={formValues.username}
+                    onChange={(e) => setUsername(e.target.value)}
                     disabled={isLoading}
                     className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
                     aria-invalid={Boolean(errors.username)}
@@ -210,8 +179,8 @@ export default function Auth() {
                   type="email"
                   placeholder={t("authEmailPlaceholder")}
                   name="email"
-                  value={values.email}
-                  onChange={(e) => setField("email", e.target.value)}
+                  value={formValues.email}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
                   className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
                   aria-invalid={Boolean(errors.email)}
@@ -226,8 +195,8 @@ export default function Auth() {
                   type="password"
                   placeholder={t("authPasswordPlaceholder")}
                   name="password"
-                  value={values.password}
-                  onChange={(e) => setField("password", e.target.value)}
+                  value={formValues.password}
+                  onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
                   className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
                   aria-invalid={Boolean(errors.password)}

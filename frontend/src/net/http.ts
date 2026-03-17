@@ -6,7 +6,7 @@ export function apiUrl(path: string) {
 }
 
 export async function apiFetch(path: string, options?: RequestInit) {
-  const res = await fetch(apiUrl(path), {
+  const response = await fetch(apiUrl(path), {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -15,27 +15,17 @@ export async function apiFetch(path: string, options?: RequestInit) {
     ...options,
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-
-    if (text) {
-      let message = text;
-
-      try {
-        const data = JSON.parse(text) as { message?: string; error?: string };
-        message = data.message || data.error || text;
-      } catch {
-        // Keep raw text fallback for non-JSON responses.
-      }
-
-      throw new Error(message);
+  if (!response.ok) {
+    try {
+      const data = (await response.json()) as { error?: string };
+      throw new Error(data.error ?? "API_ERROR");
+    } catch {
+      throw new Error("API_ERROR");
     }
-
-    throw new Error("API error");
   }
 
   try {
-    return await res.json();
+    return await response.json();
   } catch {
     return null;
   }
