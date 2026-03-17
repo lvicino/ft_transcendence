@@ -64,7 +64,7 @@ export function Navbar() {
 
         {/* NAVIGATION: Only for Authed users */}
         {isAuthed && (
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-2">
             {navItems.map((item) => (
               <Button
                 key={item.href}
@@ -73,7 +73,7 @@ export function Navbar() {
                 size="sm"
                 onClick={() => go(item.href)}
                 className={cn(
-                  'min-w-0 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all',
+                  'w-28 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all',
                   pathname === item.href
                     ? 'border-b border-brand-red text-brand-red hover:bg-transparent'
                     : 'text-white/75 hover:bg-white/5 hover:text-white'
@@ -100,7 +100,7 @@ export function Navbar() {
                 className="hidden sm:flex border-white/20"
               />
 
-              <div className="hidden sm:flex flex-col items-start leading-none mr-2">
+              <div className="mr-2 hidden w-24 shrink-0 sm:flex flex-col items-start leading-none">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{t("navbarOperator")}</span>
                 <span className="text-xs font-black text-white">{user?.username}</span>
               </div>
@@ -112,7 +112,7 @@ export function Navbar() {
                   size="sm" 
                   onClick={toggleChat}
                   icon={<MessageSquare size={14} />}
-                  className="hidden md:flex"
+                  className="hidden w-28 md:flex"
                 >
                   {t("navbarChat")}
                 </Button>
@@ -133,7 +133,7 @@ export function Navbar() {
               variant="outline"
               size="sm"
               onClick={() => navigate("/auth")}
-              className="w-36 border-white/20 hover:bg-white hover:text-black transition-all duration-700">
+              className="w-36 shrink-0 border-white/20 transition-all duration-700 hover:bg-white hover:text-black">
               {t("connect")}
             </Button>
           )}
