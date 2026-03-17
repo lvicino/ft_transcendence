@@ -131,8 +131,6 @@ export default function Auth() {
           }),
         });
 
-        toastSuccess(t("authRegisterSuccess"));
-
         await apiFetch("/auth/login", {
           method: "POST",
           body: JSON.stringify({
@@ -143,6 +141,9 @@ export default function Auth() {
       }
 
       await syncSession();
+      if (!isLogin) {
+        toastSuccess(t("authRegisterSuccess"));
+      }
       navigate("/play", { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Authentication failed";
