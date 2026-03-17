@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../lib/types';
+import { apiFetch } from '../net/http';
 
 interface AuthState {
   user: User | null;
@@ -14,14 +15,19 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       authStatus: 'checking',
       login: (user) => set({ user, authStatus: 'authenticated' }),
       updateProfile: async (username: string) => {
-        set((state) => ({
-          user: state.user ? { ...state.user, username } : state.user,
-        }));
+        const updatedUser = await apiFetch('/users/me', {
+          method: 'PATCH',
+          body: JSON.stringify({ username }),
+        }) as Partial<User>;
+        const currentUser = get().user;
+        if (currentUser && updatedUser) {
+          set({ user: { ...currentUser, ...updatedUser } });
+        }
       },
       uploadAvatar: async (file: File) => {
         const avatar = URL.createObjectURL(file);

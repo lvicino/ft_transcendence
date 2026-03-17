@@ -42,7 +42,7 @@ type ProfileResponse = {
 export default function Profile() {
   const { id } = useParams<{ id?: string }>();
   const { t } = useTranslation();
-  const { user, updateProfile, uploadAvatar } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { success, error } = useToast();
 
   const effectiveUserId = id ?? user?.id ?? "dev";
@@ -90,23 +90,12 @@ export default function Profile() {
 
     const formData = new FormData(e.currentTarget);
     const newLogin = formData.get("login") as string;
-    const avatarFile = formData.get("avatar") as File;
-
     try {
       let nextLogin = viewedUser?.login ?? user?.username ?? "";
-      let nextAvatar = viewedUser?.avatar ?? user?.avatar ?? null;
 
       if (newLogin && newLogin !== viewedUser?.login) {
         await updateProfile(newLogin);
         nextLogin = newLogin;
-      }
-
-      if (avatarFile && avatarFile.size > 0) {
-        if (!avatarFile.type.startsWith("image/")) {
-          throw new Error("Avatar file must be an image");
-        }
-        await uploadAvatar(avatarFile);
-        nextAvatar = URL.createObjectURL(avatarFile);
       }
 
       setProfileData((current) =>
@@ -116,7 +105,6 @@ export default function Profile() {
               user: {
                 ...current.user,
                 login: nextLogin,
-                avatar: nextAvatar,
               },
             }
           : current
@@ -169,14 +157,6 @@ export default function Profile() {
               size="xl"
               className="h-48 w-48 border-4 border-primary"
             />
-            {isEditing && (
-              <Input
-                name="avatar"
-                type="file"
-                accept="image/jpeg, image/png, image/webp"
-                className="w-48 text-xs"
-              />
-            )}
           </div>
 
           <div className="flex-1 space-y-4 text-center md:text-left">

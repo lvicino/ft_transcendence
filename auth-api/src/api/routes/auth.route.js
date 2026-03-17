@@ -6,6 +6,7 @@ const API_UID = process.env.API_UID;
 const API_SECRET = process.env.API_SECRET;
 const API_REDIRECT_URI = process.env.API_REDIRECT_URI 
 const FRONTEND_URL = process.env.FRONTEND_URL 
+const isProduction = process.env.NODE_ENV === 'production';
 
 function genererToken(user) {
   const payload = {
@@ -18,6 +19,16 @@ function genererToken(user) {
   });
 
   return token;
+}
+
+function authCookieOptions() {
+	return {
+		path: "/",
+		httpOnly: true,
+		secure: isProduction,
+		sameSite: "lax",
+		maxAge: 3600,
+	};
 }
 
 module.exports = async function (fastify, opts) {
@@ -53,13 +64,7 @@ module.exports = async function (fastify, opts) {
 						});
 		else {
 			const access_token = genererToken(user);
-			reply.setCookie("access_token", access_token, {
-				path: "/",
-				httpOnly: true,
-				secure: true,
-				sameSite: "lax",
-				maxAge: 3600,
-			});
+			reply.setCookie("access_token", access_token, authCookieOptions());
 			return reply.code(200).send({
 				message: "Login successful"
 			});
@@ -96,12 +101,7 @@ module.exports = async function (fastify, opts) {
 	});
 
 	fastify.post('/logout', async (request, reply) => {
-		reply.clearCookie("access_token", {
-			path: "/",
-			httpOnly: true,
-			secure: true,
-			sameSite: "lax",
-		});
+		reply.clearCookie("access_token", authCookieOptions());
 		return reply.code(204).send();
 	});
 
@@ -133,13 +133,7 @@ module.exports = async function (fastify, opts) {
 			const user = await fastify.authService.oauth(userResponse.data.email);
 
 			const access_token = genererToken(user);
-			reply.setCookie("access_token", access_token, {
-				path: "/",
-				httpOnly: true,
-				secure: true,
-				sameSite: "lax", // ou strict
-				maxAge: 3600,
-			});
+			reply.setCookie("access_token", access_token, authCookieOptions());
 			return reply.redirect(FRONTEND_URL)
 		} catch (error) {
 			request.log.error(error);

@@ -29,4 +29,13 @@ async function findById(id) {
   `
 }
 
-module.exports = {create, findByEmail, findById};
+async function updateUsername(id, username) {
+  return await sql`
+  UPDATE users
+  SET username = ${username}
+  WHERE id = ${id}
+  RETURNING id, email, username, oauth
+  `
+}
+
+module.exports = {create, findByEmail, findById, updateUsername};

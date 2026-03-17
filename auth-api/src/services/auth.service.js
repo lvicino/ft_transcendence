@@ -42,4 +42,15 @@ async function getById(id) {
 	});
 }
 
-module.exports = {register, login, oauth, getById};
+async function updateUsername(id, username) {
+	const user = await UserRepository.updateUsername(id, username);
+	if (user.length === 0)
+		return (null);
+	return ({
+		id: String(user[0].id),
+		email: user[0].email,
+		username: user[0].username,
+	});
+}
+
+module.exports = {register, login, oauth, getById, updateUsername};
