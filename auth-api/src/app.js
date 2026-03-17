@@ -17,8 +17,7 @@ function build(opts = {}) {
 		const token = request.cookies.access_token;
 		if (!token) {
 			return reply.code(401).send({
-				error: "Unauthorized",
-				message: "No active session",
+				error: "NO_ACTIVE_SESSION",
 			});
 		}
 
@@ -28,8 +27,7 @@ function build(opts = {}) {
 			});
 		} catch {
 			return reply.code(401).send({
-				error: "Unauthorized",
-				message: "Invalid session",
+				error: "INVALID_SESSION",
 			});
 		}
 	});

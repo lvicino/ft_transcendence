@@ -3,8 +3,7 @@ module.exports = async function (fastify, opts) {
 		const user = await fastify.authService.getById(request.params.id);
 		if (!user) {
 			return reply.code(404).send({
-				error: "Not Found",
-				message: "User not found",
+				error: "USER_NOT_FOUND",
 			});
 		}
 
@@ -30,14 +29,12 @@ module.exports = async function (fastify, opts) {
 		const username = request.body?.username?.trim();
 		if (!username) {
 			return reply.code(400).send({
-				error: "Bad Request",
-				message: "Username is required",
+				error: "USERNAME_REQUIRED",
 			});
 		}
 		if (username.length < 2 || username.length > 24) {
 			return reply.code(400).send({
-				error: "Bad Request",
-				message: "Username must be between 2 and 24 characters",
+				error: "USERNAME_LENGTH_INVALID",
 			});
 		}
 
@@ -45,16 +42,14 @@ module.exports = async function (fastify, opts) {
 			const user = await fastify.authService.updateUsername(request.auth.id, username);
 			if (!user) {
 				return reply.code(404).send({
-					error: "Not Found",
-					message: "User not found",
+					error: "USER_NOT_FOUND",
 				});
 			}
 			return reply.code(200).send(user);
 		} catch (error) {
 			if (error.message.includes('users_username_key')) {
 				return reply.code(409).send({
-					error: "Conflict",
-					message: "Cet username est déjà utilisé.",
+					error: "USERNAME_ALREADY_TAKEN",
 				});
 			}
 			throw error;

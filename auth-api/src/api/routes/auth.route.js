@@ -40,13 +40,11 @@ module.exports = async function (fastify, opts) {
 		} catch (error) {
 			if (error.message.includes('users_email_key')) {
 				return reply.code(409).send({ 
-					error: "Conflict", 
-					message: "Cet email est déjà enregistré." 
+					error: "EMAIL_ALREADY_REGISTERED",
 				});
 			} else if (error.message.includes('users_username_key')) {
 				return reply.code(409).send({ 
-					error: "Conflict", 
-					message: "Cet username est déjà utilisé." 
+					error: "USERNAME_ALREADY_TAKEN",
 				});
 			}
 			console.log("error register: ", error.message);
@@ -59,8 +57,7 @@ module.exports = async function (fastify, opts) {
 		const user = await fastify.authService.login(email, password);
 		if (!user)
 			return reply.code(401).send({ 
-							error: "Unauthorized", 
-							message: "Identifiants invalides" 
+							error: "INVALID_CREDENTIALS",
 						});
 		else {
 			const access_token = genererToken(user);
@@ -75,8 +72,7 @@ module.exports = async function (fastify, opts) {
 		const token = request.cookies.access_token;
 		if (!token) {
 			return reply.code(401).send({
-				error: "Unauthorized",
-				message: "No active session",
+				error: "NO_ACTIVE_SESSION",
 			});
 		}
 
@@ -87,15 +83,13 @@ module.exports = async function (fastify, opts) {
 			const user = await fastify.authService.getById(payload.id);
 			if (!user) {
 				return reply.code(404).send({
-					error: "Not Found",
-					message: "User not found",
+					error: "USER_NOT_FOUND",
 				});
 			}
 			return reply.code(200).send({ user });
 		} catch (error) {
 			return reply.code(401).send({
-				error: "Unauthorized",
-				message: "Invalid session",
+				error: "INVALID_SESSION",
 			});
 		}
 	});
