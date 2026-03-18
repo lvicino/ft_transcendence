@@ -96,7 +96,12 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      if (!isLogin) {
+      if (isLogin) {
+        await api.authApi.login({
+          email: formValues.email.trim(),
+          password: formValues.password,
+        });
+      } else {
         await api.authApi.register({
           username: formValues.username.trim(),
           email: formValues.email.trim(),
