@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import MainLayout from './MainLayout';
 
 import LandingPage from './pages/LandingPage';
@@ -20,11 +20,16 @@ import { useAuth } from './store';
 import { SessionHydrator } from './components/auth/SessionHydrator';
 import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
+import { Loader } from './components/ui/Loader';
+
+function AuthGateLoader() {
+  return <Loader variant="full-page" size="lg" />;
+}
 
 function RequireAuthShell() {
   const { isAuthenticated, authStatus } = useAuth();
 
-  if (authStatus === 'checking') return null;
+  if (authStatus === 'checking') return <AuthGateLoader />;
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
 
   return (
@@ -36,29 +41,14 @@ function RequireAuthShell() {
   );
 }
 
-function RequireGuest() {
-  const { isAuthenticated, authStatus } = useAuth();
-  const location = useLocation();
-
-  const forceAuthMock =
-    location.pathname === '/auth' &&
-    new URLSearchParams(location.search).get('forceAuthMock') === '1';
-
-  if (authStatus === 'checking') return <Outlet />;
-  return isAuthenticated && !forceAuthMock ? <Navigate to="/play" replace /> : <Outlet />;
-}
-
 export default function App() {
   return (
     <>
       <SessionHydrator />
       <Routes>
         <Route element={<MainLayout />}>
-
-          <Route element={<RequireGuest />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth" element={<Auth />} />
-          </Route>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<Auth />} />
 
 
           <Route path="/terms" element={<Terms />} />
