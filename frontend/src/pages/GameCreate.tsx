@@ -24,7 +24,9 @@ export default function GameCreate() {
   } = useGameFlowStore();
 
   const createGame = () => {
-    navigate("/lobby");
+	console.log({theme, ballSpeed, paddleSpeed, maxScore});
+
+    //navigate("/lobby");
   };
 
   return (
