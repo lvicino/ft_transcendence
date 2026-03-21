@@ -16,7 +16,7 @@ export default defineConfig({
   server: {
     port: 3000,
     strictPort: true,
-    proxy: {
+    proxy: { // pour quoi fair ??
       '/api': {
         target: 'https://localhost:8443',
         changeOrigin: true,
@@ -24,5 +24,9 @@ export default defineConfig({
         ws: true,
       },
     },
+ 	hmr: {
+      // On dit au HMR de passer par le domaine public géré par Traefik
+      clientPort: 8443, 
+    }
   },
 })

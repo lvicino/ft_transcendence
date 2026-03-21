@@ -26,7 +26,7 @@ services:
       cert-gen:
         condition: service_completed_successfully
     labels:
-      - "traefik.http.routers.auth-api.rule=PathPrefix(`/api/auth`) || PathPrefix(`/api/users`)"
+      - "traefik.http.routers.auth-api.rule=PathPrefix(`/api/auth`)"
       - "traefik.http.routers.auth-api.entrypoints=websecure"
       - "traefik.http.routers.auth-api.tls=true"
       - "traefik.http.services.auth-api.loadbalancer.server.scheme=https"
@@ -90,7 +90,7 @@ services:
     ports:
       - "8443:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro
 
 
   cert-gen:
@@ -107,15 +107,16 @@ services:
     labels:
       - "traefik.enable=false"
 
-  frontend:
-      build:
-        context: ./frontend
-        target: production
+  debug-client:
+      build: 
+        context: ./debug-client
+      volumes:
+       - ./debug-client/src/:/usr/share/nginx/html/
       labels:
-        - "traefik.http.routers.front.rule=PathPrefix(`/`)"
-        - "traefik.http.routers.front.entrypoints=websecure"
-        - "traefik.http.routers.front.tls=true"
-        - "traefik.http.services.front.loadbalancer.server.port=80"
+        - "traefik.http.routers.debug-client.rule=PathPrefix(`/test/`)"
+        - "traefik.http.routers.debug-client.entrypoints=websecure"
+        - "traefik.http.routers.debug-client.tls=true"
+        - "traefik.http.services.debug-client.loadbalancer.server.port=80"
 
 volumes:
   certs-data:

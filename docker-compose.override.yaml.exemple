@@ -22,3 +22,17 @@ services:
       - "--api.insecure=true"
     ports:
       - 8080:8080
+
+  frontend:
+      build:
+        context: ./frontend
+        target: development
+      user: "root"
+      volumes:
+        - /usr/src/app/node_modules
+        - ./frontend/:/usr/src/app
+      labels:
+        - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.frontend.entrypoints=websecure"
+        - "traefik.http.routers.frontend.tls=true"
+        - "traefik.http.services.frontend.loadbalancer.server.port=3000"
