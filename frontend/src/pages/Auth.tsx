@@ -10,6 +10,8 @@ import { Terminal } from "lucide-react";
 import { api, getErrorMessage } from "@/net/api";
 import { useAuthStore, useToast } from "@/store";
 
+import { Loader } from '../components/ui/Loader';
+
 type LoginValues = {
   username: string;
   email: string;
@@ -138,129 +140,134 @@ export default function Auth() {
     window.location.href = api.authApi.getOAuthLoginUrl();
   }
 
-  return (
-    <>
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)]" />
+  if (!isLoading) {
+  	return (
+			<>
+			<div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)]" />
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md animate-fade-in border-white/10 bg-black/70 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-          <CardHeader className="text-center pb-2">
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-                <Terminal className="text-white/80 w-6 h-6" />
-              </div>
-            </div>
+			<div className="relative z-10 flex min-h-screen items-center justify-center p-4">
+				<Card className="w-full max-w-md animate-fade-in border-white/10 bg-black/70 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+				<CardHeader className="text-center pb-2">
+					<div className="flex justify-center mb-4">
+					<div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+						<Terminal className="text-white/80 w-6 h-6" />
+					</div>
+					</div>
 
-            <CardTitle className="text-3xl text-white">
-              {isLogin ? t("authSystemAccess") : t("authNewRegistration")}
-            </CardTitle>
+					<CardTitle className="text-3xl text-white">
+					{isLogin ? t("authSystemAccess") : t("authNewRegistration")}
+					</CardTitle>
 
-            <p className="text-xs text-white/40 font-mono uppercase tracking-[0.2em] mt-2">
-              {t("authSecureConnection")}
-            </p>
-          </CardHeader>
+					<p className="text-xs text-white/40 font-mono uppercase tracking-[0.2em] mt-2">
+					{t("authSecureConnection")}
+					</p>
+				</CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin ? (
-                <div className="space-y-2">
-                  <Input
-                    placeholder={t("authCodenamePlaceholder")}
-                    name="username"
-                    value={formValues.username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    disabled={isLoading}
-                    className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
-                    aria-invalid={Boolean(errors.username)}
-                  />
-                  {errors.username ? (
-                    <div className="text-xs font-mono text-red-300 text-center">{errors.username}</div>
-                  ) : null}
-                </div>
-              ) : null}
+				<CardContent>
+					<form onSubmit={handleSubmit} className="space-y-4">
+					{!isLogin ? (
+						<div className="space-y-2">
+						<Input
+							placeholder={t("authCodenamePlaceholder")}
+							name="username"
+							value={formValues.username}
+							onChange={(e) => setUsername(e.target.value)}
+							disabled={isLoading}
+							className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
+							aria-invalid={Boolean(errors.username)}
+						/>
+						{errors.username ? (
+							<div className="text-xs font-mono text-red-300 text-center">{errors.username}</div>
+						) : null}
+						</div>
+					) : null}
 
-              <div className="space-y-2">
-                <Input
-                  type="email"
-                  placeholder={t("authEmailPlaceholder")}
-                  name="email"
-                  value={formValues.email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
-                  aria-invalid={Boolean(errors.email)}
-                />
-                {errors.email ? (
-                  <div className="text-xs font-mono text-red-300 text-center">{errors.email}</div>
-                ) : null}
-              </div>
+					<div className="space-y-2">
+						<Input
+						type="email"
+						placeholder={t("authEmailPlaceholder")}
+						name="email"
+						value={formValues.email}
+						onChange={(e) => setEmail(e.target.value)}
+						disabled={isLoading}
+						className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
+						aria-invalid={Boolean(errors.email)}
+						/>
+						{errors.email ? (
+						<div className="text-xs font-mono text-red-300 text-center">{errors.email}</div>
+						) : null}
+					</div>
 
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder={t("authPasswordPlaceholder")}
-                  name="password"
-                  value={formValues.password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
-                  aria-invalid={Boolean(errors.password)}
-                />
-                {errors.password ? (
-                  <div className="text-xs font-mono text-red-300 text-center">{errors.password}</div>
-                ) : null}
-              </div>
+					<div className="space-y-2">
+						<Input
+						type="password"
+						placeholder={t("authPasswordPlaceholder")}
+						name="password"
+						value={formValues.password}
+						onChange={(e) => setPassword(e.target.value)}
+						disabled={isLoading}
+						className="font-mono text-center bg-black/50 border-white/10 focus:border-white/30"
+						aria-invalid={Boolean(errors.password)}
+						/>
+						{errors.password ? (
+						<div className="text-xs font-mono text-red-300 text-center">{errors.password}</div>
+						) : null}
+					</div>
 
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  className="w-full font-goonies text-lg tracking-widest"
-                  variant="primary"
-                  isLoading={isLoading}
-                  disabled={isLoading}
-                >
-                  {isLoading ? t("authProcessing") : isLogin ? t("authEstablishLink") : t("authCreateIdentity")}
-                </Button>
-              </div>
+					<div className="pt-2">
+						<Button
+						type="submit"
+						className="w-full font-goonies text-lg tracking-widest"
+						variant="primary"
+						isLoading={isLoading}
+						disabled={isLoading}
+						>
+						{isLoading ? t("authProcessing") : isLogin ? t("authEstablishLink") : t("authCreateIdentity")}
+						</Button>
+					</div>
 
-            </form>
+					</form>
 
-            <div className="mt-7 flex items-center justify-between text-xs font-mono uppercase text-white/40">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="px-0 underline underline-offset-4"
-                onClick={toggleMode}
-                disabled={isLoading}
-              >
-                {isLogin ? t("authNeedAccessRegister") : t("authHaveAccessLogin")}
-              </Button>
-            </div>
+					<div className="mt-7 flex items-center justify-between text-xs font-mono uppercase text-white/40">
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						className="px-0 underline underline-offset-4"
+						onClick={toggleMode}
+						disabled={isLoading}
+					>
+						{isLogin ? t("authNeedAccessRegister") : t("authHaveAccessLogin")}
+					</Button>
+					</div>
 
-            {/* ✅ SSO внизу как “Continue with …” */}
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/10" />
-                <div className="text-[10px] uppercase tracking-[0.3em] text-white/35 font-mono">
-                  {t("authOrContinueWith")}
-                </div>
-                <div className="h-px flex-1 bg-white/10" />
-              </div>
+					{/* ✅ SSO внизу как “Continue with …” */}
+					<div className="mt-6 space-y-3">
+					<div className="flex items-center gap-3">
+						<div className="h-px flex-1 bg-white/10" />
+						<div className="text-[10px] uppercase tracking-[0.3em] text-white/35 font-mono">
+						{t("authOrContinueWith")}
+						</div>
+						<div className="h-px flex-1 bg-white/10" />
+					</div>
 
-              <Button
-                type="button"
-                className="w-full font-mono tracking-widest"
-                variant="secondary"
-                onClick={loginWith42}
-                disabled={isLoading}
-              >
-                {t("authLoginWith42Upper")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
+					<Button
+						type="button"
+						className="w-full font-mono tracking-widest"
+						variant="secondary"
+						onClick={loginWith42}
+						disabled={isLoading}
+					>
+						{t("authLoginWith42Upper")}
+					</Button>
+					</div>
+				</CardContent>
+				</Card>
+			</div>
+			</>
+		);
+  }
+	else {
+		return <Loader variant="full-page" size="lg" />;
+	}
 }

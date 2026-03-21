@@ -20,16 +20,10 @@ import { useAuth } from './store';
 import { SessionHydrator } from './components/auth/SessionHydrator';
 import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
-import { Loader } from './components/ui/Loader';
-
-function AuthGateLoader() {
-  return <Loader variant="full-page" size="lg" />;
-}
 
 function RequireAuthShell() {
-  const { isAuthenticated, authStatus } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  if (authStatus === 'checking') return <AuthGateLoader />;
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
 
   return (
@@ -49,7 +43,6 @@ export default function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<Auth />} />
-
 
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
