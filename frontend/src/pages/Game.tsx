@@ -1,5 +1,5 @@
 // src/pages/Game.tsx
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../components/ui/Button';
@@ -8,21 +8,11 @@ import GameCanvas from '../components/GameCanvas';
 
 export default function Game() {
   const navigate = useNavigate();
-  const { matchId: routeMatchId } = useParams();
   const { t } = useTranslation();
 
   const matchId = useGameFlowStore((s) => s.matchId);
-  const finishMatch = useGameFlowStore((s) => s.finishMatch);
-
+  const finishMatch = useGameFlowStore((s) => s.finishMatch); // ??
   const score = useGameStore((state) => state.score);
-
-/*  --uncomment when backend is ready-- useEffect(() => {
-    if (status !== 'playing') {
-      navigate('/play', { replace: true });
-    }
-  }, [status, navigate]); 
-
-  if (status !== 'playing') return null; */
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-8 animate-fade-in">
@@ -32,7 +22,7 @@ export default function Game() {
         <div className="text-primary">{score.left}</div>
 
         <div className="text-sm font-sans tracking-widest text-white/50">
-          {t("gameMatchLabel")}: {matchId || routeMatchId || t("unknown")}
+          {t("gameMatchLabel")}: {matchId || t("unknown")} {/* j'ai supp un truc */}
         </div>
 
         <div className="text-primary">{score.right}</div>

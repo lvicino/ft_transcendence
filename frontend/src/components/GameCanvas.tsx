@@ -6,23 +6,23 @@ import { connectGameSocket } from '../net/socket';
 
 export default function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { matchId } = useParams();
+  const { matchId } = useParams(); // a suup; utiliser useGameFlowStore a la place
 
   const updateGame = useGameStore((s) => s.updateGame);
 
-  useEffect(() => {
+  useEffect(() => { // ducoup ca fait quoi useEffect exactement ?
     if (!matchId) return;
 
     const socket = connectGameSocket(matchId, (data) => {
       if (data.type === 'state') {
-        updateGame(data.state);
+        updateGame(data.state); //
       }
     });
 
     return () => socket.close();
-  }, [matchId, updateGame]);
+  }, [matchId, updateGame]); // pas besoin de [matchId, updateGame] car il ne sont pas sense changer il me semble...
 
-  useEffect(() => {
+  useEffect(() => { // pour quoi 2 useEfect diferent ??
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ export default function GameCanvas() {
       }
 
       const { width, height } = canvas;
-      const state = useGameStore.getState();
+      const state = useGameStore.getState(); // pour quoi .getState() ?? sa reagie a updateGame() ??
 
       ctx.clearRect(0, 0, width, height);
 
@@ -67,12 +67,14 @@ export default function GameCanvas() {
       ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
       ctx.fill();
 
-      animationId = requestAnimationFrame(render);
+      animationId = requestAnimationFrame(render); // ca sort d'ou "requestAnimationFrame" 
+	  											   // et pour quoi il prend "render" en parametre ?
+												   // ducoup c'est recursif ??
     };
 
     render();
 
-    return () => cancelAnimationFrame(animationId);
+    return () => cancelAnimationFrame(animationId); // ca sort d'ou "cancelAnimationFrame" ?
   }, []);
 
   return <canvas ref={canvasRef} className="block w-full h-full" />;

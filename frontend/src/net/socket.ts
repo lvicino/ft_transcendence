@@ -4,6 +4,7 @@ const WS_BASE_URL =
 
 export function connectGameSocket(
   matchId: string,
+  //password
   onMessage: (data: any) => void
 ) {
   const ws = new WebSocket(WS_BASE_URL);
