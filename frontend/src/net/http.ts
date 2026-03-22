@@ -16,12 +16,17 @@ export async function apiFetch(path: string, options?: RequestInit) {
   });
 
   if (!response.ok) {
+    let messageError = "API_ERROR";
     try {
       const data = (await response.json()) as { error?: string };
-      throw new Error(data.error ?? "API_ERROR");
+      console.log("apiFetch data: ", data)
+      if (data.error) {
+        messageError = data.error;
+      }
     } catch {
-      throw new Error("API_ERROR");
+      // normal
     }
+    throw new Error(messageError);
   }
 
   try {
