@@ -3,6 +3,8 @@ import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { useGameFlowStore } from "../store/gameStore";
 
+import { api, getErrorMessage } from "@/net/api";
+
 const THEMES = [
   { id: "classic", name: "Classic", bg: "bg-black" },
   { id: "42", name: "42", bg: "bg-slate-900" },
@@ -13,21 +15,50 @@ export default function GameCreate() {
   const navigate = useNavigate();
 
   const {
+    status,
+    matchId,
+    password,
     theme,
     ballSpeed,
     paddleSpeed,
     maxScore,
+
+    setStatus,
     setTheme,
     setBallSpeed,
     setPaddleSpeed,
     setMaxScore,
+    setmatchId,
+    setpassword,
   } = useGameFlowStore();
 
   const createGame = () => {
-	console.log({theme, ballSpeed, paddleSpeed, maxScore});
+	  console.log({theme, ballSpeed, paddleSpeed, maxScore});
+
+    api.gameApi.create({
+      gameParameter: {
+        gw: 500,
+        gh: 100, 
+        ballRadius: 4, 
+        ballSpeed: 2, 
+        playerW: 5, 
+        playerH: 20, 
+        playerSpeed: 2, 
+        playerNumber: 2
+      }
+    }).then((data) => {
+      console.log(data);
+      setmatchId(data.id);
+      setpassword(data.password);
+      setStatus('created');
+    });
 
     //navigate("/lobby");
   };
+
+  function navigateToLoby() {
+    navigate("/lobby");
+  }
 
   return (
     <div className="max-w-xl mx-auto">
@@ -120,6 +151,21 @@ export default function GameCreate() {
           <Button className="w-full mt-4" onClick={createGame}>
             Create Lobby
           </Button>
+
+          {status === 'created' ? (
+            <>
+              <div className="space-y-2">
+                id: {matchId}
+              </div>
+              <div className="space-y-2">
+                password: {password}
+              </div>
+              
+              <Button className="w-full mt-4" onClick={navigateToLoby}>
+                go to Lobby
+              </Button>
+            </>
+          ) : null}
 
         </CardContent>
       </Card>

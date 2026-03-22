@@ -5,13 +5,15 @@ import type { GameStatus, GameTheme, GameplayState } from '../lib/types';
 
 type GameFlowState = {
   status: GameStatus;
-  matchId: string | null;
+  matchId: number | null;
+  password: string | null;
   theme: GameTheme;
   ballSpeed: number;
   paddleSpeed: number;
   maxScore: number;
 
-  enterLobby: (matchId: string) => void;
+  setStatus: (status: GameStatus) => void;
+  enterLobby: (matchId: number) => void;
   leaveLobby: () => void;
   startMatch: () => void;
   finishMatch: () => void;
@@ -19,27 +21,33 @@ type GameFlowState = {
   setBallSpeed: (ballSpeed: number) => void;
   setPaddleSpeed: (paddleSpeed: number) => void;
   setMaxScore: (maxScore: number) => void;
+  setmatchId: (matchId: number) => void;
+  setpassword: (password: string) => void;
 };
 
 export const useGameFlowStore = create<GameFlowState>((set, get) => ({
   status: 'idle',
   matchId: null,
+  password: null,
   theme: 'classic',
   ballSpeed: 5,
   paddleSpeed: 5,
   maxScore: 5,
 
-  enterLobby: (matchId) => set({ status: 'lobby', matchId }),
 
-  leaveLobby: () => set({ status: 'idle', matchId: null }),
+  setStatus: (status) => set({status}),
 
-  startMatch: () => {
+  enterLobby: (matchId) => set({ status: 'lobby', matchId }), // a supp ?
+
+  leaveLobby: () => set({ status: 'idle', matchId: null }), // a supp ?
+
+  startMatch: () => { // a metre dans use game Store ?
     const { status, matchId } = get();
     if (status !== 'lobby' || !matchId) return;
     set({ status: 'playing' });
   },
 
-  finishMatch: () => {
+  finishMatch: () => { // a metre dans use game Store ?
     const { status } = get();
     if (status !== 'playing') return;
     set({ status: 'finished' });
@@ -52,6 +60,10 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
   setPaddleSpeed: (paddleSpeed) => set({ paddleSpeed }),
 
   setMaxScore: (maxScore) => set({ maxScore }),
+
+  setmatchId: (matchId) => set({ matchId }),
+
+  setpassword: (password) => set({ password }),
 }));
 
 export const useGameStore = create<GameplayState>((set) => ({

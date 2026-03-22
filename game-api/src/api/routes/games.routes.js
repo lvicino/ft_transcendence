@@ -8,6 +8,8 @@ module.exports = async function (fastify, opts) {
 
 		if (result.success) {
 			reply.code(201).send({...result.data});
+		} else if (result.error === "GAME_ALREADY_EXISTE") {
+			reply.code(201).send({...result.data});
 		} else {
 			reply.code(409).send({error: result.error, ...result.data});
 		}
