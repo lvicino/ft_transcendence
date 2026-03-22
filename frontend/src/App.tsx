@@ -22,7 +22,10 @@ import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
 
 function RequireAuthShell() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, authStatus } = useAuth();
+
+  if (authStatus == 'checking')
+	return (<></>);
 
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
 

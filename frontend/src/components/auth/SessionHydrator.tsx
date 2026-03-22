@@ -23,7 +23,7 @@ export function SessionHydrator() {
 
     async function restoreSession() {
       if (authStatus === 'authenticated' && user) return;
-      if (lastCheckedPathRef.current === location.pathname) return;
+      //if (lastCheckedPathRef.current === location.pathname) return; pas vrement besoin; cree des problemme
 
       lastCheckedPathRef.current = location.pathname;
       setChecking();
