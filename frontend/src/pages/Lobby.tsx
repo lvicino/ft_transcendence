@@ -13,6 +13,7 @@ export default function Lobby() {
 
   const matchId = useGameFlowStore((s) => s.matchId);
   const password = useGameFlowStore((s) => s.password);
+  const messageInfo = useGameFlowStore((s) => s.messageInfo);
   const startMatch = useGameFlowStore((s) => s.startMatch);
   const leaveLobby = useGameFlowStore((s) => s.leaveLobby);
   const setpassword = useGameFlowStore((s) => s.setpassword);
@@ -22,6 +23,8 @@ export default function Lobby() {
     <div className="mx-auto w-full max-w-md space-y-6 py-10">
 
       <h1 className="text-3xl font-bold text-white">{t("lobbyTitle")}</h1>
+
+		<p>{messageInfo}</p>
 
 			<Input
 				placeholder={"Match ID"}

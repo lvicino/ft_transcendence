@@ -11,6 +11,7 @@ type GameFlowState = {
   ballSpeed: number;
   paddleSpeed: number;
   maxScore: number;
+  messageInfo: string;
 
   setStatus: (status: GameStatus) => void;
   enterLobby: (matchId: number) => void;
@@ -23,6 +24,7 @@ type GameFlowState = {
   setMaxScore: (maxScore: number) => void;
   setmatchId: (matchId: number) => void;
   setpassword: (password: string) => void;
+  setMessageInfo: (messageInfo: string) => void;
 };
 
 export const useGameFlowStore = create<GameFlowState>((set, get) => ({
@@ -33,6 +35,7 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
   ballSpeed: 5,
   paddleSpeed: 5,
   maxScore: 5,
+  messageInfo: '',
 
 
   setStatus: (status) => set({status}),
@@ -64,6 +67,8 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
   setmatchId: (matchId) => set({ matchId }),
 
   setpassword: (password) => set({ password }),
+
+  setMessageInfo: (messageInfo) => set({ messageInfo }),
 }));
 
 export const useGameStore = create<GameplayState>((set) => ({

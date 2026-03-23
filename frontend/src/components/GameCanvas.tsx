@@ -3,22 +3,36 @@ import { useEffect, useRef } from 'react';
 import { useGameStore, useGameFlowStore } from '../store';
 import { connectGameSocket } from '../net/socket';
 
+import { useNavigate } from 'react-router-dom';
+
 export default function GameCanvas() {
+  const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   //const { matchId } = useParams(); // a suup; utiliser useGameFlowStore a la place
-  const matchId = useGameFlowStore((s) => s.matchId)
-  const password = useGameFlowStore((s) => s.password)
+  const matchId = useGameFlowStore((s) => s.matchId);
+  const password = useGameFlowStore((s) => s.password);
 
+  const setStatus = useGameFlowStore((s) => s.setStatus);
+  const setMessageInfo = useGameFlowStore((s) => s.setMessageInfo);
   const updateGame = useGameStore((s) => s.updateGame);
 
   useEffect(() => { // ducoup ca fait quoi useEffect exactement ?
-    if (!matchId) return;
+    if (!matchId) {
+		setMessageInfo("no game id");
+		setStatus('error');
+		navigate('/lobby');
+		return;
+	}
 
     const socket = connectGameSocket(matchId, password, (data) => {
       console.log("data websocket: ", data);
       if (data.type === 'state') {
         updateGame(data.state); //
-      }
+      } else if (data.type === 'error') {
+		setMessageInfo(data.message);
+		setStatus('error');
+		navigate('/lobby');
+	  }
     });
 
     return () => socket.close();
