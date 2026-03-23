@@ -68,7 +68,7 @@ class GameManager {
 		game.intervalID = setInterval(() => {
 			const mooves = [...game.players.values()].map((p) => {return p.moove});
 			const gameState = game.pong.update(...mooves);
-			const data = JSON.stringify(gameState);
+			const data = JSON.stringify({type: 'state', state: gameState});
 			[...game.players.values()].map((p) => {p.socket.send(data)});
 		}, 1000 / 60);
 	}
