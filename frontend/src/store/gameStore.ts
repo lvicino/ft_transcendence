@@ -67,16 +67,9 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
 }));
 
 export const useGameStore = create<GameplayState>((set) => ({
-  ball: { x: 50, y: 50 },
-  paddles: { left: 50, right: 50 },
-  score: { left: 0, right: 0 },
+  frame: null,
 
-  updateGame: (data) => set((state) => ({ ...state, ...data })),
+  updateGame: (frame) => set({ frame }),
 
-  resetGame: () => // pas besoin car c'est le backend qui le fait non ?
-    set({
-      ball: { x: 50, y: 50 },
-      paddles: { left: 50, right: 50 },
-      score: { left: 0, right: 0 },
-    }),
+  resetGame: () => set({ frame: null }),
 }));

@@ -1,19 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
 
-import { useGameStore } from '../store';
+import { useGameStore, useGameFlowStore } from '../store';
 import { connectGameSocket } from '../net/socket';
 
 export default function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { matchId } = useParams(); // a suup; utiliser useGameFlowStore a la place
+  //const { matchId } = useParams(); // a suup; utiliser useGameFlowStore a la place
+  const matchId = useGameFlowStore((s) => s.matchId)
+  const password = useGameFlowStore((s) => s.password)
 
   const updateGame = useGameStore((s) => s.updateGame);
 
   useEffect(() => { // ducoup ca fait quoi useEffect exactement ?
     if (!matchId) return;
 
-    const socket = connectGameSocket(matchId, (data) => {
+    const socket = connectGameSocket(matchId, password, (data) => {
+      console.log("data websocket: ", data);
       if (data.type === 'state') {
         updateGame(data.state); //
       }
@@ -37,10 +39,11 @@ export default function GameCanvas() {
       }
 
       const { width, height } = canvas;
-      const state = useGameStore.getState(); // pour quoi .getState() ?? sa reagie a updateGame() ??
+      const frame = useGameStore.getState().frame;
 
       ctx.clearRect(0, 0, width, height);
 
+      // Center line
       ctx.strokeStyle = 'rgba(255,255,255,0.1)';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -48,24 +51,29 @@ export default function GameCanvas() {
       ctx.lineTo(width / 2, height);
       ctx.stroke();
 
-      ctx.fillStyle = '#fff';
+      if (frame) {
+        // Scale factors from game coordinates to canvas pixels
+        const sx = width / frame.gameWide;
+        const sy = height / frame.gameHeight;
 
-      const paddleW = width * 0.015;
-      const paddleH = height * 0.15;
-      const ballR = width * 0.01;
+        ctx.fillStyle = '#fff';
 
-      const leftY = (state.paddles.left / 100) * height - paddleH / 2;
-      ctx.fillRect(10, leftY, paddleW, paddleH);
+        // Draw players
+        for (const p of frame.players) {
+          const px = p.x * sx - (p.w * sx) / 2;
+          const py = p.y * sy - (p.h * sy) / 2;
+          ctx.fillRect(px, py, p.w * sx, p.h * sy);
+        }
 
-      const rightY = (state.paddles.right / 100) * height - paddleH / 2;
-      ctx.fillRect(width - 10 - paddleW, rightY, paddleW, paddleH);
+        // Draw ball
+        const ballX = frame.ball.x * sx;
+        const ballY = frame.ball.y * sy;
+        const ballR = frame.ball.radius * Math.min(sx, sy);
 
-      const ballX = (state.ball.x / 100) * width;
-      const ballY = (state.ball.y / 100) * height;
-
-      ctx.beginPath();
-      ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
-      ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       animationId = requestAnimationFrame(render); // ca sort d'ou "requestAnimationFrame" 
 	  											   // et pour quoi il prend "render" en parametre ?

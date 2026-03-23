@@ -45,11 +45,32 @@ export interface ToastState {
 
 export type AppStore = AuthState & GameFlowState & UIState & ToastState;
 
+export interface Player {
+  x: number;
+  y: number;
+  speed: number;
+  h: number;
+  w: number;
+  team: number; // 0 = left, 1 = right
+  move: number;
+}
+
+export interface Ball {
+  x: number;
+  y: number;
+  radius: number;
+}
+
+export interface GameFrame {
+  gameWide: number;
+  gameHeight: number;
+  ball: Ball;
+  players: Player[];
+}
+
 export interface GameplayState {
-  ball: { x: number; y: number };
-  paddles: { left: number; right: number };
-  score: { left: number; right: number };
-  updateGame: (data: Partial<GameplayState>) => void;
+  frame: GameFrame | null;
+  updateGame: (frame: GameFrame) => void;
   resetGame: () => void;
 }
 

@@ -1,19 +1,20 @@
 const WS_BASE_URL =
   import.meta.env.VITE_WS_BASE_URL ??
-  `ws://${window.location.host}/api/games/ws`;
+  `wss://${window.location.host}/api/games/ws`;
 
 export function connectGameSocket(
-  matchId: string,
-  //password
+  matchId: number,
+  password: string | null,
   onMessage: (data: any) => void
 ) {
+  console.log("test Socket: ", { WS_BASE_URL });
   const ws = new WebSocket(WS_BASE_URL);
 
   ws.onopen = () => {
     ws.send(
       JSON.stringify({
         gameid: matchId,
-        password: "",
+        password: password, // il ce passe quoi si c'est null ?
       })
     );
   };
