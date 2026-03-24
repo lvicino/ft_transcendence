@@ -73,8 +73,14 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
 
 export const useGameStore = create<GameplayState>((set) => ({
   frame: null,
+  scoreLeft: 0,
+  scoreRight: 0,
 
-  updateGame: (frame) => set({ frame }),
+  updateGame: (frame) => set({ frame, scoreLeft: frame.players[0].score, scoreRight: frame.players[1].score }),
 
-  resetGame: () => set({ frame: null }),
+  resetGame: () => set({ frame: null, scoreLeft: 0, scoreRight: 0}),
+
+  setscoreLeft: (scoreLeft) => set({scoreLeft}), // a supp
+
+  setscoreRight: (scoreRight) => set({scoreRight}),// a supp
 }));

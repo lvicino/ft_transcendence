@@ -68,9 +68,23 @@ class GameManager {
 		game.intervalID = setInterval(() => {
 			const mooves = [...game.players.values()].map((p) => {return p.moove});
 			const gameState = game.pong.update(...mooves);
+			if (!gameState) {
+				this.stopGame(id);
+			}
 			const data = JSON.stringify({type: 'state', state: gameState});
 			[...game.players.values()].map((p) => {p.socket.send(data)});
 		}, 1000 / 60);
+	}
+
+	stopGame(gameid) {
+		if (this.startedGames.has(gameid)) {
+			for (const [id, player] of this.startedGames.get(gameid).players) {
+				player.socket.send(JSON.stringify({type: "Game Stop", reason: 0, winner: player.score >=3 ? true : false}));
+				player.socket.close();
+			}
+			clearInterval(this.startedGames.get(gameid).intervalID);
+			this.startedGames.delete(gameid);
+		}
 	}
 
 	HandleInput(gameid, user, moove) {

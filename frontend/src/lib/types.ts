@@ -53,6 +53,7 @@ export interface Player {
   w: number;
   team: number; // 0 = left, 1 = right
   move: number;
+  score: number;
 }
 
 export interface Ball {
@@ -70,8 +71,12 @@ export interface GameFrame {
 
 export interface GameplayState {
   frame: GameFrame | null;
+  scoreLeft: number;
+  scoreRight: number;
   updateGame: (frame: GameFrame) => void;
   resetGame: () => void;
+  setscoreLeft: (scoreLeft: number) => void;
+  setscoreRight: (scoreRight: number) => void;
 }
 
 export interface GameState {

@@ -16,8 +16,8 @@ class PongGame {
 		if (number % 2 != 0 || number < 2)
 			throw "error"
 		for (;number > 0;number -= 2) {
-			this.players.push({x: 10 + w / 2, y: this.h / 2, speed: speed, h: h, w: w, team: 0});
-			this.players.push({x: this.w - 10 - w / 2, y: this.h / 2, speed: speed, h: h, w: w, team: 1});
+			this.players.push({x: 10 + w / 2, y: this.h / 2, speed: speed, h: h, w: w, team: 0, move: 0, score: 0});
+			this.players.push({x: this.w - 10 - w / 2, y: this.h / 2, speed: speed, h: h, w: w, team: 1, move: 0, score: 0});
 		}
 	}
 
@@ -114,8 +114,23 @@ class PongGame {
 			this.updateBallAxis(ballStep, "y", ...this.players);
 			step--;
 		}
-		if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > this.w)
+		if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > this.w) {
+			if (this.ball.x - this.ball.radius < 0) {
+				this.players[1].score++;
+			} else {
+				this.players[0].score++;
+			}
 			this.setupBall(this.ballSpeed);
+			return { // pas bien... (c'est  juste pour affichier le score aumoin une dernier foit)
+				gameWide: this.w,
+				gameHeight: this.h,
+				ball: {x: this.ball.x, y: this.ball.y, radius: this.ball.radius},
+				players: [...this.players],
+			}
+		}
+
+		if (this.players[1].score >= 3 || this.players[0].score >= 3)
+			return null;
 
 		return {
 			gameWide: this.w,

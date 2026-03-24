@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../components/ui/Button';
-import { useGameFlowStore } from '../store';
+import { useGameFlowStore, useGameStore } from '../store';
 import GameCanvas from '../components/GameCanvas';
 
 export default function Game() {
@@ -12,19 +12,22 @@ export default function Game() {
 
   const matchId = useGameFlowStore((s) => s.matchId);
   const finishMatch = useGameFlowStore((s) => s.finishMatch);
+  const status = useGameFlowStore((s) => s.status);
+  const scoreLeft = useGameStore((s) => s.scoreLeft);
+  const scoreRight = useGameStore((s) => s.scoreRight);
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-8 animate-fade-in">
       
       {/* Scoreboard – TODO: add score when backend supports it */}
       <div className="flex w-full max-w-4xl items-center justify-between px-8 text-4xl font-bold font-goonies tracking-widest text-brand-white drop-shadow-md">
-        <div className="text-primary">–</div>
+        <div className="text-primary">{scoreLeft}</div>
 
         <div className="text-sm font-sans tracking-widest text-white/50">
           {t("gameMatchLabel")}: {matchId || t("unknown")}
         </div>
 
-        <div className="text-primary">–</div>
+        <div className="text-primary">{scoreRight}</div>
       </div>
 
       {/* Game Area */}
@@ -39,11 +42,13 @@ export default function Game() {
         className="mt-4 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
         onClick={() => {
           finishMatch();
-          navigate('/game/finished');
+          navigate('/game/finished'); // a changer
         }}
       >
         {t("forfeitMatch")}
       </Button>
+
+      {status === 'finished' ? <p>{scoreLeft} / {scoreRight}</p> : null}
     </div>
   );
 }

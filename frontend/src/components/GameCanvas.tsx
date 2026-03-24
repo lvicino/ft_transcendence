@@ -32,7 +32,9 @@ export default function GameCanvas() {
 		setMessageInfo(data.message);
 		setStatus('error');
 		navigate('/lobby');
-	  }
+	  } else if (data.type === 'Game Stop') {
+      setStatus('finished');
+    }
     });
 
     // inpute clavier
@@ -81,7 +83,7 @@ export default function GameCanvas() {
       window.removeEventListener('keyup', handleKeyUp);
       socket.close();
     };
-  }, [matchId, updateGame]); // pas besoin de [matchId, updateGame] car il ne sont pas sense changer il me semble... ; [matchId, password, updateGame, navigate, setMessageInfo, setStatus]); ???
+  }, [matchId, updateGame]); // pas besoin de [matchId, updateGame] car il ne sont pas sense changer il me semble... ; [matchId, password, updateGame, navigate, setMessageInfo, setStatus]);
 
   useEffect(() => { // pour quoi 2 useEfect diferent ??
     const canvas = canvasRef.current;
