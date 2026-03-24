@@ -13,6 +13,7 @@ export default function Lobby() {
 
   const matchId = useGameFlowStore((s) => s.matchId);
   const password = useGameFlowStore((s) => s.password);
+  const status = useGameFlowStore((s) => s.status);
   const messageInfo = useGameFlowStore((s) => s.messageInfo);
   const startMatch = useGameFlowStore((s) => s.startMatch);
   const leaveLobby = useGameFlowStore((s) => s.leaveLobby);
@@ -24,7 +25,7 @@ export default function Lobby() {
 
       <h1 className="text-3xl font-bold text-white">{t("lobbyTitle")}</h1>
 
-		<p>{messageInfo}</p>
+      {status === 'error' ? <p>{messageInfo}</p> : null}
 
 			<Input
 				placeholder={"Match ID"}
