@@ -39,11 +39,11 @@ export default function GameCreate() {
       gameParameter: {
         gw: 500,
         gh: 100, 
-        ballRadius: 4, 
-        ballSpeed: 2, 
+        ballRadius: 4,
+        ballSpeed: ballSpeed, 
         playerW: 5, 
         playerH: 20, 
-        playerSpeed: 2, 
+        playerSpeed: paddleSpeed, 
         playerNumber: 2
       }
     }).then((data) => {
