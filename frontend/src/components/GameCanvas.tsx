@@ -35,8 +35,53 @@ export default function GameCanvas() {
 	  }
     });
 
-    return () => socket.close();
-  }, [matchId, updateGame]); // pas besoin de [matchId, updateGame] car il ne sont pas sense changer il me semble...
+    // inpute clavier
+    
+    const keys = { up: false, down: false };
+    let currentMove = 0;
+
+    const updateMovement = () => {
+      let newMove = 0;
+      if (keys.up) newMove -= 1;
+      if (keys.down) newMove += 1;
+
+      if (newMove !== currentMove) { // pas besoin je pense
+        currentMove = newMove;
+        socket.send({ type: 'input', moove: currentMove });
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
+        keys.up = true;
+        updateMovement();
+      }
+      if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
+        keys.down = true;
+        updateMovement();
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
+        keys.up = false;
+        updateMovement();
+      }
+      if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
+        keys.down = false;
+        updateMovement();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      socket.close();
+    };
+  }, [matchId, updateGame]); // pas besoin de [matchId, updateGame] car il ne sont pas sense changer il me semble... ; [matchId, password, updateGame, navigate, setMessageInfo, setStatus]); ???
 
   useEffect(() => { // pour quoi 2 useEfect diferent ??
     const canvas = canvasRef.current;
