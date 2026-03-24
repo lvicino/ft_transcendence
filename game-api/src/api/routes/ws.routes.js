@@ -18,6 +18,7 @@ module.exports = async function (fastify) {
                 socket.send(JSON.stringify({type:"info", message: "Partie rejoin avec succes", player: state.players}));
             } catch (err) {
                 socket.send(JSON.stringify({type:"error", message: err.message}));
+				user = null; // pour ne pas appler handleDisconnect() on close.
                 socket.close();
             }
             socket.on('message', (message) => {
