@@ -13,11 +13,11 @@ module.exports = async function (fastify) {
                 user = {...req.user, gameid: data.gameid};
                 const state = fastify.gameManager.joinGame(data.gameid, data.password, user, socket);
                 if (!state.joined) {
-                    throw new Error("impossible de rejoindere la partie: "+ state.reason);
+                    throw new Error("GAME_JOIN_FAILED");
                 }
-                socket.send(JSON.stringify({type:"info", message: "Partie rejoin avec succes", player: state.players}));
+                socket.send(JSON.stringify({type:"info", code: "GAME_JOIN_SUCCESS", player: state.players}));
             } catch (err) {
-                socket.send(JSON.stringify({type:"error", message: err.message}));
+                socket.send(JSON.stringify({type:"error", code: err.message}));
 				user = null; // pour ne pas appler handleDisconnect() on close.
                 socket.close();
             }
@@ -30,14 +30,14 @@ module.exports = async function (fastify) {
                         fastify.gameManager.HandleInput(user.gameid, user, data.moove);
                     }
                 } catch (error) {
-                    socket.send(JSON.stringify({type:"error", message: error.message}));
+                    socket.send(JSON.stringify({type:"error", code: error.message}));
                 }
             });
         });
 
         setTimeout(() => {
             if (!user)
-                socket.close(4001, 'Authentication Timeout');
+                socket.close(4001, 'WS_AUTH_TIMEOUT');
         }, 500);
 
         socket.on('close', () => {

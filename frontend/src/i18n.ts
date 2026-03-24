@@ -88,6 +88,31 @@ const resources = {
       wins: "Wins",
       losses: "Losses",
       winrate: "Winrate %",
+      // Profile
+      profileUpdated: "Profile updated",
+      saveProfile: "Save",
+      cancel: "Cancel",
+      profileIdMissing: "Profile ID is missing",
+      // Backend error codes
+      errUsernameRequired: "Username is required",
+      errUsernameLengthInvalid: "Username must be between 2 and 24 characters",
+      errNoActiveSession: "No active session",
+      errInvalidSession: "Session expired, please log in again",
+      errUserNotFound: "User not found",
+      errApiError: "A network error occurred",
+      // GameCreate
+      gameTheme: "Theme",
+      gameBallSpeed: "Ball speed",
+      gamePaddleSpeed: "Paddle speed",
+      gameMaxScore: "Max score",
+      goToLobby: "Go to Lobby",
+      // Lobby
+      matchPassword: "Match password",
+      // WebSocket messages
+      wsGameJoinSuccess: "Game joined successfully",
+      wsGameJoinFailed: "Failed to join game",
+      wsAuthTimeout: "Authentication timed out",
+      noGameId: "No game ID provided",
     },
   },
 
@@ -177,6 +202,31 @@ const resources = {
       wins: "Victoires",
       losses: "Defaites",
       winrate: "Taux de victoire %",
+      // Profile
+      profileUpdated: "Profil mis a jour",
+      saveProfile: "Enregistrer",
+      cancel: "Annuler",
+      profileIdMissing: "L'identifiant du profil est manquant",
+      // Backend error codes
+      errUsernameRequired: "Le nom d'utilisateur est requis",
+      errUsernameLengthInvalid: "Le nom d'utilisateur doit contenir entre 2 et 24 caracteres",
+      errNoActiveSession: "Aucune session active",
+      errInvalidSession: "Session expiree, veuillez vous reconnecter",
+      errUserNotFound: "Utilisateur introuvable",
+      errApiError: "Une erreur reseau s'est produite",
+      // GameCreate
+      gameTheme: "Theme",
+      gameBallSpeed: "Vitesse de la balle",
+      gamePaddleSpeed: "Vitesse de la raquette",
+      gameMaxScore: "Score maximum",
+      goToLobby: "Aller au lobby",
+      // Lobby
+      matchPassword: "Mot de passe du match",
+      // WebSocket messages
+      wsGameJoinSuccess: "Partie rejointe avec succes",
+      wsGameJoinFailed: "Impossible de rejoindre la partie",
+      wsAuthTimeout: "Delai d'authentification depasse",
+      noGameId: "Aucun identifiant de partie fourni",
     },
   },
 
@@ -266,6 +316,31 @@ const resources = {
       wins: "Победы",
       losses: "Поражения",
       winrate: "Процент побед %",
+      // Profile
+      profileUpdated: "Профиль обновлён",
+      saveProfile: "Сохранить",
+      cancel: "Отмена",
+      profileIdMissing: "Идентификатор профиля отсутствует",
+      // Backend error codes
+      errUsernameRequired: "Имя пользователя обязательно",
+      errUsernameLengthInvalid: "Имя пользователя должно содержать от 2 до 24 символов",
+      errNoActiveSession: "Нет активной сессии",
+      errInvalidSession: "Сессия истекла, войдите снова",
+      errUserNotFound: "Пользователь не найден",
+      errApiError: "Произошла сетевая ошибка",
+      // GameCreate
+      gameTheme: "Тема",
+      gameBallSpeed: "Скорость мяча",
+      gamePaddleSpeed: "Скорость ракетки",
+      gameMaxScore: "Максимальный счёт",
+      goToLobby: "Перейти в лобби",
+      // Lobby
+      matchPassword: "Пароль матча",
+      // WebSocket messages
+      wsGameJoinSuccess: "Игра успешно присоединена",
+      wsGameJoinFailed: "Не удалось присоединиться к игре",
+      wsAuthTimeout: "Превышено время аутентификации",
+      noGameId: "Идентификатор игры не указан",
     },
   },
 };

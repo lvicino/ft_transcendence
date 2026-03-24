@@ -25,10 +25,10 @@ export default function Lobby() {
 
       <h1 className="text-3xl font-bold text-white">{t("lobbyTitle")}</h1>
 
-      {status === 'error' ? <p>{messageInfo}</p> : null}
+      {status === 'error' ? <p>{t(messageInfo)}</p> : null}
 
 			<Input
-				placeholder={"Match ID"}
+				placeholder={t("matchId")}
 				name="matchID"
 				value={matchId ?? ""}
 				onChange={(e) => !Number.isNaN(Number(e.target.value)) ? setmatchId(Number(e.target.value)) : null}
@@ -36,7 +36,7 @@ export default function Lobby() {
 			/>
 
 			<Input
-				placeholder={"Match password"}
+				placeholder={t("matchPassword")}
 				name="password"
 				value={password ?? ""}
 				onChange={(e) => setpassword(e.target.value)}

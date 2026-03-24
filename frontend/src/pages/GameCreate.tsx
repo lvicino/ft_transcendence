@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { useGameFlowStore } from "../store/gameStore";
 
-import { api, getErrorMessage } from "@/net/api";
+import { api } from "@/net/api";
 
 const THEMES = [
   { id: "classic", name: "Classic", bg: "bg-black" },
@@ -13,6 +14,7 @@ const THEMES = [
 
 export default function GameCreate() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const {
     status,
@@ -65,14 +67,14 @@ export default function GameCreate() {
   
        <Card>
         <CardHeader>
-          <CardTitle>Create Game</CardTitle>
+          <CardTitle>{t("createGame")}</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
 
-          {/* Theme - ТВОЙ ОРИГИНАЛЬНЫЙ ДИЗАЙН */}
+          {/* Theme */}
           <div className="space-y-2">
-            <p className="text-sm opacity-70">Theme</p>
+            <p className="text-sm opacity-70">{t("gameTheme")}</p>
 
             <div className="grid grid-cols-3 gap-3">
               {THEMES.map((item) => (
@@ -99,7 +101,7 @@ export default function GameCreate() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm opacity-70">Ball speed</p>
+              <p className="text-sm opacity-70">{t("gameBallSpeed")}</p>
               <span className="text-sm text-white/70">{ballSpeed}</span>
             </div>
 
@@ -116,7 +118,7 @@ export default function GameCreate() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm opacity-70">Paddle speed</p>
+              <p className="text-sm opacity-70">{t("gamePaddleSpeed")}</p>
               <span className="text-sm text-white/70">{paddleSpeed}</span>
             </div>
 
@@ -132,7 +134,7 @@ export default function GameCreate() {
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm opacity-70">Max score</p>
+            <p className="text-sm opacity-70">{t("gameMaxScore")}</p>
 
             <div className="flex gap-2">
               {[3, 5, 10].map((score) => (
@@ -149,7 +151,7 @@ export default function GameCreate() {
           </div>
 
           <Button className="w-full mt-4" onClick={createGame}>
-            Create Lobby
+            {t("createLobby")}
           </Button>
 
           {status === 'created' ? (
@@ -162,7 +164,7 @@ export default function GameCreate() {
               </div>
               
               <Button className="w-full mt-4" onClick={navigateToLoby}>
-                go to Lobby
+                {t("goToLobby")}
               </Button>
             </>
           ) : null}

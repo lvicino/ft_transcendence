@@ -5,6 +5,16 @@ import { connectGameSocket } from '../net/socket';
 
 import { useNavigate } from 'react-router-dom';
 
+/** Convertit un code WS backend en clé i18n. */
+function wsCodeToKey(code: string): string {
+  switch (code) {
+    case 'GAME_JOIN_SUCCESS': return 'wsGameJoinSuccess';
+    case 'GAME_JOIN_FAILED':  return 'wsGameJoinFailed';
+    case 'WS_AUTH_TIMEOUT':   return 'wsAuthTimeout';
+    default:                  return 'authErrorGeneric';
+  }
+}
+
 export default function GameCanvas() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,7 +28,7 @@ export default function GameCanvas() {
 
   useEffect(() => { // ducoup ca fait quoi useEffect exactement ?
     if (!matchId) {
-		setMessageInfo("no game id");
+		setMessageInfo('noGameId');
 		setStatus('error');
 		navigate('/lobby');
 		return;
@@ -27,12 +37,14 @@ export default function GameCanvas() {
     const socket = connectGameSocket(matchId, password, (data) => {
       console.log("data websocket: ", data);
       if (data.type === 'state') {
-        updateGame(data.state); //
+        updateGame(data.state);
       } else if (data.type === 'error') {
-		setMessageInfo(data.message);
+		setMessageInfo(wsCodeToKey(data.code ?? data.message ?? 'GAME_JOIN_FAILED'));
 		setStatus('error');
 		navigate('/lobby');
-	  } else if (data.type === 'Game Stop') {
+	  } else if (data.type === 'info') {
+        // info de connexion — rien a afficher
+      } else if (data.type === 'Game Stop') {
       setStatus('finished');
     }
     });

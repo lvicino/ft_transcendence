@@ -13,6 +13,7 @@ import { Loader } from "../components/ui/Loader";
 import { Input } from "../components/ui/Input";
 
 import { apiFetch } from "../net/http";
+import { getErrorMessage } from "../net/api";
 import { useAuth, useToast } from "../store";
 
 type ProfileResponse = {
@@ -78,7 +79,7 @@ export default function Profile() {
   React.useEffect(() => {
     if (!effectiveUserId) {
       setIsLoading(false);
-      setLoadError("Profile id is missing");
+      setLoadError(t("profileIdMissing"));
       return;
     }
     fetchProfile();
@@ -113,7 +114,7 @@ export default function Profile() {
       success(t("profileUpdated"));
       setIsEditing(false);
     } catch (err) {
-      error(err instanceof Error ? err.message : "Failed to update profile");
+      error(getErrorMessage(err instanceof Error ? err.message : "API_ERROR"));
     } finally {
       setIsSaving(false);
     }
