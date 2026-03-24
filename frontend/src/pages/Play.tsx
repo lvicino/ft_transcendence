@@ -36,7 +36,7 @@ export default function Play() {
 
         {/* Карточка присоединения к игре */}
         <Card
-          onClick={() => navigate("/game/join")}
+          onClick={() => navigate("/lobby")}
           className={cn(
             "group flex min-h-[300px] cursor-pointer flex-col items-center justify-center p-8 transition-all duration-300",
             "border-2 border-white/20 bg-transparent text-white",
