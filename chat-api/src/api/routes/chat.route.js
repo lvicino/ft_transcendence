@@ -45,6 +45,8 @@ module.exports = async function (fastify, opts) {
       return reply.code(400).send({ error: "Bad Request", message: "friendId required" });
     }
     try {
+      // Ensure the requesting user is registered in the chat DB
+      await chatService.ensureUserExists(request.user.id, request.user.username);
       await chatService.addFriend(request.user.id, friendId);
       return reply.code(201).send({ message: "Friend added successfully" });
     } catch (error) {

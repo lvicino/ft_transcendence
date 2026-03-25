@@ -1,11 +1,14 @@
 // src/pages/Auth.tsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Terminal } from "lucide-react";
+
+import { useAuth } from "../store";
 
 type LoginValues = {
   email: string;
@@ -21,11 +24,13 @@ type FieldErrors = Partial<Record<"username" | "email" | "password", string>>;
 const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";
 function oAuth42Url(): string {
   const base = apiBase ? apiBase.replace(/\/+$/, "") : "";
-  return base ? `${base}/auth/42` : "/api/auth/42";
+  return base ? `${base}/auth/login/oauth` : "/api/auth/login/oauth";
 }
 
 export default function Auth() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
@@ -85,14 +90,69 @@ export default function Auth() {
     return true;
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
     if (!validateCurrent()) return;
 
     setIsLoading(true);
-    setStatusMsg(t("authMockRemoved"));
-    setIsLoading(false);
+    setStatusMsg("");
+
+    try {
+      if (isLogin) {
+        // ── Login ──
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email: loginValues.email.trim(),
+            password: loginValues.password,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => null);
+          setStatusMsg(err?.message ?? "Login failed");
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await res.json().catch(() => null);
+        login("cookie", {
+          id: String(data?.user?.id ?? ""),
+          username: data?.user?.username ?? "",
+          email: loginValues.email.trim(),
+        });
+
+        navigate("/play");
+      } else {
+        // ── Register ──
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: registerValues.email.trim(),
+            username: registerValues.username.trim(),
+            password: registerValues.password,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => null);
+          setStatusMsg(err?.message ?? "Registration failed");
+          setIsLoading(false);
+          return;
+        }
+
+        setStatusMsg("Account created! You can now log in.");
+        setIsLogin(true);
+      }
+    } catch (err: any) {
+      setStatusMsg(err?.message ?? "Network error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   function toggleMode() {
@@ -104,6 +164,8 @@ export default function Auth() {
 
   function loginWith42() {
     if (isLoading) return;
+    // Clear the logout flag so session restore works after OAuth redirect
+    sessionStorage.removeItem('just_logged_out');
     window.location.href = oAuth42Url();
   }
 
@@ -192,8 +254,8 @@ export default function Auth() {
                 </Button>
               </div>
 
-              {isLoading ? (
-                <div className="text-center font-mono text-xs text-white/60 animate-pulse">
+              {statusMsg ? (
+                <div className={`text-center font-mono text-xs ${isLoading ? 'text-white/60 animate-pulse' : 'text-amber-300'}`}>
                   {">"} {statusMsg}
                 </div>
               ) : null}

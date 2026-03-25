@@ -63,6 +63,7 @@ export interface ChatMessage {
   senderId: string;
   senderLogin?: string;
   senderAvatar?: string | null;
+  receiverId?: string;
   text: string;
   timestampISO: string;
 }

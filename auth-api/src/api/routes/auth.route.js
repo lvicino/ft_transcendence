@@ -58,14 +58,32 @@ module.exports = async function (fastify, opts) {
 				maxAge: 3600,
 			});
 			return reply.code(200).send({
-				message: "Login successful"
+				message: "Login successful",
+				user: { id: user.id, username: user.username }
 			});
 		}
 	});
 
 	fastify.post('/logout', async (request, reply) => {
-		reply.clearCookie('access_token', { path: '/' });
+		reply.clearCookie('access_token', {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax',
+		});
 		return reply.code(200).send({ message: 'Logged out' });
+	});
+
+	fastify.get('/me', async (request, reply) => {
+		const token = request.cookies.access_token;
+		if (!token)
+			return reply.code(401).send({ error: "Unauthorized" });
+		try {
+			const decoded = require('jsonwebtoken').verify(token, JWT_SECRET);
+			return reply.code(200).send({ id: decoded.id, username: decoded.username });
+		} catch (err) {
+			return reply.code(401).send({ error: "Unauthorized" });
+		}
 	});
 
 	fastify.get('/login/oauth', async (request, reply) => {

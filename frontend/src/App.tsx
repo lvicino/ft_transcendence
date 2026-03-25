@@ -1,4 +1,5 @@
 // src/App.tsx
+import { useEffect, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import MainLayout from './MainLayout';
 
@@ -15,20 +16,30 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 
-import { useAuth } from './store';
+import { useAuth, useAuthStore, useChatStore } from './store';
 
 import { Toaster } from './components/Toaster';
 import ChatSidebar from './components/ChatSidebar';
+import { Loader } from './components/ui/Loader';
 
 function RequireAuthShell() {
-/*   for testing without auth --- const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) return <Navigate to="/auth" replace />; */
+  // Auto-connect chat WebSocket as soon as the user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      useChatStore.getState().connect();
+    }
+    return () => {
+      useChatStore.getState().disconnect();
+    };
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
 
   return (
     <>
       <Outlet />
-
       <ChatSidebar />
     </>
   );
@@ -45,7 +56,55 @@ function RequireGuest() {
   return isAuthenticated && !forceAuthMock ? <Navigate to="/play" replace /> : <Outlet />;
 }
 
+// Session restoration: check if the user has a valid JWT cookie on app load
+function useSessionRestore() {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Clear the flag so it doesn't persist across future navigations
+    const justLoggedOut = sessionStorage.getItem('just_logged_out');
+    if (justLoggedOut) sessionStorage.removeItem('just_logged_out');
+
+    const restore = async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          useAuthStore.getState().actions.login('cookie', {
+            id: String(data.id),
+            username: data.username,
+            email: '',
+          });
+        }
+      } catch {
+        // no valid session — that's fine
+      } finally {
+        setIsReady(true);
+      }
+    };
+
+    // Only restore if the auth store doesn't already have a user
+    if (!useAuthStore.getState().user) {
+      restore();
+    } else {
+      setIsReady(true);
+    }
+  }, []);
+
+  return isReady;
+}
+
 export default function App() {
+  const isReady = useSessionRestore();
+
+  if (!isReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-brand-bg">
+        <Loader size="lg" label="Restoring session…" />
+      </div>
+    );
+  }
+
   return (
     <>
       <Routes>

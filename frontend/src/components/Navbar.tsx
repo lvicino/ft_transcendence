@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LogOut, User, Gamepad2, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useAuth, useAuthStore, useGameFlowStore, useGameStore, useUI, useToast } from "../store";
-import { cn } from "../lib/utils";
+import { useAuth, useAuthStore, useGameFlowStore, useGameStore, useUI, useToast, useChatStore } from "../store";
+import { cn, displayTag } from "../lib/utils";
 import { Button } from "./ui/Button";
 import { Avatar } from "./ui/Avatar";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -22,10 +22,23 @@ export function Navbar() {
     navigate(to);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Clear the persisted auth storage first so session restore doesn't re-login
     useAuthStore.getState().actions.logout();
+    useChatStore.getState().disconnect();
     useGameFlowStore.getState().leaveLobby();
     useGameStore.getState().resetGame();
+
+    // Clear the httpOnly cookie on the backend
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch {
+      // best-effort
+    }
+
+    // Mark that we intentionally logged out so session restore won't re-login
+    sessionStorage.setItem('just_logged_out', '1');
+
     success(t("loggedOut"));
     navigate("/auth");
   };
@@ -93,7 +106,7 @@ export function Navbar() {
 
               <div className="hidden sm:flex flex-col items-start leading-none mr-2">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{t("navbarOperator")}</span>
-                <span className="text-xs font-black text-white">{user?.username}</span>
+                <span className="text-xs font-black text-white">{displayTag(user?.username, user?.id)}</span>
               </div>
 
               <div className="flex items-center gap-2">

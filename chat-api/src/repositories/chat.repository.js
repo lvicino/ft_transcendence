@@ -4,7 +4,7 @@ async function ensureUserExists(id, username) {
   await sql`
     INSERT INTO users (id, username)
     VALUES (${id}, ${username})
-    ON CONFLICT (id) DO NOTHING
+    ON CONFLICT (id) DO UPDATE SET username = ${username}
   `;
 }
 

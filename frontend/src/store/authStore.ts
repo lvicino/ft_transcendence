@@ -20,10 +20,21 @@ export const useAuthStore = create<AuthState>()(
         login: (token, user) => set({ token, user }),
         logout: () => {
           set({ token: null, user: null });
+          try { localStorage.removeItem('auth-storage'); } catch {}
         },
       },
     }),
-    { name: 'auth-storage' }
+    {
+      name: 'auth-storage',
+      version: 1,
+      partialize: (state) => ({ token: state.token, user: state.user }),
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted && typeof persisted === 'object' ? persisted : {}),
+        // Never let persisted data overwrite live action functions
+        actions: current.actions,
+      }),
+    }
   )
 );
 

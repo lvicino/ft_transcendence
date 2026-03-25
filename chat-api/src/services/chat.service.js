@@ -48,10 +48,12 @@ class ChatService {
       throw Object.assign(new Error('Cannot add yourself as a friend'), { code: 'SELF_ADD' });
     }
 
+    // Ensure the target user has a row in the chat users table.
+    // If they haven't connected yet, create a placeholder entry;
+    // their username will be updated when they actually connect via WS.
     const friendExists = await ChatRepository.userExists(friendId);
-
     if (!friendExists) {
-      throw Object.assign(new Error('User does not exist or has never connected to the chat'), { code: 'USER_NOT_FOUND' });
+      await ChatRepository.ensureUserExists(friendId, `user_${friendId}`);
     }
 
     await ChatRepository.addFriend(userId, friendId);
