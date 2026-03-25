@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Goonies";
+  src: url("/fonts/goonies.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* Base: Dark Gray */
+  --color-background: #0f1318;
+  --color-foreground: #e8edf2;
+  --color-border: #2a323a;
+  --color-muted: #94a3b0;
+  
+  /* Accent: Ocean */
+  --color-primary: #5bb2b8;
+  --color-primary-foreground: #07171a;
+  --color-brand-blue: #4ea1ab;
+  --color-brand-bg: #0b1015;
+  --color-brand-white: #eef3f7;
+  --color-card-foreground: #eef3f7;
+
+  --color-card: rgba(12, 18, 24, 0.55); 
+  
+  --font-goonies: "Goonies", system-ui, -apple-system, sans-serif;
+  
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  --animate-fade-in: fade-in 1s ease-out forwards;
+}
+
+@layer base {
+  body {
+    /* Фон передали в MainLayout. Здесь оставляем только базовые цвета */
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  /* Заголовки всегда шрифтом Goonies */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-goonies);
+    text-transform: uppercase;
+  }
+}
