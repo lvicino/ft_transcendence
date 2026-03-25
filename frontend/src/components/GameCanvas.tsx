@@ -25,8 +25,10 @@ export default function GameCanvas() {
   const setStatus = useGameFlowStore((s) => s.setStatus);
   const setMessageInfo = useGameFlowStore((s) => s.setMessageInfo);
   const updateGame = useGameStore((s) => s.updateGame);
+  const resetGame = useGameStore((s) => s.resetGame);
 
   useEffect(() => { // ducoup ca fait quoi useEffect exactement ?
+    resetGame();
     if (!matchId) {
 		setMessageInfo('noGameId');
 		setStatus('error');
@@ -48,6 +50,8 @@ export default function GameCanvas() {
       setStatus('finished');
     }
     });
+
+    setStatus('playing');
 
     // inpute clavier
     
@@ -113,8 +117,11 @@ export default function GameCanvas() {
 
       const { width, height } = canvas;
       const frame = useGameStore.getState().frame;
+      const status = useGameFlowStore.getState().status;
 
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, width, height);        
+      if (status === 'finished')
+          return ;
 
       // Center line
       ctx.strokeStyle = 'rgba(255,255,255,0.1)';

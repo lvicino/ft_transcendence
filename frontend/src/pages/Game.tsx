@@ -31,24 +31,26 @@ export default function Game() {
       </div>
 
       {/* Game Area */}
-      <div className="relative aspect-video w-full max-w-4xl overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-[0_0_40px_rgba(91,178,184,0.15)] backdrop-blur-sm">
+      <div className={`relative aspect-video w-full max-w-4xl overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-[0_0_40px_rgba(91,178,184,0.15)] backdrop-blur-sm ${status !== 'playing' ? 'block' : 'block'}`}>
         <GameCanvas />
       </div>
 
       {/* Controls */}
+      {status !== 'finished' ?
       <Button
         type="button"
         variant="outline"
         className="mt-4 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
         onClick={() => {
           finishMatch();
-          navigate('/game/finished'); // a changer
+          navigate('/play '); // a changer
         }}
       >
         {t("forfeitMatch")}
       </Button>
+      : null}
 
-      {status === 'finished' ? <p>{scoreLeft} / {scoreRight}</p> : null}
+      {status === 'finished' ? <p>{scoreLeft >=3 ? "winer" : "loser"} | {scoreRight >=3 ? "winer" : "loser"}</p> : null}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { useGameFlowStore } from "../store/gameStore";
 
+import Lobby from './Lobby';
+
 import { api } from "@/net/api";
 
 const THEMES = [
@@ -133,23 +135,6 @@ export default function GameCreate() {
             />
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm opacity-70">{t("gameMaxScore")}</p>
-
-            <div className="flex gap-2">
-              {[3, 5, 10].map((score) => (
-                <Button
-                  key={score}
-                  variant={maxScore === score ? "default" : "outline"}
-                  onClick={() => setMaxScore(score)}
-                  className="flex-1"
-                >
-                  {score}
-                </Button>
-              ))}
-            </div>
-          </div>
-
           <Button className="w-full mt-4" onClick={createGame}>
             {t("createLobby")}
           </Button>
@@ -163,9 +148,15 @@ export default function GameCreate() {
                 password: {password}
               </div>
               
-              <Button className="w-full mt-4" onClick={navigateToLoby}>
-                {t("goToLobby")}
-              </Button>
+            <Button
+              className="w-full"
+              onClick={() => {
+                // startMatch(); // pour quoi fair ?
+                navigate(`/game`);
+              }}
+            >
+              {t("startMatch")}
+            </Button>
             </>
           ) : null}
 

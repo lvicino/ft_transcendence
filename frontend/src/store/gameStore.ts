@@ -27,7 +27,8 @@ type GameFlowState = {
   setMessageInfo: (messageInfo: string) => void;
 };
 
-export const useGameFlowStore = create<GameFlowState>((set, get) => ({
+export const useGameFlowStore = create<GameFlowState>(
+  (set, get) => ({
   status: 'idle',
   matchId: null,
   password: null,
@@ -69,7 +70,8 @@ export const useGameFlowStore = create<GameFlowState>((set, get) => ({
   setpassword: (password) => set({ password }),
 
   setMessageInfo: (messageInfo) => set({ messageInfo }),
-}));
+})
+);
 
 export const useGameStore = create<GameplayState>((set) => ({
   frame: null,
