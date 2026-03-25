@@ -20,7 +20,7 @@ async function initDb() {
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
                     email TEXT NOT NULL UNIQUE,
-					username TEXT NOT NULL UNIQUE,
+					username TEXT NOT NULL,
                     password_hash TEXT,
 					oauth BOOLEAN NOT NULL DEFAULT false,
 

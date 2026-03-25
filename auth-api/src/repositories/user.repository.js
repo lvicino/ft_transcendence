@@ -15,8 +15,7 @@ async function create(email, username, passwordHash, oauth) {
 
 async function findByEmail(email) {
   return await sql`
-  SELECT * 
-  FROM users 
+  SELECT * FROM users
   WHERE email = ${email}
   `
 }

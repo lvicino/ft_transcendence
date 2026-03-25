@@ -1,15 +1,17 @@
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const UserRepository = require('../../repositories/user.repository.js');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const API_UID = process.env.API_UID;
 const API_SECRET = process.env.API_SECRET;
-const API_REDIRECT_URI = process.env.API_REDIRECT_URI 
-const FRONTEND_URL = process.env.FRONTEND_URL 
+const API_REDIRECT_URI = process.env.API_REDIRECT_URI
+const FRONTEND_URL = process.env.FRONTEND_URL
 
 function genererToken(user) {
   const payload = {
     id: user.id,
+    username: user.username,
   };
 
   const token = jwt.sign(payload, JWT_SECRET, {
@@ -28,14 +30,9 @@ module.exports = async function (fastify, opts) {
 			return reply.code(201).send();
 		} catch (error) {
 			if (error.message.includes('users_email_key')) {
-				return reply.code(409).send({ 
-					error: "Conflict", 
-					message: "Cet email est déjà enregistré." 
-				});
-			} else if (error.message.includes('users_username_key')) {
-				return reply.code(409).send({ 
-					error: "Conflict", 
-					message: "Cet username est déjà utilisé." 
+				return reply.code(409).send({
+					error: "Conflict",
+					message: "Cet email est déjà enregistré."
 				});
 			}
 			console.log("error register: ", error.message);
@@ -47,9 +44,9 @@ module.exports = async function (fastify, opts) {
 		const { email, password } = request.body;
 		const user = await fastify.authService.login(email, password);
 		if (!user)
-			return reply.code(401).send({ 
-							error: "Unauthorized", 
-							message: "Identifiants invalides" 
+			return reply.code(401).send({
+							error: "Unauthorized",
+							message: "Identifiants invalides"
 						});
 		else {
 			const access_token = genererToken(user);
@@ -64,6 +61,11 @@ module.exports = async function (fastify, opts) {
 				message: "Login successful"
 			});
 		}
+	});
+
+	fastify.post('/logout', async (request, reply) => {
+		reply.clearCookie('access_token', { path: '/' });
+		return reply.code(200).send({ message: 'Logged out' });
 	});
 
 	fastify.get('/login/oauth', async (request, reply) => {
@@ -91,7 +93,7 @@ module.exports = async function (fastify, opts) {
 				headers: { Authorization: `Bearer ${accessToken}` }
 			});
 
-			const user = await fastify.authService.oauth(userResponse.data.email);
+			const user = await fastify.authService.oauth(userResponse.data.email, userResponse.data.login);
 
 			const access_token = genererToken(user);
 			reply.setCookie("access_token", access_token, {

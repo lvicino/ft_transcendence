@@ -25,6 +25,8 @@ services:
     depends_on:
       cert-gen:
         condition: service_completed_successfully
+      databse:
+        condition: service_started
     labels:
       - "traefik.http.routers.auth-api.rule=PathPrefix(`/api/auth`)"
       - "traefik.http.routers.auth-api.entrypoints=websecure"
@@ -54,6 +56,37 @@ services:
     labels:
       - "traefik.enable=false"
 
+  chat-api:
+    build:
+      context: ./chat-api/
+      target: production
+    image: chat-service:1.0.0
+    container_name: chat-api_prod
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_SSL_KEY_PATH=${NODE_SSL_KEY_PATH}
+      - NODE_SSL_CERT_PATH=${NODE_SSL_CERT_PATH}
+      - CHAT_DB=${CHAT_DB}
+      - CHAT_DB_USER=${CHAT_DB_USER}
+      - CHAT_DB_PASSWORD=${CHAT_DB_PASSWORD}
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
+      databse:
+        condition: service_started
+    labels:
+      - "traefik.http.routers.chat-api.rule=PathPrefix(`/api/chat`)"
+      - "traefik.http.routers.chat-api.entrypoints=websecure"
+      - "traefik.http.routers.chat-api.tls=true"
+      - "traefik.http.services.chat-api.loadbalancer.server.scheme=https"
+      - "traefik.http.services.chat-api.loadbalancer.server.port=443"
+    volumes:
+      - certs-data:/certs/
+
   game-api:
     build:
       context: ./game-api/
@@ -71,6 +104,8 @@ services:
     depends_on:
       cert-gen:
         condition: service_completed_successfully
+      databse:
+        condition: service_started
     labels:
       - "traefik.http.routers.game-api.rule=PathPrefix(`/api/games`)"
       - "traefik.http.routers.game-api.entrypoints=websecure"

@@ -14,19 +14,19 @@ async function login(email, plainTextPassword) {
 		return (null);
 	const [salt, hash] = user[0].password_hash.split(':');
 	if (timingSafeEqual(Buffer.from(hash, 'hex'), scryptSync(plainTextPassword, salt, 64)))
-		return ({"id": user[0].id});
+		return ({"id": user[0].id, "username": user[0].username});
 	else
 		return (null);
 }
 
-async function oauth(email) {
+async function oauth(email, username) {
 	const user = await UserRepository.findByEmail(email);
 	if (user.length === 0) {
-		const newUser = await UserRepository.create(email, crypto.randomUUID(), null, true);
-		return ({"id": newUser[0].id});
+		const newUser = await UserRepository.create(email, username || crypto.randomUUID(), null, true);
+		return ({"id": newUser[0].id, "username": newUser[0].username});
 	}
 	else if (user[0].oauth === true) {
-		return ({"id": user[0].id});
+		return ({"id": user[0].id, "username": user[0].username});
 	}
 	return (null);
 }
