@@ -25,10 +25,14 @@ Key features include:
 ### Setup
 
 1. Clone the repository.
-2. Several `.env.example` files are provided across the repository (e.g., in the root, `database/`, and `auth-api/` directories). You must copy them to `.env` and configure your credentials.
+2. Several `.env.example` files are provided across the repository in the root, `database/`, `auth-api/` directories and `root` . You must copy them to `.env` and configure your credentials.
    ```bash
    cp .env.example .env
-   # Repeat for other specific directories as needed
+      ```
+3. Inside your root .env file:
+```bash
+  UID=1000 # Replace with the output of: id -u
+  GID=1000 # Replace with the output of: id -g
    ```
 
 ### Run
@@ -49,7 +53,7 @@ The application will be accessible. The default exposed port is 8443 via HTTPS (
   *Responsibilities:* API design, game logic implementation, database architecture, WebSocket server configuration, and overall technical decisions.
 
 - **lvicino** — Chat Developer, Product Owner  
-  *Responsibilities:* Chat system architecture, direct messaging features, user blocking logic, feature prioritization, and validation.
+  *Responsibilities:* Chat system architecture, direct messaging features, Integrated 42 API login in the auth-service, feature prioritization, and validation.
   
 - **kosipova** — Frontend Developer, Project Manager  
   *Responsibilities:* UI/UX implementation, game rendering on the canvas, WebSocket client integration, project coordination, and task tracking.
@@ -109,7 +113,7 @@ The database relies on a relational model centered around the user.
 
 ## Features List
 
-- **Authentication and Profiles** (amonot, kosipova): Secure login via 42 OAuth. Users can update their avatar and view their match history.
+- **Authentication and Profiles** (amonot, lvicino): Secure login via 42 OAuth. Users can update their avatar and view their match history.
 - **Chat System** (lvicino): Real-time chat allowing users to send direct messages, block other users, and invite them to play.
 - **Pong Game** (amonot, kosipova): The core gameplay loop, featuring server-authoritative physics and real-time client rendering.
 - **Lobby System** (amonot, kosipova): Matchmaking system allowing users to find opponents or accept direct challenges.
@@ -146,12 +150,12 @@ The database relies on a relational model centered around the user.
 
 1. **Design system:** Reusable UI components built with Tailwind CSS. (kosipova)
 2. **Multiple languages:** Built using `react-i18next`. (kosipova)
-3. **Game customization:** Stored in user preferences, alters canvas rendering. (kosipova)
+3. **Game customization:** Alters canvas rendering. (kosipova)
 4. **Notification system:** Global React context triggering toast components via WebSockets. (kosipova, lvicino)
-5. **OAuth 2.0:** Integrated 42 API login in the auth-service. (amonot)
+5. **OAuth 2.0:** Integrated 42 API login in the auth-service. (amonot, lvicino)
 6. **Additional browsers:** Ensuring compatibility across Chrome, Firefox, and Safari via standard web APIs. (kosipova)
 7. **Frontend framework:** React 19 setup with Vite. (kosipova)
-8. **Backend framework:** Fastify setup. (amonot)
+8. **Backend framework:** Fastify setup. (amonot, lvicino)
 
 **Total:** 20 points
 
@@ -165,7 +169,7 @@ The database relies on a relational model centered around the user.
 - **Solution:** Implemented a server-authoritative model with a fixed tick rate to ensure both players see consistent physics.
 
 ### lvicino
-- **Contributions:** Designed and implemented the complete chat system, including the database schema for messages and relations, and the WebSocket message broker.
+- **Contributions:** Designed and implemented chat system, including the database schema for messages and relations, and the WebSocket message broker.
 - **Challenges:** Handling edge cases like users blocking each other while currently in a chat or game.
 - **Solution:** Added strict middleware checks on the WebSocket events to intercept and drop messages if a block relation exists in the database.
 
