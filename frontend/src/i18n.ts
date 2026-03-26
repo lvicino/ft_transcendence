@@ -14,8 +14,10 @@ const resources = {
       back: "Back",
       backToPlay: "Back to Play",
       connect: "Connect",
-      terms: "Terms",
-      privacy: "Privacy",
+      legalNav: {
+        terms: "Terms",
+        privacy: "Privacy",
+      },
       status: "Status",
       matchId: "Match ID",
       na: "n/a",
@@ -26,7 +28,7 @@ const resources = {
       navbarChat: "Chat",
       loggedOut: "Logged out",
       userAvatar: "User avatar",
-      landingTagline: "Cinematic Arcade Experience",
+      landingTagline: "Final project of Common Core",
       loginWith42: "Login with 42",
       authSystemAccess: "SYSTEM ACCESS",
       authNewRegistration: "NEW REGISTRATION",
@@ -47,6 +49,137 @@ const resources = {
       authErrorUsernameTaken: "This username is already taken",
       authErrorGeneric: "Authentication failed",
       authRegisterSuccess: "Account created",
+      privacy: {
+        meta: {
+          category: "Legal",
+          title: "Privacy Policy",
+          description:
+            "This page explains what data may be processed when using this Pong platform prototype and how it is used inside the application.",
+          lastUpdated: "Last updated: February 22, 2026",
+        },
+        sections: [
+          {
+            title: "1. Data We May Process",
+            paragraphs: ["Depending on implemented features, the application may process:"],
+            list: [
+              "account information (username, email, avatar);",
+              "session/authentication tokens stored in the browser;",
+              "game-related state (match IDs, lobby status, scores);",
+              "chat messages and presence indicators;",
+              "basic technical logs for debugging and stability.",
+            ],
+          },
+          {
+            title: "2. Why We Use Data",
+            paragraphs: ["Data is used only for operating the service and improving the project, including to:"],
+            list: [
+              "authenticate users and maintain sessions;",
+              "connect players to lobbies and matches;",
+              "display game UI, profiles, and chat interactions;",
+              "diagnose errors, performance issues, or abuse.",
+            ],
+          },
+          {
+            title: "3. Storage and Retention",
+            paragraphs: [
+              "Because this is a development/educational project, some data may be mocked, temporary, or reset without notice. Retention periods may vary depending on the current implementation stage.",
+            ],
+            list: [],
+          },
+          {
+            title: "4. Sharing",
+            paragraphs: [
+              "We do not sell personal data. Data may be visible to other players as part of core functionality (for example usernames, avatars, chat messages, or match presence).",
+            ],
+            list: [],
+          },
+          {
+            title: "5. Security",
+            paragraphs: [
+              "Reasonable measures are taken within the project scope, but no system is guaranteed to be perfectly secure. Avoid sharing sensitive information in chat or profile fields.",
+            ],
+            list: [],
+          },
+          {
+            title: "6. Your Choices",
+            paragraphs: [
+              "You may stop using the service at any time and request guidance from the project team/instructors regarding account data handling, where applicable.",
+            ],
+            list: [],
+          },
+          {
+            title: "7. Changes to This Policy",
+            paragraphs: [
+              "This policy may be updated as features change. The “Last updated” date on this page indicates the most recent revision.",
+            ],
+            list: [],
+          },
+        ],
+      },
+      terms: {
+        meta: {
+          category: "Legal",
+          title: "Terms of Use",
+          description:
+            "These terms govern access to and use of this Pong platform prototype, including gameplay pages, account features, chat UI, and related interfaces.",
+          lastUpdated: "Last updated: February 22, 2026",
+        },
+        sections: [
+          {
+            title: "1. Purpose of the Service",
+            paragraphs: [
+              "This project is an educational web application built for demonstration and learning purposes. Some features may be mocked or incomplete, and availability is not guaranteed.",
+            ],
+            list: [],
+          },
+          {
+            title: "2. Acceptable Use",
+            paragraphs: ["You agree not to misuse the service. In particular, you must not:"],
+            list: [
+              "attempt to disrupt matches, chat, or site availability;",
+              "use abusive, hateful, or unlawful content in usernames or messages;",
+              "attempt to access accounts or data that do not belong to you;",
+              "reverse engineer or exploit the service beyond normal browser use.",
+            ],
+          },
+          {
+            title: "3. Accounts and Access",
+            paragraphs: [
+              "You are responsible for activity performed through your account session. Keep your credentials private and log out when using a shared device.",
+              "We may suspend access to protect the platform, other users, or project infrastructure if misuse is detected.",
+            ],
+            list: [],
+          },
+          {
+            title: "4. Gameplay and Availability",
+            paragraphs: [
+              "Matchmaking, lobby states, scores, and game outcomes may be simulated during development. No guarantee is made regarding persistence, fairness, ranking accuracy, or uninterrupted operation.",
+            ],
+            list: [],
+          },
+          {
+            title: "5. Intellectual Property",
+            paragraphs: [
+              "Unless otherwise noted, the project code, interface design, and original assets are provided for the educational project context. Third-party libraries and icons remain subject to their own licenses.",
+            ],
+            list: [],
+          },
+          {
+            title: "6. Limitation of Liability",
+            paragraphs: [
+              "The service is provided “as is” without warranties of any kind. To the maximum extent permitted by law, the project authors are not liable for data loss, service interruptions, or indirect damages arising from use of the application.",
+            ],
+            list: [],
+          },
+          {
+            title: "7. Changes to These Terms",
+            paragraphs: [
+              "These terms may be updated as the project evolves. Material changes will be reflected on this page with a revised “Last updated” date.",
+            ],
+            list: [],
+          },
+        ],
+      },
       validationMin2: "Min 2 characters",
       validationMax24: "Max 24 characters",
       validationInvalidEmail: "Invalid email",
@@ -129,8 +262,10 @@ const resources = {
       back: "Retour",
       backToPlay: "Retour au jeu",
       connect: "Connexion",
-      terms: "Conditions",
-      privacy: "Confidentialité",
+      legalNav: {
+        terms: "Conditions",
+        privacy: "Confidentialité",
+      },
       status: "Statut",
       matchId: "ID du match",
       na: "n/d",
@@ -141,7 +276,7 @@ const resources = {
       navbarChat: "Chat",
       loggedOut: "Déconnecté",
       userAvatar: "Avatar utilisateur",
-      landingTagline: "Expérience d'arcade cinématographique",
+      landingTagline: "Projet final du Common Core",
       loginWith42: "Connexion avec 42",
       authSystemAccess: "ACCES SYSTEME",
       authNewRegistration: "NOUVELLE INSCRIPTION",
@@ -162,6 +297,139 @@ const resources = {
       authErrorUsernameTaken: "Ce nom d'utilisateur est deja utilise",
       authErrorGeneric: "Echec de l'authentification",
       authRegisterSuccess: "Compte cree",
+      privacy: {
+        meta: {
+          category: "Légal",
+          title: "Politique de confidentialité",
+          description:
+            "Cette page explique quelles données peuvent être traitées lors de l'utilisation de ce prototype de plateforme Pong et comment elles sont utilisées au sein de l'application.",
+          lastUpdated: "Dernière mise à jour : 22 février 2026",
+        },
+        sections: [
+          {
+            title: "1. Données pouvant être traitées",
+            paragraphs: ["Selon les fonctionnalités implémentées, l'application peut traiter :"],
+            list: [
+              "les informations de compte (nom d'utilisateur, adresse e-mail, avatar) ;",
+              "les jetons de session/d'authentification stockés dans le navigateur ;",
+              "les données liées au jeu (identifiants de match, état du lobby, scores) ;",
+              "les messages du chat et les indicateurs de présence ;",
+              "des journaux techniques de base à des fins de débogage et de stabilité.",
+            ],
+          },
+          {
+            title: "2. Finalités de l'utilisation des données",
+            paragraphs: [
+              "Les données sont utilisées uniquement pour exploiter le service et améliorer le projet, notamment afin de :",
+            ],
+            list: [
+              "authentifier les utilisateurs et maintenir leurs sessions ;",
+              "connecter les joueurs aux lobbies et aux matchs ;",
+              "afficher l'interface de jeu, les profils et les interactions de chat ;",
+              "diagnostiquer les erreurs, les problèmes de performance ou les usages abusifs.",
+            ],
+          },
+          {
+            title: "3. Stockage et durée de conservation",
+            paragraphs: [
+              "Comme il s'agit d'un projet de développement à visée pédagogique, certaines données peuvent être simulées, temporaires ou réinitialisées sans préavis. Les durées de conservation peuvent varier selon l'état actuel de l'implémentation.",
+            ],
+            list: [],
+          },
+          {
+            title: "4. Partage",
+            paragraphs: [
+              "Nous ne vendons pas de données personnelles. Certaines données peuvent être visibles par d'autres joueurs dans le cadre des fonctionnalités principales, par exemple les noms d'utilisateur, avatars, messages du chat ou indicateurs de présence en match.",
+            ],
+            list: [],
+          },
+          {
+            title: "5. Sécurité",
+            paragraphs: [
+              "Des mesures raisonnables sont prises dans le périmètre du projet, mais aucun système ne peut être garanti comme parfaitement sécurisé. Évitez de partager des informations sensibles dans le chat ou dans les champs de profil.",
+            ],
+            list: [],
+          },
+          {
+            title: "6. Vos choix",
+            paragraphs: [
+              "Vous pouvez cesser d'utiliser le service à tout moment et demander, le cas échéant, des indications à l'équipe projet ou aux enseignants concernant le traitement des données de compte.",
+            ],
+            list: [],
+          },
+          {
+            title: "7. Modifications de cette politique",
+            paragraphs: [
+              "Cette politique peut être mise à jour à mesure que les fonctionnalités évoluent. La mention « Dernière mise à jour » figurant sur cette page indique la révision la plus récente.",
+            ],
+            list: [],
+          },
+        ],
+      },
+      terms: {
+        meta: {
+          category: "Légal",
+          title: "Conditions d'utilisation",
+          description:
+            "Les présentes conditions régissent l'accès à ce prototype de plateforme Pong et son utilisation, y compris les pages de jeu, les fonctionnalités de compte, l'interface de chat et les interfaces associées.",
+          lastUpdated: "Dernière mise à jour : 22 février 2026",
+        },
+        sections: [
+          {
+            title: "1. Objet du service",
+            paragraphs: [
+              "Ce projet est une application web éducative conçue à des fins de démonstration et d'apprentissage. Certaines fonctionnalités peuvent être simulées ou incomplètes, et leur disponibilité n'est pas garantie.",
+            ],
+            list: [],
+          },
+          {
+            title: "2. Utilisation acceptable",
+            paragraphs: ["Vous vous engagez à ne pas faire un usage abusif du service. En particulier, il vous est interdit de :"],
+            list: [
+              "tenter de perturber les matchs, le chat ou la disponibilité du site ;",
+              "utiliser un contenu abusif, haineux ou illicite dans les noms d'utilisateur ou les messages ;",
+              "tenter d'accéder à des comptes ou à des données qui ne vous appartiennent pas ;",
+              "rétroconcevoir le service ou l'exploiter au-delà d'un usage normal via navigateur.",
+            ],
+          },
+          {
+            title: "3. Comptes et accès",
+            paragraphs: [
+              "Vous êtes responsable de l'activité effectuée au moyen de votre session de compte. Gardez vos identifiants confidentiels et déconnectez-vous lorsque vous utilisez un appareil partagé.",
+              "Nous pouvons suspendre l'accès afin de protéger la plateforme, les autres utilisateurs ou l'infrastructure du projet en cas de détection d'un usage abusif.",
+            ],
+            list: [],
+          },
+          {
+            title: "4. Jeu et disponibilité",
+            paragraphs: [
+              "Le matchmaking, les états de lobby, les scores et les résultats des parties peuvent être simulés pendant le développement. Aucune garantie n'est donnée quant à la persistance des données, à l'équité, à la précision du classement ou au fonctionnement ininterrompu du service.",
+            ],
+            list: [],
+          },
+          {
+            title: "5. Propriété intellectuelle",
+            paragraphs: [
+              "Sauf mention contraire, le code du projet, le design de l'interface et les éléments originaux sont fournis dans le cadre de ce projet éducatif. Les bibliothèques tierces et les icônes restent soumises à leurs propres licences.",
+            ],
+            list: [],
+          },
+          {
+            title: "6. Limitation de responsabilité",
+            paragraphs: [
+              "Le service est fourni « en l'état », sans garantie d'aucune sorte. Dans toute la mesure permise par la loi, les auteurs du projet ne sauraient être tenus responsables de la perte de données, des interruptions de service ou des dommages indirects résultant de l'utilisation de l'application.",
+            ],
+            list: [],
+          },
+          {
+            title: "7. Modifications des présentes conditions",
+            paragraphs: [
+              "Les présentes conditions peuvent être mises à jour à mesure que le projet évolue. Les modifications substantielles seront indiquées sur cette page par une nouvelle date de « Dernière mise à jour ».",
+            ],
+            list: [],
+          },
+        ],
+      },
       validationMin2: "Min 2 caracteres",
       validationMax24: "Max 24 caracteres",
       validationInvalidEmail: "Email invalide",
@@ -244,8 +512,10 @@ const resources = {
       back: "Назад",
       backToPlay: "Назад к игре",
       connect: "Подключиться",
-      terms: "Условия",
-      privacy: "Конфиденциальность",
+      legalNav: {
+        terms: "Условия",
+        privacy: "Конфиденциальность",
+      },
       status: "Статус",
       matchId: "ID матча",
       na: "н/д",
@@ -256,7 +526,7 @@ const resources = {
       navbarChat: "Чат",
       loggedOut: "Вы вышли",
       userAvatar: "Аватар пользователя",
-      landingTagline: "Кинематографичный аркадный опыт",
+      landingTagline: "Финальный проект Common Core",
       loginWith42: "Войти через 42",
       authSystemAccess: "ДОСТУП К СИСТЕМЕ",
       authNewRegistration: "НОВАЯ РЕГИСТРАЦИЯ",
@@ -277,6 +547,137 @@ const resources = {
       authErrorUsernameTaken: "Это имя пользователя уже занято",
       authErrorGeneric: "Ошибка аутентификации",
       authRegisterSuccess: "Аккаунт создан",
+      privacy: {
+        meta: {
+          category: "Правовая информация",
+          title: "Политика конфиденциальности",
+          description:
+            "На этой странице объясняется, какие данные могут обрабатываться при использовании данного прототипа платформы Pong и как они используются внутри приложения.",
+          lastUpdated: "Последнее обновление: 22 февраля 2026 года",
+        },
+        sections: [
+          {
+            title: "1. Какие данные мы можем обрабатывать",
+            paragraphs: ["В зависимости от реализованных функций приложение может обрабатывать:"],
+            list: [
+              "информацию об аккаунте (имя пользователя, адрес электронной почты, аватар);",
+              "токены сессии и аутентификации, хранящиеся в браузере;",
+              "данные, связанные с игрой (идентификаторы матчей, состояние лобби, счёт);",
+              "сообщения чата и индикаторы присутствия;",
+              "базовые технические журналы для отладки и обеспечения стабильности.",
+            ],
+          },
+          {
+            title: "2. Зачем мы используем данные",
+            paragraphs: ["Данные используются только для работы сервиса и улучшения проекта, в том числе чтобы:"],
+            list: [
+              "аутентифицировать пользователей и поддерживать активные сессии;",
+              "подключать игроков к лобби и матчам;",
+              "отображать игровой интерфейс, профили и взаимодействия в чате;",
+              "выявлять ошибки, проблемы с производительностью или злоупотребления.",
+            ],
+          },
+          {
+            title: "3. Хранение и сроки хранения",
+            paragraphs: [
+              "Поскольку это учебный проект, находящийся в разработке, часть данных может быть смоделирована, носить временный характер или сбрасываться без предварительного уведомления. Сроки хранения могут различаться в зависимости от текущего этапа реализации.",
+            ],
+            list: [],
+          },
+          {
+            title: "4. Передача данных",
+            paragraphs: [
+              "Мы не продаём персональные данные. Часть данных может быть видна другим игрокам в рамках основной функциональности сервиса, например имена пользователей, аватары, сообщения чата или присутствие в матче.",
+            ],
+            list: [],
+          },
+          {
+            title: "5. Безопасность",
+            paragraphs: [
+              "В рамках проекта принимаются разумные меры безопасности, однако ни одна система не может считаться полностью защищённой. Не размещайте конфиденциальную информацию в чате или в полях профиля.",
+            ],
+            list: [],
+          },
+          {
+            title: "6. Ваш выбор",
+            paragraphs: [
+              "Вы можете прекратить использование сервиса в любое время и при необходимости запросить у команды проекта или преподавателей разъяснения по вопросам обработки данных аккаунта.",
+            ],
+            list: [],
+          },
+          {
+            title: "7. Изменения в настоящей политике",
+            paragraphs: [
+              "Настоящая политика может обновляться по мере изменения функциональности. Пометка «Последнее обновление» на этой странице указывает на самую свежую редакцию.",
+            ],
+            list: [],
+          },
+        ],
+      },
+      terms: {
+        meta: {
+          category: "Правовая информация",
+          title: "Условия использования",
+          description:
+            "Настоящие условия регулируют доступ к данному прототипу платформы Pong и его использование, включая игровые страницы, функции аккаунта, интерфейс чата и связанные интерфейсы.",
+          lastUpdated: "Последнее обновление: 22 февраля 2026 года",
+        },
+        sections: [
+          {
+            title: "1. Назначение сервиса",
+            paragraphs: [
+              "Этот проект представляет собой учебное веб-приложение, созданное в демонстрационных и образовательных целях. Некоторые функции могут быть смоделированы или реализованы не полностью, и их доступность не гарантируется.",
+            ],
+            list: [],
+          },
+          {
+            title: "2. Допустимое использование",
+            paragraphs: ["Вы соглашаетесь не злоупотреблять сервисом. В частности, вам запрещается:"],
+            list: [
+              "пытаться нарушить работу матчей, чата или доступность сайта;",
+              "использовать оскорбительный, разжигающий ненависть или незаконный контент в именах пользователей или сообщениях;",
+              "пытаться получить доступ к аккаунтам или данным, которые вам не принадлежат;",
+              "проводить обратную разработку сервиса или эксплуатировать его за пределами обычного использования через браузер.",
+            ],
+          },
+          {
+            title: "3. Аккаунты и доступ",
+            paragraphs: [
+              "Вы несёте ответственность за действия, совершаемые через вашу сессию аккаунта. Храните свои учётные данные в тайне и выходите из системы при использовании общего устройства.",
+              "Мы можем приостановить доступ, чтобы защитить платформу, других пользователей или инфраструктуру проекта, если будет выявлено злоупотребление.",
+            ],
+            list: [],
+          },
+          {
+            title: "4. Игровой процесс и доступность",
+            paragraphs: [
+              "Подбор матчей, состояния лобби, счёт и результаты игр могут быть смоделированы в процессе разработки. Не даётся никаких гарантий в отношении сохранности данных, справедливости, точности рейтинга или бесперебойной работы сервиса.",
+            ],
+            list: [],
+          },
+          {
+            title: "5. Интеллектуальная собственность",
+            paragraphs: [
+              "Если не указано иное, код проекта, дизайн интерфейса и оригинальные материалы предоставляются в контексте данного учебного проекта. Сторонние библиотеки и иконки регулируются их собственными лицензиями.",
+            ],
+            list: [],
+          },
+          {
+            title: "6. Ограничение ответственности",
+            paragraphs: [
+              "Сервис предоставляется «как есть», без каких-либо гарантий. В максимально допустимой законом степени авторы проекта не несут ответственности за потерю данных, перебои в работе сервиса или косвенный ущерб, возникший в результате использования приложения.",
+            ],
+            list: [],
+          },
+          {
+            title: "7. Изменения настоящих условий",
+            paragraphs: [
+              "Настоящие условия могут обновляться по мере развития проекта. Существенные изменения будут отражаться на этой странице с указанием новой даты «Последнее обновление».",
+            ],
+            list: [],
+          },
+        ],
+      },
       validationMin2: "Минимум 2 символа",
       validationMax24: "Максимум 24 символа",
       validationInvalidEmail: "Некорректный email",

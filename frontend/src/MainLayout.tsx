@@ -37,10 +37,10 @@ export default function MainLayout() {
         <footer className="mt-auto border-t border-white/10 pt-4">
           <nav className="flex items-center justify-center gap-6 text-xs uppercase tracking-widest text-white/60">
             <Link to="/terms" className="transition-colors hover:text-primary">
-              {t("terms")}
+              {t("legalNav.terms")}
             </Link>
             <Link to="/privacy" className="transition-colors hover:text-primary">
-              {t("privacy")}
+              {t("legalNav.privacy")}
             </Link>
           </nav>
         </footer>
