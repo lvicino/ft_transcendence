@@ -54,7 +54,14 @@ export default function Game() {
       </Button>
       : null}
 
-      {status === 'finished' ? <p>{scoreLeft >=3 ? "winer" : "loser"} | {scoreRight >=3 ? "winer" : "loser"}</p> : null}
+        {status === 'finished' ? (
+    <p>
+      {scoreLeft < 3 && scoreRight < 3
+        ? "L’adversaire a déclaré forfait"
+        : `${scoreLeft >= 3 ? "winner" : "loser"} | ${scoreRight >= 3 ? "winner" : "loser"}`
+      }
+    </p>
+  ) : null}
     </div>
   );
 }
