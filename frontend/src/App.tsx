@@ -1,4 +1,5 @@
 // src/App.tsx
+import { useEffect } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import MainLayout from './MainLayout';
 
@@ -15,7 +16,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 
-import { useAuth } from './store';
+import { useAuth, useChatStore } from './store';
 
 import { SessionHydrator } from './components/auth/SessionHydrator';
 import { Toaster } from './components/Toaster';
@@ -23,6 +24,16 @@ import ChatSidebar from './components/ChatSidebar';
 
 function RequireAuthShell() {
   const { isAuthenticated, authStatus } = useAuth();
+
+  // Auto-connect chat WebSocket as soon as the user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      useChatStore.getState().connect();
+    }
+    return () => {
+      useChatStore.getState().disconnect();
+    };
+  }, [isAuthenticated]);
 
   if (authStatus == 'checking')
 	return (<></>);
@@ -32,7 +43,6 @@ function RequireAuthShell() {
   return (
     <>
       <Outlet />
-
       <ChatSidebar />
     </>
   );

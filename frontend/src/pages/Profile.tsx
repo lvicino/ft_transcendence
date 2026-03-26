@@ -1,50 +1,54 @@
 // src/pages/Profile.tsx
 import * as React from "react";
-import { useParams } from "react-router-dom";
-import { UserRound } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { UserRound, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Alert } from "../components/ui/Alert";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Avatar } from "../components/ui/Avatar";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Loader } from "../components/ui/Loader";
 import { Input } from "../components/ui/Input";
+import { Alert } from "../components/ui/Alert";
 
+import { useAuth, useToast, useChat } from "../store";
+import { cn, displayTag } from "../lib/utils";
 import { apiFetch } from "../net/http";
 import { getErrorMessage } from "../net/api";
-import { useAuth, useToast } from "../store";
 
-type ProfileResponse = {
-  user: {
-    id: string;
-    login: string;
-    avatar: string | null;
-    status: "online" | "offline" | "ingame";
-  };
-  stats: {
-    wins: number;
-    losses: number;
-    winrate: number;
-    rating: number;
-    gamesPlayed: number;
-  };
-  recentMatches: {
-    id: string;
-    opponentLogin: string;
-    opponentAvatar: string | null;
-    score: string;
-    result: "win" | "loss";
-    playedAt: string;
-  }[];
+type ProfileUser = {
+  id: string;
+  login: string;
+  avatar: string | null;
+  status: string;
 };
+type ProfileStats = {
+  wins: number;
+  losses: number;
+  winrate: number;
+  rating: number;
+  gamesPlayed: number;
+};
+type ProfileMatch = {
+  id: string;
+  opponentLogin: string;
+  result: string;
+};
+type ProfileResponse = {
+  user: ProfileUser;
+  stats: ProfileStats;
+  recentMatches: ProfileMatch[];
+};
+type FriendEntry = { id: number; username: string; online?: boolean };
 
 export default function Profile() {
   const { id } = useParams<{ id?: string }>();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user, updateProfile } = useAuth();
-  const { success, error } = useToast();
+  const { success, error: showError } = useToast();
+  const { friends, onlineUsers, addFriend, removeFriend, fetchFriends } = useChat();
 
   const effectiveUserId = id ?? user?.id ?? "dev";
   const isOwnProfile = Boolean(user?.id && effectiveUserId === user.id);
@@ -52,10 +56,17 @@ export default function Profile() {
   const [profileData, setProfileData] = React.useState<ProfileResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
-  const [isFriend, setIsFriend] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [friendLoading, setFriendLoading] = React.useState(false);
 
+  // Check if this user is in our friends list
+  const isFriend = friends.some((f) => String(f.id) === String(effectiveUserId));
+
+  // Check online status from live data
+  const isOnline = onlineUsers.some((u) => String(u.id) === String(effectiveUserId));
+
+  // ── Profile data fetching ──
   const fetchProfile = React.useCallback(() => {
     setIsLoading(true);
     apiFetch(`/users/${effectiveUserId}`)
@@ -85,6 +96,47 @@ export default function Profile() {
     fetchProfile();
   }, [fetchProfile, effectiveUserId]);
 
+  // ── Friends data ──
+  // Fetch our own friends on mount
+  React.useEffect(() => {
+    fetchFriends();
+  }, [fetchFriends]);
+
+  // For other users' profiles: fetch their friends
+  const [fetchedFriends, setFetchedFriends] = React.useState<FriendEntry[]>([]);
+  const [profileFriendsLoading, setProfileFriendsLoading] = React.useState(!isOwnProfile);
+
+  React.useEffect(() => {
+    if (isOwnProfile || !effectiveUserId) return;
+
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const data = await apiFetch(`/api/chat/friends/${effectiveUserId}`);
+        if (!cancelled && Array.isArray(data)) {
+          setFetchedFriends(data.map((f: any) => ({ id: f.id, username: f.username })));
+        }
+      } catch {
+        if (!cancelled) setFetchedFriends([]);
+      } finally {
+        if (!cancelled) setProfileFriendsLoading(false);
+      }
+    }
+
+    load();
+    const interval = setInterval(load, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [effectiveUserId, isOwnProfile]);
+
+  // Merge live online status into the friends list
+  const profileFriends: FriendEntry[] = React.useMemo(() => {
+    const source = isOwnProfile ? friends : fetchedFriends;
+    const onlineIds = new Set(onlineUsers.map((u) => u.id));
+    return source.map((f) => ({ ...f, online: onlineIds.has(f.id) }));
+  }, [isOwnProfile, friends, fetchedFriends, onlineUsers]);
+
+  // ── Profile editing ──
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSaving(true);
@@ -114,15 +166,51 @@ export default function Profile() {
       success(t("profileUpdated"));
       setIsEditing(false);
     } catch (err) {
-      error(getErrorMessage(err instanceof Error ? err.message : "API_ERROR"));
+      showError(getErrorMessage(err instanceof Error ? err.message : "API_ERROR"));
     } finally {
       setIsSaving(false);
     }
   };
 
+  // ── Friend actions ──
+  async function handleAddFriend() {
+    if (!effectiveUserId) return;
+    setFriendLoading(true);
+    try {
+      await addFriend(Number(effectiveUserId));
+      success(t("friendAdded"));
+    } catch (err: any) {
+      showError(err?.message ?? "Failed to add friend");
+    } finally {
+      setFriendLoading(false);
+    }
+  }
+
+  async function handleRemoveFriend() {
+    if (!effectiveUserId) return;
+    setFriendLoading(true);
+    try {
+      await removeFriend(Number(effectiveUserId));
+      success(t("friendRemoved"));
+    } catch (err: any) {
+      showError(err?.message ?? "Failed to remove friend");
+    } finally {
+      setFriendLoading(false);
+    }
+  }
+
+  function handleViewProfile(userId: number | string) {
+    const myId = user?.id;
+    if (String(userId) === String(myId)) {
+      navigate("/me");
+    } else {
+      navigate(`/users/${userId}`);
+    }
+  }
+
   const viewedUser = profileData?.user;
   const viewedStats = profileData?.stats;
-  const profileStatus = viewedUser?.status ?? "offline";
+  const profileStatus = viewedUser?.status ?? (isOnline ? "online" : "offline");
 
   if (isLoading && !profileData) {
     return (
@@ -146,6 +234,7 @@ export default function Profile() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-10 py-10 px-6">
+      {/* Profile Header Card */}
       <Card className="border border-white/10 bg-white/5 p-10">
         <form 
           onSubmit={isEditing ? handleSave : (e) => e.preventDefault()} 
@@ -189,6 +278,30 @@ export default function Profile() {
               </Badge>
             </div>
 
+            {/* Add/Remove friend buttons (only on other users' profiles) */}
+            {!isOwnProfile && (
+              <div className="flex gap-2 justify-center md:justify-start">
+                <Button
+                  size="sm"
+                  disabled={isFriend || friendLoading}
+                  onClick={handleAddFriend}
+                  isLoading={friendLoading && !isFriend}
+                >
+                  {isFriend ? t("alreadyFriend") ?? "Already friends" : t("addFriend")}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!isFriend || friendLoading}
+                  onClick={handleRemoveFriend}
+                  isLoading={friendLoading && isFriend}
+                >
+                  {t("removeFriend")}
+                </Button>
+              </div>
+            )}
+
             {isOwnProfile && (
               <div className="flex justify-center md:justify-start gap-2 pt-4">
                 {isEditing ? (
@@ -212,6 +325,7 @@ export default function Profile() {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Matches / Friends Card */}
         <Card className="border-t-2 border-t-primary">
           <CardHeader>
             <CardTitle className="text-xs flex items-center gap-2">
@@ -233,19 +347,11 @@ export default function Profile() {
               ) : (
                 <p className="text-sm text-white/60">{t("noRecentMatches")}</p>
               )
-            ) : (
-              <>
-                <Button className="w-full" disabled={isFriend} onClick={() => { setIsFriend(true); success(t("friendAdded")); }}>
-                  {t("addFriend")}
-                </Button>
-                <Button variant="outline" className="w-full" disabled={!isFriend} onClick={() => { setIsFriend(false); success(t("friendRemoved")); }}>
-                  {t("removeFriend")}
-                </Button>
-              </>
-            )}
+            ) : null}
           </CardContent>
         </Card>
 
+        {/* Stats Cards */}
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { label: t("wins"), value: viewedStats?.wins ?? 0 },
@@ -261,6 +367,55 @@ export default function Profile() {
           ))}
         </div>
       </div>
+
+      {/* Friends List */}
+      <Card className="border-t-2 border-t-primary">
+        <CardHeader>
+          <CardTitle className="text-xs flex items-center gap-2">
+            <Users size={14} />
+            {isOwnProfile ? t("myFriends") ?? "My Friends" : t("friends") ?? "Friends"} ({profileFriends.length})
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {profileFriendsLoading ? (
+            <div className="flex justify-center py-6">
+              <Loader size="md" />
+            </div>
+          ) : profileFriends.length === 0 ? (
+            <p className="text-sm text-white/60 text-center py-6">
+              {isOwnProfile ? t("noFriendsYet") ?? "No friends yet" : t("noFriendsYet") ?? "No friends yet"}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {profileFriends.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => handleViewProfile(f.id)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg border border-white/5 bg-white/5 p-3",
+                    "transition-colors hover:bg-white/10 hover:border-white/10 text-left"
+                  )}
+                >
+                  <Avatar userId={String(f.id)} size="sm" className="h-8 w-8 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-sm text-white truncate block">
+                      {displayTag(f.username, f.id)}
+                    </span>
+                  </div>
+                  <span
+                    className={cn(
+                      "h-2 w-2 rounded-full flex-shrink-0",
+                      f.online ? "bg-emerald-400" : "bg-white/20"
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

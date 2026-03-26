@@ -5,6 +5,7 @@ export function apiUrl(path: string) {
   return `${API_BASE}${path}`;
 }
 
+
 export async function apiFetch(path: string, options?: RequestInit) {
   const response = await fetch(apiUrl(path), {
     credentials: "include",

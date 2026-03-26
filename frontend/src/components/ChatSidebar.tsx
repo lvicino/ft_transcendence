@@ -1,49 +1,61 @@
 // src/components/ChatSidebar.tsx
-import { X, Send, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { X, Send, MessageSquare, Users, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAuth, useUI } from '../store';
-import { cn } from '../lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { useAuth, useUI, useChat } from '../store';
+import { cn, displayTag } from '../lib/utils';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import ChatWindow from './ChatWindow';
-import type { ChatMessage } from '../lib/types';
 
-const BASE_MOCK_MESSAGES: ChatMessage[] = [
-  {
-    id: '1',
-    senderId: 'system',
-    senderLogin: 'System',
-    text: 'Welcome to the game!',
-    timestampISO: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    senderId: 'bot',
-    senderLogin: 'Game_Bot',
-    text: 'Good luck, have fun.',
-    timestampISO: new Date().toISOString(),
-  },
-];
+type Tab = 'chat' | 'online' | 'friends';
 
 export default function ChatSidebar() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { isChatOpen, toggleChat } = useUI();
-  const messages: ChatMessage[] = [
-    ...BASE_MOCK_MESSAGES,
-    {
-      id: '3',
-      senderId: user?.id ?? 'me',
-      senderLogin: user?.username ?? 'You',
-      senderAvatar: user?.avatar ?? null,
-      text: 'Ready to play.',
-      timestampISO: new Date().toISOString(),
-    },
-  ];
+  const { isChatOpen, toggleChat, closeChat } = useUI();
+  const {
+    messages,
+    onlineUsers,
+    friends,
+    privateTarget,
+    isConnected,
+    send,
+    setPrivateTarget,
+    addFriend,
+    removeFriend,
+  } = useChat();
+
+  const [tab, setTab] = useState<Tab>('chat');
+  const [inputValue, setInputValue] = useState('');
+
+  function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    send(inputValue.trim());
+    setInputValue('');
+  }
+
+  function handleDM(userId: number, username: string) {
+    setPrivateTarget({ id: userId, username });
+    setTab('chat');
+  }
+
+  function handleViewProfile(userId: number | string) {
+    const myId = user?.id;
+    if (String(userId) === String(myId)) {
+      navigate('/me');
+    } else {
+      navigate(`/users/${userId}`);
+    }
+    closeChat();
+  }
 
   return (
     <div className={cn('fixed inset-0 z-[100]', isChatOpen ? 'pointer-events-auto' : 'pointer-events-none')}>
-      {/* Backdrop (клик по фону закрывает чат) */}
+      {/* Backdrop */}
       <button
         type="button"
         aria-label={t("closeChat")}
@@ -71,7 +83,13 @@ export default function ChatSidebar() {
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold tracking-wide text-white">{t("chat")}</span>
-              <span className="text-[10px] uppercase tracking-widest text-white/40">{t("global")}</span>
+              <span className="text-[10px] uppercase tracking-widest text-white/40">
+                {privateTarget
+                  ? `DM → ${displayTag(privateTarget.username, privateTarget.id)}`
+                  : isConnected
+                  ? t("global")
+                  : 'Offline'}
+              </span>
             </div>
           </div>
 
@@ -87,22 +105,166 @@ export default function ChatSidebar() {
           </Button>
         </div>
 
-        {/* Messages */}
-        <ChatWindow messages={messages} currentUserId={user?.id ?? null} />
-
-        {/* Input */}
-        <div className="flex flex-shrink-0 gap-2 border-t border-white/10 bg-black/40 p-4">
-          <form className="flex w-full gap-2" onSubmit={(e) => e.preventDefault()}>
-            <Input
-              placeholder={t("typeMessage")}
-              aria-label={t("message")}
-              className="flex-1 bg-white/5"
-            />
-            <Button type="submit" size="icon" aria-label={t("sendMessage")} className="w-12 rounded-lg">
-              <Send className="h-[18px] w-[18px]" />
-            </Button>
-          </form>
+        {/* Tab Bar */}
+        <div className="flex border-b border-white/10 bg-black/20">
+          {([
+            { key: 'chat' as Tab, icon: MessageSquare, label: t("chat") },
+            { key: 'online' as Tab, icon: Users, label: `Online (${onlineUsers.length})` },
+            { key: 'friends' as Tab, icon: UserPlus, label: `Friends (${friends.length})` },
+          ]).map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setTab(item.key)}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 py-2.5 text-[10px] uppercase tracking-widest transition-colors',
+                tab === item.key
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-white/40 hover:text-white/70'
+              )}
+            >
+              <item.icon className="h-3 w-3" />
+              {item.label}
+            </button>
+          ))}
         </div>
+
+        {/* DM indicator + clear */}
+        {privateTarget && tab === 'chat' && (
+          <div className="flex items-center justify-between bg-primary/10 border-b border-primary/20 px-4 py-2">
+            <span className="text-xs text-primary">
+              DM → <strong>{displayTag(privateTarget.username, privateTarget.id)}</strong>
+            </span>
+            <button
+              type="button"
+              className="text-[10px] uppercase text-white/50 hover:text-white"
+              onClick={() => setPrivateTarget(null)}
+            >
+              {t("global")}
+            </button>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
+          {tab === 'chat' && (
+            <ChatWindow
+              messages={messages}
+              currentUserId={user?.id ?? null}
+              onUsernameClick={handleViewProfile}
+            />
+          )}
+
+          {tab === 'online' && (
+            <div className="flex-1 space-y-1 overflow-y-auto p-3">
+              {onlineUsers.length === 0 ? (
+                <p className="text-center text-xs text-white/40 py-8">No users online</p>
+              ) : (
+                onlineUsers.map((u) => (
+                  <div
+                    key={u.id}
+                    className="flex items-center justify-between rounded-lg border border-white/5 bg-white/5 p-3"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleViewProfile(u.id)}
+                      className="text-sm text-white hover:text-primary hover:underline transition-colors truncate"
+                    >
+                      {displayTag(u.username, u.id)}
+                    </button>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-[10px] h-6 px-2 text-white/60 hover:text-primary"
+                        onClick={() => handleDM(u.id, u.username)}
+                      >
+                        DM
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-[10px] h-6 px-2 text-white/60 hover:text-emerald-400"
+                        onClick={() => addFriend(u.id)}
+                      >
+                        +Friend
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {tab === 'friends' && (
+            <div className="flex-1 space-y-1 overflow-y-auto p-3">
+              {friends.length === 0 ? (
+                <p className="text-center text-xs text-white/40 py-8">No friends yet</p>
+              ) : (
+                friends.map((f) => (
+                  <div
+                    key={f.id}
+                    className="flex items-center justify-between rounded-lg border border-white/5 bg-white/5 p-3"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={cn('h-2 w-2 rounded-full flex-shrink-0', f.online ? 'bg-emerald-400' : 'bg-white/20')} />
+                      <button
+                        type="button"
+                        onClick={() => handleViewProfile(f.id)}
+                        className="text-sm text-white hover:text-primary hover:underline transition-colors truncate"
+                      >
+                        {displayTag(f.username, f.id)}
+                      </button>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-[10px] h-6 px-2 text-white/60 hover:text-primary"
+                        onClick={() => handleDM(f.id, f.username)}
+                      >
+                        DM
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-[10px] h-6 px-2 text-white/60 hover:text-rose-400"
+                        onClick={() => removeFriend(f.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Input (only shown on chat tab) */}
+        {tab === 'chat' && (
+          <div className="flex flex-shrink-0 gap-2 border-t border-white/10 bg-black/40 p-4">
+            <form className="flex w-full gap-2" onSubmit={handleSend}>
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={privateTarget ? `Message ${displayTag(privateTarget.username, privateTarget.id)}…` : t("typeMessage")}
+                aria-label={t("message")}
+                className="flex-1 bg-white/5"
+                disabled={!isConnected}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                aria-label={t("sendMessage")}
+                className="w-12 rounded-lg"
+                disabled={!isConnected}
+              >
+                <Send className="h-[18px] w-[18px]" />
+              </Button>
+            </form>
+          </div>
+        )}
       </aside>
     </div>
   );

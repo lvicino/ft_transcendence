@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const UserRepository = require('../../repositories/user.repository.js');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const API_UID = process.env.API_UID;
@@ -11,6 +12,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 function genererToken(user) {
   const payload = {
     id: user.id,
+    username: user.username,
   };
 
   const token = jwt.sign(payload, JWT_SECRET, {
@@ -57,13 +59,14 @@ module.exports = async function (fastify, opts) {
 		const user = await fastify.authService.login(email, password);
 		if (!user)
 			return reply.code(401).send({ 
-							error: "INVALID_CREDENTIALS",
-						});
+								error: "INVALID_CREDENTIALS",
+							});
 		else {
 			const access_token = genererToken(user);
 			reply.setCookie("access_token", access_token, authCookieOptions());
 			return reply.code(200).send({
-				message: "Login successful"
+				message: "Login successful",
+				user: { id: user.id, username: user.username }
 			});
 		}
 	});
@@ -124,7 +127,7 @@ module.exports = async function (fastify, opts) {
 				headers: { Authorization: `Bearer ${accessToken}` }
 			});
 
-			const user = await fastify.authService.oauth(userResponse.data.email);
+			const user = await fastify.authService.oauth(userResponse.data.email, userResponse.data.login);
 
 			const access_token = genererToken(user);
 			reply.setCookie("access_token", access_token, authCookieOptions());
