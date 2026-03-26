@@ -146,7 +146,7 @@ export default function GameCreate() {
             {t("createLobby")}
           </Button>
           </>: null}
-          {alreadyExiste? <p>alreadyExiste</p> : null}
+          {alreadyExiste ? <p className="text-red-400 text-center font-mono mt-4">{t("alreadyExiste")}</p> : null}
 
           {status === 'created' ? (
             <>

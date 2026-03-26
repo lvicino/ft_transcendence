@@ -19,8 +19,9 @@ export async function apiFetch(path: string, options?: RequestInit) {
   if (response.status === 401) {
 	if (window.location.pathname !== "/auth") {
 		window.location.href = "/auth";
-		return;
+		return new Promise(() => {});
 	}
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {

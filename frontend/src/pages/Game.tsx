@@ -55,10 +55,10 @@ export default function Game() {
       : null}
 
         {status === 'finished' ? (
-    <p>
+    <p className="text-center text-xl font-bold font-mono">
       {scoreLeft < 3 && scoreRight < 3
-        ? "L’adversaire a déclaré forfait"
-        : `${scoreLeft >= 3 ? "winner" : "loser"} | ${scoreRight >= 3 ? "winner" : "loser"}`
+        ? t("opponentForfeit")
+        : `${scoreLeft >= 3 ? t("winner") : t("loser")} | ${scoreRight >= 3 ? t("winner") : t("loser")}`
       }
     </p>
   ) : null}

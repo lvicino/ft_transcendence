@@ -74,8 +74,8 @@ module.exports = async function (fastify, opts) {
 	fastify.get('/session', async (request, reply) => {
 		const token = request.cookies.access_token;
 		if (!token) {
-			return reply.code(401).send({
-				error: "NO_ACTIVE_SESSION",
+			return reply.code(200).send({
+				user: null, error: "NO_ACTIVE_SESSION",
 			});
 		}
 
@@ -85,14 +85,14 @@ module.exports = async function (fastify, opts) {
 			});
 			const user = await fastify.authService.getById(payload.id);
 			if (!user) {
-				return reply.code(404).send({
-					error: "USER_NOT_FOUND",
+				return reply.code(200).send({
+					user: null, error: "USER_NOT_FOUND",
 				});
 			}
 			return reply.code(200).send({ user });
 		} catch (error) {
-			return reply.code(401).send({
-				error: "INVALID_SESSION",
+			return reply.code(200).send({
+				user: null, error: "INVALID_SESSION",
 			});
 		}
 	});

@@ -4,6 +4,8 @@ import { useGameStore, useGameFlowStore } from '../store';
 import { connectGameSocket } from '../net/socket';
 
 import { useNavigate } from 'react-router-dom';
+import { api } from '../net/api';
+import { useAuthStore } from '../store';
 
 /** Convertit un code WS backend en clé i18n. */
 function wsCodeToKey(code: string): string {
@@ -47,24 +49,37 @@ export default function GameCanvas() {
 		return;
 	}
 
-    const socket = connectGameSocket(matchId, password, (data) => {
-      console.log("data websocket: ", data);
-      if (data.type === 'state') {
-        updateGame(data.state);
-      } else if (data.type === 'error') {
-		setMessageInfo(wsCodeToKey(data.code ?? data.message ?? 'GAME_JOIN_FAILED'));
-		setStatus('error');
-		navigate('/lobby');
-	  } else if (data.type === 'info') {
-        if (data.theme) {
-          setTheme(data.theme);
-        }
-      } else if (data.type === 'Game Stop') {
-      setStatus('finished');
-    }
-    });
+    let socket: ReturnType<typeof connectGameSocket> | undefined;
 
-    setStatus('playing');
+    api.authApi.getSession().then((session) => {
+      if (!session || !session.user) {
+        useAuthStore.getState().logout();
+        navigate('/auth');
+        return;
+      }
+      
+      socket = connectGameSocket(matchId, password, (data) => {
+        console.log("data websocket: ", data);
+        if (data.type === 'state') {
+          updateGame(data.state);
+        } else if (data.type === 'error') {
+          setMessageInfo(wsCodeToKey(data.code ?? data.message ?? 'GAME_JOIN_FAILED'));
+          setStatus('error');
+          navigate('/lobby');
+        } else if (data.type === 'info') {
+          if (data.theme) {
+            setTheme(data.theme);
+          }
+        } else if (data.type === 'Game Stop') {
+          setStatus('finished');
+        }
+      });
+      
+      setStatus('playing');
+    }).catch(() => {
+      useAuthStore.getState().logout();
+      navigate('/auth');
+    });
 
     // inpute clavier
     
@@ -78,7 +93,7 @@ export default function GameCanvas() {
 
       if (newMove !== currentMove) { // pas besoin je pense
         currentMove = newMove;
-        socket.send({ type: 'input', moove: currentMove });
+        if (socket) socket.send({ type: 'input', moove: currentMove });
       }
     };
 
@@ -110,7 +125,7 @@ export default function GameCanvas() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      socket.close();
+      if (socket) socket.close();
     };
   }, [matchId, updateGame]); // pas besoin de [matchId, updateGame] car il ne sont pas sense changer il me semble... ; [matchId, password, updateGame, navigate, setMessageInfo, setStatus]);
 

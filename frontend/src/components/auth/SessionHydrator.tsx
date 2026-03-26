@@ -45,7 +45,11 @@ export function SessionHydrator() {
         const data = await res.json();
         if (!cancelled) {
           const session = data as SessionResponse;
-          login(session.user);
+          if (session.user) {
+            login(session.user);
+          } else {
+            logout();
+          }
         }
       } catch {
         if (!cancelled) {
