@@ -79,6 +79,7 @@ class ChatService {
 
         // Grab the username directly from active memory
         const senderUsername = this.connectedClients.get(senderId)?.username || 'unknown';
+        const receiverUsername = receiverId ? (this.connectedClients.get(receiverId)?.username || 'unknown') : null;
 
         const messagePayload = JSON.stringify({
           type: 'new_message',
@@ -87,7 +88,8 @@ class ChatService {
             receiver_id: receiverId,
             content: data.content,
             created_at: new Date().toISOString(),
-            sender_username: senderUsername
+            sender_username: senderUsername,
+            receiver_username: receiverUsername
           }
         });
 

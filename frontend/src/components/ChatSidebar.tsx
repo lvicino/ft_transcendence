@@ -44,12 +44,7 @@ export default function ChatSidebar() {
   }
 
   function handleViewProfile(userId: number | string) {
-    const myId = user?.id;
-    if (String(userId) === String(myId)) {
-      navigate('/me');
-    } else {
-      navigate(`/users/${userId}`);
-    }
+    navigate(`/users/${userId}`);
     closeChat();
   }
 
@@ -85,10 +80,10 @@ export default function ChatSidebar() {
               <span className="text-sm font-semibold tracking-wide text-white">{t("chat")}</span>
               <span className="text-[10px] uppercase tracking-widest text-white/40">
                 {privateTarget
-                  ? `DM → ${displayTag(privateTarget.username, privateTarget.id)}`
+                  ? `${t('dm')} → ${displayTag(privateTarget.username, privateTarget.id)}`
                   : isConnected
                   ? t("global")
-                  : 'Offline'}
+                  : t('offline')}
               </span>
             </div>
           </div>
@@ -109,8 +104,8 @@ export default function ChatSidebar() {
         <div className="flex border-b border-white/10 bg-black/20">
           {([
             { key: 'chat' as Tab, icon: MessageSquare, label: t("chat") },
-            { key: 'online' as Tab, icon: Users, label: `Online (${onlineUsers.length})` },
-            { key: 'friends' as Tab, icon: UserPlus, label: `Friends (${friends.length})` },
+            { key: 'online' as Tab, icon: Users, label: `${t('onlineTab')} (${onlineUsers.length})` },
+            { key: 'friends' as Tab, icon: UserPlus, label: `${t('friends')} (${friends.length})` },
           ]).map((item) => (
             <button
               key={item.key}
@@ -133,7 +128,7 @@ export default function ChatSidebar() {
         {privateTarget && tab === 'chat' && (
           <div className="flex items-center justify-between bg-primary/10 border-b border-primary/20 px-4 py-2">
             <span className="text-xs text-primary">
-              DM → <strong>{displayTag(privateTarget.username, privateTarget.id)}</strong>
+              {t('dm')} → <strong>{displayTag(privateTarget.username, privateTarget.id)}</strong>
             </span>
             <button
               type="button"
@@ -158,7 +153,7 @@ export default function ChatSidebar() {
           {tab === 'online' && (
             <div className="flex-1 space-y-1 overflow-y-auto p-3">
               {onlineUsers.length === 0 ? (
-                <p className="text-center text-xs text-white/40 py-8">No users online</p>
+                <p className="text-center text-xs text-white/40 py-8">{t('noUsersOnline')}</p>
               ) : (
                 onlineUsers.map((u) => (
                   <div
@@ -172,6 +167,7 @@ export default function ChatSidebar() {
                     >
                       {displayTag(u.username, u.id)}
                     </button>
+                    {String(u.id) !== String(user?.id) && (
                     <div className="flex gap-1">
                       <Button
                         size="sm"
@@ -187,9 +183,10 @@ export default function ChatSidebar() {
                         className="text-[10px] h-6 px-2 text-white/60 hover:text-emerald-400"
                         onClick={() => addFriend(u.id)}
                       >
-                        +Friend
+                        {t('addFriendShort')}
                       </Button>
                     </div>
+                    )}
                   </div>
                 ))
               )}
@@ -199,7 +196,7 @@ export default function ChatSidebar() {
           {tab === 'friends' && (
             <div className="flex-1 space-y-1 overflow-y-auto p-3">
               {friends.length === 0 ? (
-                <p className="text-center text-xs text-white/40 py-8">No friends yet</p>
+                <p className="text-center text-xs text-white/40 py-8">{t('noFriendsYet')}</p>
               ) : (
                 friends.map((f) => (
                   <div
@@ -231,7 +228,7 @@ export default function ChatSidebar() {
                         className="text-[10px] h-6 px-2 text-white/60 hover:text-rose-400"
                         onClick={() => removeFriend(f.id)}
                       >
-                        Remove
+                        {t('removeFriendShort')}
                       </Button>
                     </div>
                   </div>
@@ -248,6 +245,7 @@ export default function ChatSidebar() {
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
+                maxLength={64}
                 placeholder={privateTarget ? `Message ${displayTag(privateTarget.username, privateTarget.id)}…` : t("typeMessage")}
                 aria-label={t("message")}
                 className="flex-1 bg-white/5"

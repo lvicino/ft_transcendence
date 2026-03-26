@@ -90,6 +90,7 @@ export interface ChatMessage {
   senderLogin?: string;
   senderAvatar?: string | null;
   receiverId?: string;
+  receiverLogin?: string;
   text: string;
   timestampISO: string;
 }

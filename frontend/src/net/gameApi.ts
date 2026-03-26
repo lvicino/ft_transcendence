@@ -13,6 +13,7 @@ export interface GameParameters {
 
 export interface CreateGamePayload {
   gameParameter: GameParameters;
+  theme: string;
 }
 
 export interface CreateGameResponse {

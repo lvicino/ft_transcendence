@@ -52,6 +52,7 @@
     font-family: var(--font-goonies);
     text-transform: uppercase;
   }
+
 }
 
 [data-theme="classic"] {

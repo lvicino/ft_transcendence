@@ -36,6 +36,8 @@ export default function GameCanvas() {
   const updateGame = useGameStore((s) => s.updateGame);
   const resetGame = useGameStore((s) => s.resetGame);
 
+  const setTheme = useGameFlowStore((s) => s.setTheme);
+
   useEffect(() => { // ducoup ca fait quoi useEffect exactement ?
     resetGame();
     if (!matchId) {
@@ -54,7 +56,9 @@ export default function GameCanvas() {
 		setStatus('error');
 		navigate('/lobby');
 	  } else if (data.type === 'info') {
-        // info de connexion — rien a afficher
+        if (data.theme) {
+          setTheme(data.theme);
+        }
       } else if (data.type === 'Game Stop') {
       setStatus('finished');
     }
@@ -118,16 +122,27 @@ export default function GameCanvas() {
 
     let animationId: number;
 
-    const render = () => {
+    // Cache the colors to avoid calling getComputedStyle 60 times a second (layout thrashing)
+    let colors = getCanvasThemeColors(canvas);
+
+    // Resize handler to cache dimensions
+    const handleResize = () => {
       if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
       }
+      // Re-fetch theme colors in case CSS changed
+      colors = getCanvasThemeColors(canvas);
+    };
+    
+    // Initial size check
+    handleResize();
+    window.addEventListener('resize', handleResize);
 
+    const render = () => {
       const { width, height } = canvas;
       const frame = useGameStore.getState().frame;
       const status = useGameFlowStore.getState().status;
-      const colors = getCanvasThemeColors(canvas);
 
       ctx.clearRect(0, 0, width, height);        
       if (status === 'finished')
@@ -172,7 +187,10 @@ export default function GameCanvas() {
 
     render();
 
-    return () => cancelAnimationFrame(animationId); // ca sort d'ou "cancelAnimationFrame" ?
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return <canvas ref={canvasRef} className="block w-full h-full" />;

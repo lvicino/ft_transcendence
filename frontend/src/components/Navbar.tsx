@@ -49,7 +49,7 @@ export function Navbar() {
 
   const navItems = [
     { href: "/play", label: t("play"), icon: <Gamepad2 size={16} /> },
-    { href: "/me", label: t("profile"), icon: <User size={16} /> },
+    { href: `/users/${user?.id}`, label: t("profile"), icon: <User size={16} /> },
   ];
 
   const navButtonClass = (isActive: boolean) =>

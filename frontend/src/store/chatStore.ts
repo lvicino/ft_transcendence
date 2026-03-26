@@ -69,6 +69,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           text: msg.content,
           timestampISO: msg.created_at,
           receiverId: msg.receiver_id != null ? String(msg.receiver_id) : undefined,
+          receiverLogin: msg.receiver_username ?? undefined,
         };
         set((state) => ({
           messages: [...state.messages, chatMsg],
@@ -91,7 +92,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   fetchFriends: async () => {
     try {
-      const friends = await apiFetch('/api/chat/friends');
+      const friends = await apiFetch('/chat/friends');
       if (Array.isArray(friends)) {
         const onlineIds = new Set(get().onlineUsers.map((u) => u.id));
         set({
@@ -108,7 +109,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   addFriend: async (friendId: number) => {
-    await apiFetch('/api/chat/friend', {
+    await apiFetch('/chat/friend', {
       method: 'POST',
       body: JSON.stringify({ friendId }),
     });
@@ -116,7 +117,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   removeFriend: async (friendId: number) => {
-    await apiFetch('/api/chat/friend', {
+    await apiFetch('/chat/friend', {
       method: 'DELETE',
       body: JSON.stringify({ friendId }),
     });

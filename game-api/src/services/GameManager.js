@@ -7,7 +7,7 @@ class GameManager {
 		this.startedGames = new Map();
 	}
 
-	createGame(user, password, gameParameter) {
+	createGame(user, password, gameParameter, theme) {
 		const gameid = Number(user.id);
 		if (this.startedGames.has(gameid)) {
 			return {
@@ -28,6 +28,7 @@ class GameManager {
 		}
 		const game = {
 			"password": password,
+			"theme": theme || "classic",
 			"pong": new PongGame(gameParameter),
 			"players": new Map(),
 		}
@@ -46,21 +47,22 @@ class GameManager {
 
 		if (!this.games.has(gameId))
 			return ({joined: false, reason: `No game with id '${gameId}'`});
-		if (this.games.get(gameId).password !== password)
+		const game = this.games.get(gameId);
+		if (game.password !== password)
 			return ({joined: false, reason: "wrong password"});
-		if (this.games.get(gameId).players.has(user.id))
+		if (game.players.has(user.id))
 			return ({joined: false, reason: "dejat dans la partie"});
-		if (this.games.get(gameId).players.size === 1 && user.id != gameId && !this.games.get(gameId).players.has(gameId))
+		if (game.players.size === 1 && user.id != gameId && !game.players.has(gameId))
 			return ({joined: false, reason: "il y a de la place plus que pour le createur de la partie"});
 
-		this.games.get(gameId).players.set(user.id, {"socket": socket, "moove": 0, "score": 0});
-		if (this.games.get(gameId).players.size >= 2) {
-			this.startedGames.set(gameId, this.games.get(gameId));
+		game.players.set(user.id, {"socket": socket, "moove": 0, "score": 0});
+		if (game.players.size >= 2) {
+			this.startedGames.set(gameId, game);
 			this.games.delete(gameId);
 			this.#startGame(gameId);
-			return ({joined: true, reason: "", players: "2/2"});
+			return ({joined: true, reason: "", players: "2/2", theme: game.theme});
 		}
-		return ({joined: true, reason: "", players: "1/2"});
+		return ({joined: true, reason: "", players: "1/2", theme: game.theme});
 	}
 
 	#startGame(id) {

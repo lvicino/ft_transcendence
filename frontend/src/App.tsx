@@ -63,9 +63,7 @@ export default function App() {
           <Route element={<RequireAuthShell />}>
             <Route path="/play" element={<Play />} />
 
-            <Route path="/me" element={<Profile />} />
             <Route path="/users/:id" element={<Profile />} />
-            <Route path="/profile" element={<Navigate to="/me" replace />} />
 
             <Route path="/game/create" element={<GameCreate />} />
             <Route path="/game/join" element={<GameJoin />} />

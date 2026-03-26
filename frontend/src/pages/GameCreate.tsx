@@ -50,7 +50,8 @@ export default function GameCreate() {
         playerH: 20, 
         playerSpeed: paddleSpeed, 
         playerNumber: 2
-      }
+      },
+      theme: theme,
     }).then((data) => {
       console.log(data);
       setmatchId(data.id);
@@ -144,16 +145,32 @@ export default function GameCreate() {
           {status === 'created' ? (
             <>
               <div className="space-y-2">
-                id: {matchId}
+                <p className="text-sm opacity-70">{t("matchId")}</p>
+                <p className="font-mono text-white/80 bg-white/5 rounded-lg px-4 py-2 border border-white/10">{matchId}</p>
               </div>
               <div className="space-y-2">
-                password: {password}
+                <p className="text-sm opacity-70">{t("gamePassword")}</p>
+                <div className="flex items-center gap-2">
+                  <p className="flex-1 font-mono text-white/80 bg-white/5 rounded-lg px-4 py-2 border border-white/10 select-all">{password}</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => {
+                      if (password) {
+                        navigator.clipboard.writeText(password);
+                      }
+                    }}
+                  >
+                    {t("copyPassword")}
+                  </Button>
+                </div>
               </div>
               
             <Button
               className="w-full"
               onClick={() => {
-                // startMatch(); // pour quoi fair ?
                 navigate(`/game`);
               }}
             >

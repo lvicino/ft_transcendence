@@ -1,17 +1,14 @@
 import { createAuthApi, type AuthApi } from "./authApi";
 import { createGameApi, type GameApi } from "./gameApi";
-import { createUsersApi, type UsersApi } from "./usersApi";
 import i18n from "../i18n";
 
 export interface ApiFacade {
   authApi: AuthApi;
-  usersApi: UsersApi;
   gameApi: GameApi;
 }
 
 export const api: ApiFacade = {
   authApi: createAuthApi(),
-  usersApi: createUsersApi(),
   gameApi: createGameApi(),
 };
 

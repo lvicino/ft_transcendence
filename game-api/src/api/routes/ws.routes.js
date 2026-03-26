@@ -15,7 +15,7 @@ module.exports = async function (fastify) {
                 if (!state.joined) {
                     throw new Error("GAME_JOIN_FAILED");
                 }
-                socket.send(JSON.stringify({type:"info", code: "GAME_JOIN_SUCCESS", player: state.players}));
+                socket.send(JSON.stringify({type:"info", code: "GAME_JOIN_SUCCESS", player: state.players, theme: state.theme}));
             } catch (err) {
                 socket.send(JSON.stringify({type:"error", code: err.message}));
 				user = null; // pour ne pas appler handleDisconnect() on close.

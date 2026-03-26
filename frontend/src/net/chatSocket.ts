@@ -7,6 +7,7 @@ type ChatSocketCallbacks = {
     sender_id: number;
     sender_username: string;
     receiver_id: number | null;
+    receiver_username: string | null;
     content: string;
     created_at: string;
   }) => void;

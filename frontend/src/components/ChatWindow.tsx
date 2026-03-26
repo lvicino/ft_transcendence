@@ -1,5 +1,6 @@
 // src/components/ChatWindow.tsx
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from './ui/Avatar';
 import { cn, displayTag } from '../lib/utils';
 import type { ChatMessage } from '../lib/types';
@@ -17,6 +18,7 @@ function formatTime(timestampISO: string) {
 }
 
 export default function ChatWindow({ messages, currentUserId, onUsernameClick }: ChatWindowProps) {
+  const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom on new messages
@@ -28,7 +30,7 @@ export default function ChatWindow({ messages, currentUserId, onUsernameClick }:
     <div className="flex-1 space-y-4 overflow-y-auto p-4">
       {messages.length === 0 && (
         <p className="text-center text-xs text-white/30 py-12">
-          No messages yet. Say hello!
+          {t('noMessagesYet')}
         </p>
       )}
 
@@ -76,7 +78,11 @@ export default function ChatWindow({ messages, currentUserId, onUsernameClick }:
                     {displayName}
                   </button>
                   {isPrivate && (
-                    <span className="text-[9px] uppercase tracking-wider text-purple-400/70 font-semibold">DM</span>
+                    <span className="text-[9px] uppercase tracking-wider text-purple-400/70 font-semibold">
+                      {isOwn
+                        ? `→ ${msg.receiverLogin ? displayTag(msg.receiverLogin, msg.receiverId) : `User#${msg.receiverId}`}`
+                        : t('dm')}
+                    </span>
                   )}
                   <span className="text-[10px] font-mono text-white/35">{formatTime(msg.timestampISO)}</span>
                 </div>

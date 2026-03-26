@@ -32,7 +32,7 @@ function build(opts = {}) {
 		}
 	});
 	app.register(authRoutes, {prefix: 'api/auth/'});
-	app.register(usersRoutes, {prefix: 'api/users/'});
+	app.register(usersRoutes, {prefix: 'api/auth/users/'});
 	return (app);
 }
 
