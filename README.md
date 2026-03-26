@@ -129,7 +129,7 @@ The database relies on a relational model centered around the user.
 
 1. **Framework frontend + backend** *Justification:* Provides a structured architecture.  
    *Implementation:* Built using React for the SPA and Fastify for microservices.  
-   *Team:* kosipova (Front), amonot (Back).
+   *Team:* kosipova (Front), amonot, lvicino (Back).
 2. **Real-time features (WebSockets)** *Justification:* Required for multiplayer interactions.  
    *Implementation:* Native WebSockets implemented on Fastify, syncing 60 ticks per second.  
    *Team:* amonot, lvicino, kosipova.
@@ -144,7 +144,7 @@ The database relies on a relational model centered around the user.
    *Team:* amonot.
 6. **Backend as microservices** *Justification:* Separates domains for better scalability.  
    *Implementation:* Backend split into `auth-api`, `chat-api`, and `game-api`, routed through Traefik.  
-   *Team:* amonot.
+   *Team:* amonot, lvicino.
 
 ### Minor Modules (8 × 1 = 8 points)
 
@@ -169,9 +169,9 @@ The database relies on a relational model centered around the user.
 - **Solution:** Implemented a server-authoritative model with a fixed tick rate to ensure both players see consistent physics.
 
 ### lvicino
-- **Contributions:** Designed and implemented chat system, including the database schema for messages and relations, and the WebSocket message broker.
-- **Challenges:** Handling edge cases like users blocking each other while currently in a chat or game.
-- **Solution:** Added strict middleware checks on the WebSocket events to intercept and drop messages if a block relation exists in the database.
+- **Contributions:** Architected a real-time chat microservice using Fastify and WebSockets, featuring a PostgreSQL schema for managing friend relations and message routing.
+- **Challenges:** Synchronizing user identities and online status in real-time across a decoupled microservice architecture.
+- **Solution:** Engineered a WebSocket message broker that manages an in-memory client registry to broadcast live status updates and route private messages.
 
 ### kosipova
 - **Contributions:** Set up the React 19 frontend, built the design system, implemented the game canvas rendering, and integrated the i18n language switcher.
