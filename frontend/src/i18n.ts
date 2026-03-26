@@ -236,6 +236,9 @@ const resources = {
       errApiError: "A network error occurred",
       // GameCreate
       gameTheme: "Theme",
+      gameThemeClassic: "Classic",
+      gameTheme42: "42",
+      gameThemePokemon: "Pokemon",
       gameBallSpeed: "Ball speed",
       gamePaddleSpeed: "Paddle speed",
       gameMaxScore: "Max score",
@@ -486,6 +489,9 @@ const resources = {
       errApiError: "Une erreur reseau s'est produite",
       // GameCreate
       gameTheme: "Theme",
+      gameThemeClassic: "Classique",
+      gameTheme42: "42",
+      gameThemePokemon: "Pokemon",
       gameBallSpeed: "Vitesse de la balle",
       gamePaddleSpeed: "Vitesse de la raquette",
       gameMaxScore: "Score maximum",
@@ -734,6 +740,9 @@ const resources = {
       errApiError: "Произошла сетевая ошибка",
       // GameCreate
       gameTheme: "Тема",
+      gameThemeClassic: "Классика",
+      gameTheme42: "42",
+      gameThemePokemon: "Покемон",
       gameBallSpeed: "Скорость мяча",
       gamePaddleSpeed: "Скорость ракетки",
       gameMaxScore: "Максимальный счёт",

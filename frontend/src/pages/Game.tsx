@@ -13,6 +13,7 @@ export default function Game() {
   const matchId = useGameFlowStore((s) => s.matchId);
   const finishMatch = useGameFlowStore((s) => s.finishMatch);
   const status = useGameFlowStore((s) => s.status);
+  const theme = useGameFlowStore((s) => s.theme);
   const scoreLeft = useGameStore((s) => s.scoreLeft);
   const scoreRight = useGameStore((s) => s.scoreRight);
 
@@ -31,7 +32,10 @@ export default function Game() {
       </div>
 
       {/* Game Area */}
-      <div className={`relative aspect-video w-full max-w-4xl overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-[0_0_40px_rgba(91,178,184,0.15)] backdrop-blur-sm ${status !== 'playing' ? 'block' : 'block'}`}>
+      <div
+        data-theme={theme}
+        className={`relative aspect-video w-full max-w-4xl overflow-hidden rounded-xl border border-game-lines bg-game-bg shadow-[0_0_40px_rgba(0,0,0,0.18)] ${status !== 'playing' ? 'block' : 'block'}`}
+      >
         <GameCanvas />
       </div>
 

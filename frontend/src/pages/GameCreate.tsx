@@ -3,15 +3,16 @@ import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { useGameFlowStore } from "../store/gameStore";
+import type { GameTheme } from "../lib/types";
 
 
 
 import { api } from "@/net/api";
 
 const THEMES = [
-  { id: "classic", name: "Classic", bg: "bg-black" },
-  { id: "42", name: "42", bg: "bg-slate-900" },
-  { id: "pokemon", name: "Pokemon", bg: "bg-blue-900" },
+  { id: "classic", labelKey: "gameThemeClassic" },
+  { id: "42", labelKey: "gameTheme42" },
+  { id: "pokemon", labelKey: "gameThemePokemon" },
 ] as const;
 
 export default function GameCreate() {
@@ -81,19 +82,22 @@ export default function GameCreate() {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setTheme(item.id)}
+                  onClick={() => setTheme(item.id as GameTheme)}
                   className={`overflow-hidden rounded-lg border ${
                     theme === item.id ? "border-white" : "border-white/20 hover:border-white/40"
                   }`}
                 >
-                  <div className={`relative h-20 ${item.bg}`}>
-                    <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-white/40" />
-                    <div className="absolute left-2 top-1/2 h-8 w-[4px] -translate-y-1/2 bg-white" />
-                    <div className="absolute right-2 top-1/2 h-8 w-[4px] -translate-y-1/2 bg-white" />
-                    <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+                  <div
+                    data-theme={item.id}
+                    className="relative h-20 bg-game-bg"
+                  >
+                    <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-game-lines" />
+                    <div className="absolute left-2 top-1/2 h-8 w-[4px] -translate-y-1/2 bg-game-accent" />
+                    <div className="absolute right-2 top-1/2 h-8 w-[4px] -translate-y-1/2 bg-game-accent" />
+                    <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-game-accent" />
                   </div>
 
-                  <div className="py-1 text-xs">{item.name}</div>
+                  <div className="py-1 text-xs">{t(item.labelKey)}</div>
                 </button>
               ))}
             </div>

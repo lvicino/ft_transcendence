@@ -15,6 +15,15 @@ function wsCodeToKey(code: string): string {
   }
 }
 
+function getCanvasThemeColors(canvas: HTMLCanvasElement) {
+  const styles = getComputedStyle(canvas);
+
+  return {
+    accent: styles.getPropertyValue('--color-game-accent').trim() || '#ffffff',
+    lines: styles.getPropertyValue('--color-game-lines').trim() || '#334155',
+  };
+}
+
 export default function GameCanvas() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -118,13 +127,14 @@ export default function GameCanvas() {
       const { width, height } = canvas;
       const frame = useGameStore.getState().frame;
       const status = useGameFlowStore.getState().status;
+      const colors = getCanvasThemeColors(canvas);
 
       ctx.clearRect(0, 0, width, height);        
       if (status === 'finished')
           return ;
 
       // Center line
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.strokeStyle = colors.lines;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(width / 2, 0);
@@ -136,7 +146,7 @@ export default function GameCanvas() {
         const sx = width / frame.gameWide;
         const sy = height / frame.gameHeight;
 
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = colors.accent;
 
         // Draw players
         for (const p of frame.players) {

@@ -24,6 +24,11 @@
   --color-card-foreground: #eef3f7;
 
   --color-card: rgba(12, 18, 24, 0.55); 
+
+  /* Pong theme tokens */
+  --color-game-bg: #05080c;
+  --color-game-accent: #f8fafc;
+  --color-game-lines: #334155;
   
   --font-goonies: "Goonies", system-ui, -apple-system, sans-serif;
   
@@ -47,4 +52,22 @@
     font-family: var(--font-goonies);
     text-transform: uppercase;
   }
+}
+
+[data-theme="classic"] {
+  --color-game-bg: #05080c;
+  --color-game-accent: #f8fafc;
+  --color-game-lines: #334155;
+}
+
+[data-theme="42"] {
+  --color-game-bg: #0a221c;
+  --color-game-accent: #00c16a;
+  --color-game-lines: #0f5a43;
+}
+
+[data-theme="pokemon"] {
+  --color-game-bg: #1b2a52;
+  --color-game-accent: #ffcb05;
+  --color-game-lines: #ff5a5f;
 }
