@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { useGameFlowStore } from "../store/gameStore";
 
-import Lobby from './Lobby';
+
 
 import { api } from "@/net/api";
 
@@ -31,7 +31,7 @@ export default function GameCreate() {
     setTheme,
     setBallSpeed,
     setPaddleSpeed,
-    setMaxScore,
+    setMaxScore: _setMaxScore,
     setmatchId,
     setpassword,
   } = useGameFlowStore();
@@ -60,9 +60,7 @@ export default function GameCreate() {
     //navigate("/lobby");
   };
 
-  function navigateToLoby() {
-    navigate("/lobby");
-  }
+
 
   return (
     <div className="max-w-xl mx-auto">

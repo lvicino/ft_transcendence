@@ -45,7 +45,7 @@ export default function GameJoin() {
 
           const id = matchId.trim();
 
-          enterLobby(id);
+          enterLobby(Number(id));
           navigate(`/lobby/${encodeURIComponent(id)}`);
         }}
       >
