@@ -4,6 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { useGameFlowStore } from "../store/gameStore";
 import type { GameTheme } from "../lib/types";
+import { useState } from 'react';
 
 
 
@@ -18,6 +19,7 @@ const THEMES = [
 export default function GameCreate() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [alreadyExiste, setalreadyExiste] = useState(false);
 
   const {
     status,
@@ -57,6 +59,7 @@ export default function GameCreate() {
       setmatchId(data.id);
       setpassword(data.password);
       setStatus('created');
+      setalreadyExiste(data.alreadyExiste);
     });
 
     //navigate("/lobby");
@@ -75,6 +78,7 @@ export default function GameCreate() {
         <CardContent className="space-y-6">
 
           {/* Theme */}
+          {!alreadyExiste ? <>
           <div className="space-y-2">
             <p className="text-sm opacity-70">{t("gameTheme")}</p>
 
@@ -141,6 +145,8 @@ export default function GameCreate() {
           <Button className="w-full mt-4" onClick={createGame}>
             {t("createLobby")}
           </Button>
+          </>: null}
+          {alreadyExiste? <p>alreadyExiste</p> : null}
 
           {status === 'created' ? (
             <>

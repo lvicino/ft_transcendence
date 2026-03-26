@@ -7,9 +7,9 @@ module.exports = async function (fastify, opts) {
 		const result = fastify.gameManager.createGame(request.user, crypto.randomUUID(), request.body.gameParameter, request.body.theme);
 
 		if (result.success) {
-			reply.code(201).send({...result.data});
+			reply.code(201).send({...result.data, alreadyExiste: false});
 		} else if (result.error === "GAME_ALREADY_EXISTE") {
-			reply.code(200).send({...result.data});
+			reply.code(200).send({...result.data, alreadyExiste: true});
 		} else {
 			reply.code(409).send({error: result.error, ...result.data});
 		}
